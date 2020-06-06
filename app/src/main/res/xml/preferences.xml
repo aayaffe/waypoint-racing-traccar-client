@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <SwitchPreference
         android:defaultValue="false"
@@ -15,45 +16,54 @@
         android:title="@string/settings_id_title" />
 
     <EditTextPreference
+        android:key="boat_name"
+        android:title="@string/setting_boat_name" />
+
+    <EditTextPreference
         android:defaultValue="@string/settings_url_default_value"
         android:key="url"
         android:summary="@string/settings_url_summary"
-        android:title="@string/settings_url_title" />
+        android:title="@string/settings_url_title"
+        />
 
     <ListPreference
-        android:defaultValue="medium"
+        android:defaultValue="high"
         android:entries="@array/settings_accuracy_names"
         android:entryValues="@array/settings_accuracy_values"
         android:key="accuracy"
         android:summary="@string/settings_accuracy_summary"
-        android:title="@string/settings_accuracy_title" />
+        android:title="@string/settings_accuracy_title"
+        app:isPreferenceVisible="false"/>
 
     <EditTextPreference
-        android:defaultValue="300"
+        android:defaultValue="20"
         android:key="interval"
         android:inputType="number"
         android:summary="@string/settings_interval_summary"
-        android:title="@string/settings_interval_title" />
+        android:title="@string/settings_interval_title"/>
 
     <EditTextPreference
         android:defaultValue="0"
         android:key="distance"
         android:inputType="number"
         android:summary="@string/settings_distance_summary"
-        android:title="@string/settings_distance_title" />
+        android:title="@string/settings_distance_title"
+        app:isPreferenceVisible="false"/>
 
     <EditTextPreference
         android:defaultValue="0"
         android:key="angle"
         android:inputType="number"
         android:summary="@string/settings_angle_summary"
-        android:title="@string/settings_angle_title" />
+        android:title="@string/settings_angle_title"
+        app:isPreferenceVisible="false"/>
 
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="buffer"
         android:summaryOff="@string/settings_buffer_off_summary"
         android:summaryOn="@string/settings_buffer_on_summary"
-        android:title="@string/settings_buffer" />
+        android:title="@string/settings_buffer"
+        app:isPreferenceVisible="false"/>
 
 </PreferenceScreen>
