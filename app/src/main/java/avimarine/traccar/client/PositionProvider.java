@@ -24,6 +24,8 @@ import android.os.BatteryManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import avimarine.traccar.client.activities.MainFragment;
+
 public abstract class PositionProvider {
 
     private static final String TAG = PositionProvider.class.getSimpleName();

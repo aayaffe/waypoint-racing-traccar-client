@@ -33,7 +33,7 @@ import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.drawable.IconCompat;
 
-import avimarine.traccar.client.R;
+import avimarine.traccar.client.activities.MainFragment;
 
 public class ShortcutActivity extends AppCompatActivity {
 

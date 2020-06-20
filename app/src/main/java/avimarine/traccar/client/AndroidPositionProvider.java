@@ -23,6 +23,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
 
+import avimarine.traccar.client.activities.MainFragment;
+
 public class AndroidPositionProvider extends PositionProvider implements LocationListener {
 
     private LocationManager locationManager;

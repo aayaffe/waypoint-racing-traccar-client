@@ -31,7 +31,7 @@ import androidx.core.content.ContextCompat;
 import android.os.PowerManager;
 import android.util.Log;
 
-import avimarine.traccar.client.R;
+import avimarine.traccar.client.activities.MainActivity;
 
 public class TrackingService extends Service {
 

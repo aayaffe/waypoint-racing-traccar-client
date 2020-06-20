@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package avimarine.traccar.client;
+package avimarine.traccar.client.activities;
 
 import android.Manifest;
 import android.app.AlarmManager;
@@ -47,7 +47,11 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.TwoStatePreference;
 
+import avimarine.traccar.client.AutostartReceiver;
+import avimarine.traccar.client.BuildConfig;
 import avimarine.traccar.client.R;
+import avimarine.traccar.client.StatusActivity;
+import avimarine.traccar.client.TrackingService;
 
 import java.util.Arrays;
 import java.util.HashSet;

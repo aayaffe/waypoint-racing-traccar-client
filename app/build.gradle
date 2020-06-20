@@ -1,13 +1,16 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId 'avimarina.traccar.client'
         buildConfigField 'boolean', 'HIDDEN_APP', 'false'
         minSdkVersion 16
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 3
         versionName '1.0'
     }
@@ -40,11 +43,16 @@ dependencies {
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'mil.nga.sf:sf-geojson:2.0.3'
+    implementation 'net.sf.geographiclib:GeographicLib-Java:1.49'
+    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:4.9.0'
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.robolectric:robolectric:4.1'
     googleImplementation 'com.google.firebase:firebase-core:17.3.0'
     googleImplementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     googleImplementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 if (getGradle().getStartParameter().getTaskRequests().toString().contains('Google')) {
@@ -61,4 +69,7 @@ if (getGradle().getStartParameter().getTaskRequests().toString().contains('Googl
     afterEvaluate {
         preBuild.dependsOn copyJson
     }
+}
+repositories {
+    mavenCentral()
 }

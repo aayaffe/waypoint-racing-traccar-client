@@ -27,7 +27,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
 
-import avimarine.traccar.client.R;
+import avimarine.traccar.client.activities.MainFragment;
 
 public class MainApplication extends Application {
 

@@ -19,6 +19,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import avimarine.traccar.client.activities.MainActivity;
+
 public class DialLaunchReceiver extends BroadcastReceiver {
 
     private static final String LAUNCHER_NUMBER = "8722227"; // TRACCAR

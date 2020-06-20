@@ -4,6 +4,230 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="avimarine.traccar.client.Main2Activity">
+    tools:context="avimarine.traccar.client.activities.Main2Activity">
+
+    <TextView
+        android:id="@+id/text_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="5dp"
+        android:text="?"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/text_time1_label"
+        app:layout_constraintStart_toEndOf="@+id/text_lon1_label"
+        app:layout_constraintTop_toTopOf="@+id/text_time1_label" />
+
+    <TextView
+        android:id="@+id/text_time1_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text=" Time:"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/text_lat1_label"
+        app:layout_constraintTop_toBottomOf="@+id/text_lon1_label" />
+
+    <TextView
+        android:id="@+id/text_lon1_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Longitude: "
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/text_lat1_label"
+        app:layout_constraintTop_toBottomOf="@+id/text_lat1_label" />
+
+    <TextView
+        android:id="@+id/text_lat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="5dp"
+        android:text="?"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/text_lat1_label"
+        app:layout_constraintStart_toEndOf="@+id/text_lon1_label"
+        app:layout_constraintTop_toTopOf="@+id/text_lat1_label" />
+
+    <TextView
+        android:id="@+id/text_lon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="5dp"
+        android:text="?"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/text_lon1_label"
+        app:layout_constraintStart_toEndOf="@+id/text_lon1_label"
+        app:layout_constraintTop_toTopOf="@+id/text_lon1_label"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/text_lat1_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Latitude: "
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/portHeader"
+        app:layout_constraintTop_toBottomOf="@+id/cog" />
+
+    <Button
+        android:id="@+id/start_btn"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/btn_rnd_grn"
+        android:onClick="startButtonClick"
+        android:text="Start"
+        android:textAllCaps="false"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_time1_label" />
+
+    <Spinner
+        android:id="@+id/routeElementSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/portHeader2"
+        app:layout_constraintStart_toEndOf="@+id/portHeader2"
+        app:layout_constraintTop_toTopOf="@+id/portHeader2" />
+
+    <TextView
+        android:id="@+id/portHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1"
+        android:text="Port Waypoint"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/routeElementSpinner" />
+
+    <TextView
+        android:id="@+id/portHeader2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1"
+        android:text="Next Waypoint"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/stbdHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_weight="1"
+        android:text="Stbd Waypoint"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/portBearing"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/portHeader" />
+
+    <TextView
+        android:id="@+id/portBearing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="270"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/portHeader"
+        app:layout_constraintStart_toStartOf="@+id/portHeader"
+        app:layout_constraintTop_toBottomOf="@+id/portHeader" />
+
+    <TextView
+        android:id="@+id/portDistance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="12.5NM"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/portBearing"
+        app:layout_constraintStart_toStartOf="@+id/portBearing"
+        app:layout_constraintTop_toBottomOf="@+id/portBearing" />
+
+    <TextView
+        android:id="@+id/stbdBearing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="270"
+        app:layout_constraintEnd_toEndOf="@+id/stbdHeader"
+        app:layout_constraintStart_toStartOf="@+id/stbdHeader"
+        app:layout_constraintTop_toBottomOf="@+id/stbdHeader"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/stbdDistance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="12.5NM"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/stbdBearing"
+        app:layout_constraintStart_toStartOf="@+id/stbdBearing"
+        app:layout_constraintTop_toBottomOf="@+id/stbdBearing" />
+
+    <TextView
+        android:id="@+id/cogHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="COG"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/portDistance"
+        app:layout_constraintStart_toStartOf="@+id/portDistance"
+        app:layout_constraintTop_toBottomOf="@+id/portDistance" />
+
+    <TextView
+        android:id="@+id/cog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="254"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/cogHeader"
+        app:layout_constraintStart_toStartOf="@+id/cogHeader"
+        app:layout_constraintTop_toBottomOf="@+id/cogHeader" />
+
+
+    <TextView
+        android:id="@+id/sogHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="SOG"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/stbdDistance"
+        app:layout_constraintStart_toStartOf="@+id/stbdDistance"
+        app:layout_constraintTop_toBottomOf="@+id/stbdDistance" />
+
+    <TextView
+        android:id="@+id/sog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="5.7kn"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/sogHeader"
+        app:layout_constraintStart_toStartOf="@+id/sogHeader"
+        app:layout_constraintTop_toBottomOf="@+id/sogHeader" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
