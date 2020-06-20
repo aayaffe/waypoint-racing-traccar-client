@@ -31,6 +31,7 @@ import androidx.core.content.ContextCompat;
 import android.os.PowerManager;
 import android.util.Log;
 
+import avimarine.traccar.client.activities.Main2Activity;
 import avimarine.traccar.client.activities.MainActivity;
 
 public class TrackingService extends Service {
@@ -48,7 +49,7 @@ public class TrackingService extends Service {
                 .setCategory(NotificationCompat.CATEGORY_SERVICE);
         Intent intent;
         if (!BuildConfig.HIDDEN_APP) {
-            intent = new Intent(context, MainActivity.class);
+            intent = new Intent(context, Main2Activity.class);
             builder
                 .setContentTitle(context.getString(R.string.settings_status_on_summary))
                 .setTicker(context.getString(R.string.settings_status_on_summary))
