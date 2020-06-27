@@ -11,36 +11,53 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import avimarine.traccar.client.*
 import avimarine.traccar.client.PositionProvider.PositionListener
-import avimarine.traccar.client.route.Route
-import avimarine.traccar.client.route.Waypoint
+import avimarine.traccar.client.route.*
 import kotlinx.android.synthetic.main.activity_main2.*
+import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private val magnetic = false
     private lateinit var positionProvider: PositionProvider
-    private var nextWpt : Waypoint? = null
+    private var nextWpt : RouteElement? = null
     private lateinit var sharedPreferences: SharedPreferences
     private val PERMISSIONS_REQUEST_LOCATION = 2
-
+    private lateinit var route : Route
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
         sharedPreferences = getDefaultSharedPreferences(this)
-        val route = createTestRoute()
+        route = createTestRoute()
         populateRouteElementSpinner(route)
         positionProvider = PositionProviderFactory.create(this, this)
         setButton(sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false))
         if (sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false)) {
             startTrackingService(true, false)
+        }
+        val mCalendar: Calendar = GregorianCalendar()
+        val mTimeZone = mCalendar.timeZone
+        val mGMTOffset = mTimeZone.getOffset(mCalendar.timeInMillis)
+        time.setLabel("UTC " + (if (mGMTOffset>0) "+" else "") + TimeUnit.HOURS.convert(mGMTOffset.toLong(), TimeUnit.MILLISECONDS))
+        routeElementSpinner.onItemSelectedListener = object :
+                AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>,
+                                        view: View, position: Int, id: Long) {
+               nextWpt = route.elements[position]
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // write code to perform some action
+            }
         }
     }
 
@@ -72,21 +89,34 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
     }
 
     private fun createTestRoute(): Route {
-        val l1 = Location("")
-        l1.latitude = 30.0
-        l1.longitude = 30.0
-        val l2 = Location("")
-        l2.latitude = 31.0
-        l2.longitude = 31.0
-        val l3 = Location("")
-        l3.latitude = 32.0
-        l3.longitude = 32.0
+        val accoEast = Location("")
+        accoEast.latitude = 32.921666667
+        accoEast.longitude = 35.05
+        val accoWest = Location("")
+        accoWest.latitude = 32.921666667
+        accoWest.longitude = 35.025
+        val nahariyaWest = Location("")
+        nahariyaWest.latitude = 33.01
+        nahariyaWest.longitude = 35.058333333
+        val nahariyaEast = Location("")
+        nahariyaEast.latitude = 33.01
+        nahariyaEast.longitude = 35.08333333
+        val achziv = Location("")
+        achziv.latitude = 33.05
+        achziv.longitude = 35.086666666
+        val finishEast = Location("")
+        finishEast.latitude = 32.8371666666667
+        finishEast.longitude = 35.02455
+        val finishWest = Location("")
+        finishWest.latitude =  32.8371666666667
+        finishWest.longitude = 35.0200666666667
 
-        val wpt1 = Waypoint("wpt1", l1, false)
-        val wpt2 = Waypoint("wpt2", l2, false)
-        val wpt3 = Waypoint("wpt3", l3, false)
+        val acco = Gate("Acco Gate", accoEast,accoWest,true)
+        val nahariya = Gate("Nahariya Gate", nahariyaEast,nahariyaWest,true)
+        val achzivWpt = Waypoint("Achziv Turning Point", achziv, true)
+        val finish = Finish("Finish Line", finishWest, finishEast, true)
 
-        return Route("TestEvent", Calendar.getInstance().time, arrayListOf(wpt1,wpt2,wpt3),Calendar.getInstance().time)
+        return Route("TestEvent", Calendar.getInstance().time, arrayListOf(acco,nahariya,achzivWpt,finish),Calendar.getInstance().time)
 
     }
 
@@ -147,13 +177,15 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
             val distWptStbd = getDistance(position, nextWpt!!.stbdWpt)
             val dirWptPort = getDirection(position, nextWpt!!.portWpt)
             val dirWptStbd = getDirection(position, nextWpt!!.stbdWpt)
-            portBearing.text = getDirString(dirWptPort,magnetic,false,position,position.time.time)
-            stbdBearing.text = getDirString(dirWptStbd,magnetic,false,position,position.time.time)
-            portDistance.text = getDistString(distWptPort)
-            stbdDistance.text = getDistString(distWptStbd)
+            val portData = getDirString(dirWptPort,magnetic,false,position,position.time.time) + "/" + getDistString(distWptPort)
+            val stbcData = getDirString(dirWptStbd,magnetic,false,position,position.time.time) + "/" + getDistString(distWptStbd)
+            portGate.setData(portData)
+            stbdGate.setData(stbcData)
         }
-        cog.text = getDirString(position.course,magnetic,false,position,position.time.time)
-        sog.text = getSpeedString(position.speed) //TODO Fix units in the conversion (probably knots)
+        cog.setData(getDirString(position.course,magnetic,false,position,position.time.time))
+        sog.setData(getSpeedString(position.speed)) //TODO Fix units in the conversion (probably knots)
+        location.setData(getLatString(position.latitude) + "\n" + getLonString(position.longitude))
+        time.setData(timeStamptoDateString(position.time.time))
 
     }
 

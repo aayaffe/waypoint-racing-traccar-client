@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="NavTextDrawer">
+        <attr name="dataText" format="string" />
+        <attr name="labelText" format="string" />
+        <attr name="unitsText" format="string" />
+        <attr name="labelEnabled" format="boolean" />
+        <attr name="unitsEnabled" format="boolean" />
+        <attr name="dataTextSize" format="dimension" />
+    </declare-styleable>
+
+</resources>

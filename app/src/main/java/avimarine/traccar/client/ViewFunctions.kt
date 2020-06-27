@@ -2,6 +2,8 @@ package avimarine.traccar.client
 
 import android.location.Location
 import android.widget.TextView
+import java.lang.Math.abs
+import java.lang.Math.floor
 
 /**
  * This file is part of an
@@ -43,30 +45,42 @@ fun getSpeedString(
     return getSpeedString(speed,units)
 }
 
-fun getSpeedString(speed: Double, units:String="m_per_minute") : String{
-    if (speed > 3000) { //The current is over 95 kts
-        return "Error"
-    }
+/**
+ * Assumes unit input in knots.
+ */
+
+fun getSpeedString(speed: Double, units:String="knots") : String{
     if (units == "m_per_sec") {
         return (if (speed < 10) String.format("%.1f", toMPerSec(speed)) else String.format(
             "%.0f",
             toMPerSec(speed)
         )) + " m/sec"
     } else if (units == "knots") {
-        return (if (speed < 10) String.format("%.1f", toKnots(speed)) else String.format(
+        return (
+                if (speed < 100)
+                    String.format("%.1f", speed)
+                else
+                    String.format("%.0f", speed))
+    } else if(units == "kmh"){
+        return (if (speed < 10) String.format("%.1f", toKMh(speed)) else String.format(
+                "%.0f",
+                toKMh(speed)
+        )) + " m/min"
+    }
+    else {
+        return (if (speed < 10) String.format("%.1f", toMPerMin(speed)) else String.format(
             "%.0f",
-            toKnots(speed)
-        )) + " kts"
-    } else {
-        return (if (speed < 10) String.format("%.1f", speed) else String.format(
-            "%.0f",
-            speed
+                toMPerMin(speed)
         )) + " m/min"
     }
 }
 
+/***
+ * Expects distance in meters, returns in Nautical miles
+ */
 fun getDistString(dist: Double, units:String="nms") : String{
-    return String.format("%.0f", dist) + " NMs"
+    val nms = dist * 0.000539957
+    return String.format("%.2f", nms)
 }
 
 fun getTimerString(milliseconds: Long): String {
@@ -74,4 +88,15 @@ fun getTimerString(milliseconds: Long): String {
     val minutes = (milliseconds / 1000 / 60) % 60
     val seconds = milliseconds / 1000 % 60
     return String.format("%02d:%02d:%02d", hours, minutes, seconds)
+}
+
+fun getLatString(lat: Double): String {
+    if (lat>90 || lat<-90)
+        return "Error"
+    return String.format("%02d",abs(floor(lat)).toInt()) + "\u00B0 " +  String.format("%06.3f", abs(lat-floor(lat)) * 60) + "' "+ if (lat>0) "N" else "S"
+}
+fun getLonString(lon: Double): String {
+    if (lon > 180 || lon < -180)
+        return "Error"
+    return String.format("%03d", abs(floor(lon)).toInt()) + "\u00B0 " + String.format("%06.3f", abs(lon - floor(lon)) * 60) + "' "+ if (lon > 0) "E" else "W"
 }

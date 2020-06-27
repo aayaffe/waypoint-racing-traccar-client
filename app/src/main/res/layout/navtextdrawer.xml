@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/drawer_bg"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/dataTV"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:drawablePadding="4dp"
+        android:fontFamily="sans-serif-black"
+        android:gravity="center_vertical"
+        android:textColor="@android:color/black"
+        android:textSize="36sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="270/12" />
+
+    <TextView
+        android:id="@+id/labelTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:drawablePadding="4dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical"
+        android:textColor="@android:color/secondary_text_light"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dataTV"
+        tools:text="Direction/Distance" />
+
+    <TextView
+        android:id="@+id/unitsTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="3dp"
+        android:layout_marginRight="3dp"
+        android:drawablePadding="4dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="NM" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -51,13 +51,19 @@ fun getDirString(dir: Double, magnetic: Boolean, fromNotation: Boolean, latitude
 }
 
 
+/**
+ * Al conversion functions are from Knots
+ */
+fun toMPerMin(speed: Double): Double {
+    return speed * 30.8667
+}
 
-fun toKnots(speed: Double): Double {
-    return speed * 0.0323974
+fun toKMh(speed: Double): Double {
+    return speed * 1.852
 }
 
 fun toMPerSec(speed: Double): Double {
-    return speed / 60
+    return speed * 0.514444
 }
 
 /**
@@ -92,13 +98,22 @@ fun getDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double 
     )
     return line.Distance()
 }
-
+/***
+ * Returns Distance in meters
+ */
 fun getDistance(firstLocation : Location, secondLocation: Location): Double {
     return getDistance(firstLocation.latitude, firstLocation.longitude, secondLocation.latitude, secondLocation.longitude)
 }
+
+/***
+ * Returns Distance in meters
+ */
 fun getDistance(firstLocation : Position, secondLocation: Location): Double {
     return getDistance(firstLocation.latitude, firstLocation.longitude, secondLocation.latitude, secondLocation.longitude)
 }
+/***
+ * Returns Distance in meters
+ */
 fun getDistance(firstLocation : Position, secondLocation: Position): Double {
     return getDistance(firstLocation.latitude, firstLocation.longitude, secondLocation.latitude, secondLocation.longitude)
 }
