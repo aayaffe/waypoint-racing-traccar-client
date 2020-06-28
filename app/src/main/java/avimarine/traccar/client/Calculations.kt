@@ -7,6 +7,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import net.sf.geographiclib.Geodesic
+import net.sf.geographiclib.GeodesicLine
 import net.sf.geographiclib.GeodesicMask
 import java.time.Instant
 import java.time.LocalDateTime
@@ -178,4 +179,22 @@ fun getDirError(firstLocation: Location, secondLocation: Location, err1: Double,
  */
 fun getDistError(err1: Double, err2: Double): Double {
     return err1+err2
+}
+
+/**
+ * Returns a location of [dist] and [dir] from [loc]
+ *
+ * @param loc
+ * @param dir - Degrees true from north
+ * @param dist - Distance in Nautical miles
+ * @return
+ */
+fun getLocFromDirDist(loc: Location, dir: Double, dist: Double) : Location{
+    val line = GeodesicLine(geod, loc.latitude,loc.longitude, dir, GeodesicMask.DISTANCE_IN or GeodesicMask.LATITUDE or GeodesicMask.LONGITUDE)
+    val gd = line.Position(dist * 1852.0)
+    val ret = Location("")
+    ret.latitude = gd.lat2
+    ret.longitude = gd.lon2
+    return ret
+
 }
