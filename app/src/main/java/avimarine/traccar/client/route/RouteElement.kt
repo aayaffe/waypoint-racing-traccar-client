@@ -8,7 +8,7 @@ interface RouteElement {
     val stbdWpt : Location
     val portWpt : Location
     val mandatory : Boolean
-//    val proofArea : ProofArea
+    val proofArea : ProofArea
 
 
 }

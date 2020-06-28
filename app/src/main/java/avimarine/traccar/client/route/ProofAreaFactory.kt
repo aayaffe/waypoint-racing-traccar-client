@@ -20,6 +20,17 @@ class ProofAreaFactory {
         }
 
         /**
+         * Create a proof quadrant area for a passing waypoint
+         *
+         * @param wpt - Wpt
+         * @param bearing1, bearing2 - bearings in degrees north in a clockwise order
+         * @return ProofArea
+         */
+        fun createProofArea(wpt: Location, bearing1: Double, bearing2: Double): ProofArea {
+            return ProofArea(arrayListOf(bearing1, bearing2))
+        }
+
+        /**
          * Creates a polygon proof area, which starts with [bearing1] with a [dist] from [portWpt],
          * extending to a polygon of [dist] from the gate line and ends with [bearing2] from [stbdWpt]
          * @param portWpt

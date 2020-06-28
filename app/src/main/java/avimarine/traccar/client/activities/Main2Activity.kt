@@ -111,11 +111,10 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
         finishWest.latitude =  32.8371666666667
         finishWest.longitude = 35.0200666666667
 
-        val acco = Gate("Acco Gate", accoEast,accoWest,true)
-        val nahariya = Gate("Nahariya Gate", nahariyaEast,nahariyaWest,true)
-        val achzivWpt = Waypoint("Achziv Turning Point", achziv, true)
-        val finish = Finish("Finish Line", finishWest, finishEast, true)
-        val area = ProofAreaFactory.createProofArea(accoWest,accoEast,315.0,045.0, 2.0)
+        val acco = Gate("Acco Gate", accoEast,accoWest,true,315.0,45.0, 0.25)
+        val nahariya = Gate("Nahariya Gate", nahariyaEast,nahariyaWest,true,315.0,45.0, 0.25)
+        val achzivWpt = Waypoint("Achziv Turning Point", achziv, true,315.0,45.0)
+        val finish = Finish("Finish Line", finishWest, finishEast, 0.15)
         return Route("TestEvent", Calendar.getInstance().time, arrayListOf(acco,nahariya,achzivWpt,finish),Calendar.getInstance().time)
 
     }
