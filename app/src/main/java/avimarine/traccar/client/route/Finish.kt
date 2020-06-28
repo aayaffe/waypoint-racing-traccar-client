@@ -9,6 +9,7 @@ class Finish : RouteElement  {
     override val portWpt: Location
     override val mandatory: Boolean
     override val proofArea: ProofArea
+    override var firstTimeInProofArea: Long = -1
 
     constructor(name: String, stbdLocation: Location, portLocation: Location, bearing1: Double, bearing2: Double, dist: Double){
         this.name = name
@@ -23,6 +24,9 @@ class Finish : RouteElement  {
         portWpt = portLocation
         this.mandatory = true
         this.proofArea = ProofAreaFactory.createProofArea(stbdWpt,portWpt,dist)
+    }
+    override fun isInProofArea(loc: Location):Boolean{
+        return proofArea.isInProofArea(portWpt,stbdWpt,loc)
     }
     override fun toString() : String{
         return name

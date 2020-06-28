@@ -40,7 +40,7 @@ class ProofAreaFactory {
          * @param dist - in Nautical miles
          * @return ProofArea
          */
-        fun createProofArea(portWpt: Location, stbdWpt: Location, bearing1: Double, bearing2: Double, dist: Double): ProofArea {
+        fun createProofArea(stbdWpt: Location, portWpt: Location, bearing1: Double, bearing2: Double, dist: Double): ProofArea {
             val wpts = arrayListOf(portWpt)
             val gateDir = getDirection(portWpt, stbdWpt)
             wpts.add(getLocFromDirDist(portWpt, bearing1, dist))

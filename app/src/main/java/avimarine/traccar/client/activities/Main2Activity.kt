@@ -20,7 +20,6 @@ import avimarine.traccar.client.*
 import avimarine.traccar.client.PositionProvider.PositionListener
 import avimarine.traccar.client.route.*
 import kotlinx.android.synthetic.main.activity_main2.*
-import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -180,12 +179,30 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
             val stbcData = getDirString(dirWptStbd,magnetic,false,position,position.time.time) + "/" + getDistString(distWptStbd)
             portGate.setData(portData)
             stbdGate.setData(stbcData)
+            updateIsInArea(position)
         }
         cog.setData(getDirString(position.course,magnetic,false,position,position.time.time))
         sog.setData(getSpeedString(position.speed)) //TODO Fix units in the conversion (probably knots)
         location.setData(getLatString(position.latitude) + "\n" + getLonString(position.longitude))
         time.setData(timeStamptoDateString(position.time.time))
 
+
+    }
+
+    private fun updateIsInArea(location: Position) {
+        val l = Location("")
+        l.latitude = location.latitude
+        l.longitude = location.longitude
+        if (nextWpt!=null){
+            if (nextWpt!!.isInProofArea(l)){
+                inProofAreaImageView.setImageResource(R.drawable.btn_rnd_grn)
+                if (nextWpt!!.passedGate(location)){
+                    StatusActivity.addMessage("Passed " + nextWpt!!.name)
+                }
+            } else {
+                inProofAreaImageView.setImageResource(R.drawable.btn_rnd_red)
+            }
+        }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {

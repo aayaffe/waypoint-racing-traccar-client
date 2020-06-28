@@ -50,7 +50,7 @@
 
 
 
-        <activity android:name=".StatusActivity" />
+        <activity android:name=".activities.StatusActivity" />
         <activity
             android:name=".ShortcutActivity"
             android:label="@string/menu_shortcuts">

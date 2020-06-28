@@ -15,48 +15,29 @@
  */
 package avimarine.traccar.client.activities;
 
-import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
 import androidx.preference.EditTextPreference;
 import androidx.preference.EditTextPreferenceDialogFragmentCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
-import androidx.preference.TwoStatePreference;
 
-import avimarine.traccar.client.AutostartReceiver;
-import avimarine.traccar.client.BuildConfig;
 import avimarine.traccar.client.R;
-import avimarine.traccar.client.StatusActivity;
-import avimarine.traccar.client.TrackingService;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 public class MainFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener {
 

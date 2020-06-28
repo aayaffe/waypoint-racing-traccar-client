@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package avimarine.traccar.client;
+package avimarine.traccar.client.activities;
 
 import java.text.DateFormat;
 import java.util.Date;

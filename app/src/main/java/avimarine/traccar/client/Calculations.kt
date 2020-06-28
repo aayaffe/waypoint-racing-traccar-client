@@ -4,8 +4,12 @@ import android.hardware.GeomagneticField
 import android.location.Location
 import android.util.Log
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.Polygon
 import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfConstants.UNIT_MILES
+import com.mapbox.turf.TurfJoins.inside
 import com.mapbox.turf.TurfMeasurement
+import com.mapbox.turf.TurfTransformation
 import net.sf.geographiclib.Geodesic
 import net.sf.geographiclib.GeodesicLine
 import net.sf.geographiclib.GeodesicMask
@@ -13,6 +17,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+
 
 /**
  * This file is part of an
@@ -198,3 +203,17 @@ fun getLocFromDirDist(loc: Location, dir: Double, dist: Double) : Location{
     return ret
 
 }
+
+fun isPointInPolygon(wpts : ArrayList<Location>, loc: Location) : Boolean{
+    val poly: Polygon = Polygon.fromLngLats(toListOfListOfLocs(wpts))
+    return inside(Point.fromLngLat(loc.longitude,loc.latitude),poly)
+}
+
+fun toListOfListOfLocs(wpts : ArrayList<Location>):List<List<Point>>{
+    val ret = arrayListOf(arrayListOf<Point>())
+    wpts.forEach{
+        ret[0].add(Point.fromLngLat(it.longitude,it.latitude))
+    }
+    return ret
+}
+

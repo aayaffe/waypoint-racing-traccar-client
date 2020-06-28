@@ -1,6 +1,11 @@
 package avimarine.traccar.client.route
 
 import android.location.Location
+import android.util.Log
+import avimarine.traccar.client.TAG
+import avimarine.traccar.client.isPointInPolygon
+import com.mapbox.geojson.Point
+import com.mapbox.turf.TurfMeasurement.bearing
 
 class ProofArea {
     val type : ProofAreaType
@@ -27,11 +32,29 @@ class ProofArea {
         this.wpts = wpts
     }
 
-    constructor(wpt: Location){
-        this.type = ProofAreaType.CIRCLE
-        this.bearings = arrayListOf()
-        this.wpts = arrayListOf()
+    fun isInProofArea(portWpt: Location, stbdWpt: Location, loc:Location):Boolean{
+        if (type==ProofAreaType.POLYGON){
+            return isPointInPolygon(wpts,loc)
+        } else if (type==ProofAreaType.QUADRANT){
+            val b1 = bearing(Point.fromLngLat(portWpt.longitude,portWpt.latitude), Point.fromLngLat(loc.longitude,loc.latitude))
+            val b2 = bearing(Point.fromLngLat(stbdWpt.longitude,stbdWpt.latitude), Point.fromLngLat(loc.longitude,loc.latitude))
+            if ((b1>=bearings[0] && b1<=bearings[1])||(b2>=bearings[0] && b2<=bearings[1]))
+                return true
+        }
+        Log.e(TAG,"Unknown type of ProofArea for isInProofArea")
+        return false
     }
 
+    fun isInProofArea(wpt: Location, loc:Location):Boolean{
+        if (type==ProofAreaType.POLYGON){
+            return isPointInPolygon(wpts,loc)
+        } else if (type==ProofAreaType.QUADRANT){
+            val b1 = bearing(Point.fromLngLat(wpt.longitude,wpt.latitude), Point.fromLngLat(loc.longitude,loc.latitude))
+            if (b1>=bearings[0] && b1<=bearings[1])
+                return true
+        }
+        Log.e(TAG,"Unknown type of ProofArea for isInProofArea")
+        return false
+    }
 
 }

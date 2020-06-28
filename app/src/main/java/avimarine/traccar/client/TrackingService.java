@@ -32,7 +32,7 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import avimarine.traccar.client.activities.Main2Activity;
-import avimarine.traccar.client.activities.MainActivity;
+import avimarine.traccar.client.activities.StatusActivity;
 
 public class TrackingService extends Service {
 

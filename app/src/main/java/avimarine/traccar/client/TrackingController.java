@@ -22,6 +22,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import avimarine.traccar.client.activities.MainFragment;
+import avimarine.traccar.client.activities.StatusActivity;
 
 public class TrackingController implements PositionProvider.PositionListener, NetworkManager.NetworkHandler {
 
