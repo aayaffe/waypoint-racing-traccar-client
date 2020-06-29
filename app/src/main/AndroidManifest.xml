@@ -24,7 +24,8 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.Main2Activity">
+        <activity android:name=".activities.Main2Activity"
+            android:screenOrientation="portrait">
 
         </activity>
         <activity-alias
@@ -46,14 +47,17 @@
 
         <activity
             android:name=".activities.MainActivity"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"/>
 
 
 
-        <activity android:name=".activities.StatusActivity" />
+        <activity android:name=".activities.StatusActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ShortcutActivity"
-            android:label="@string/menu_shortcuts">
+            android:label="@string/menu_shortcuts"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
