@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.Color.green
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
@@ -12,16 +13,20 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
-import android.widget.ArrayAdapter
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.size
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import avimarine.traccar.client.*
 import avimarine.traccar.client.PositionProvider.PositionListener
 import avimarine.traccar.client.route.*
+import avimarine.traccar.client.ui.RouteElementAdapter
 import kotlinx.android.synthetic.main.activity_main2.*
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.schedule
+
 
 class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -51,7 +56,13 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
                 AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>,
                                         view: View, position: Int, id: Long) {
-               nextWpt = route.elements[position]
+                nextWpt = route.elements[position]
+                if (nextWpt!!.firstTimeInProofArea!=-1L){
+                    (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(android.R.color.holo_green_light))
+                } else {
+                    (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(android.R.color.black))
+                }
+
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -68,7 +79,6 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
             Log.w(TAG, e)
         }
     }
-
     override fun onResume() {
         super.onResume()
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
@@ -77,7 +87,6 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
         super.onPause()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
     }
-
     override fun onStop() {
         try {
             positionProvider.stopUpdates()
@@ -119,8 +128,8 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
     }
 
     fun populateRouteElementSpinner(route: Route){
-        val adapter = ArrayAdapter(this,
-                R.layout.waypoint_spinner_item, route.elements)
+        val adapter = RouteElementAdapter(this,
+                R.layout.waypoint_spinner_item,0, route.elements)
         routeElementSpinner.adapter = adapter
     }
 
@@ -195,12 +204,18 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
         l.longitude = location.longitude
         if (nextWpt!=null){
             if (nextWpt!!.isInProofArea(l)){
-                inProofAreaImageView.setImageResource(R.drawable.btn_rnd_grn)
                 if (nextWpt!!.passedGate(location)){
                     StatusActivity.addMessage("Passed " + nextWpt!!.name)
+                    (routeElementSpinner.selectedView as TextView).setTextColor(resources.getColor(android.R.color.holo_green_light))
+                    Timer("AdvanceWaypoint", false).schedule(3000) {
+                        runOnUiThread {
+                            if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count-1) {
+                                routeElementSpinner.setSelection(routeElementSpinner.selectedItemPosition + 1)
+                            }
+                        }
+                    }
                 }
             } else {
-                inProofAreaImageView.setImageResource(R.drawable.btn_rnd_red)
             }
         }
     }

@@ -217,3 +217,17 @@ fun toListOfListOfLocs(wpts : ArrayList<Location>):List<List<Point>>{
     return ret
 }
 
+fun isBetweenAngles(from: Double, to:Double, angle:Double): Boolean{
+    var b1 = from
+    var b2 = to
+    var a = angle
+    if (to < from) {
+        b2 = to + 360.0
+    }
+    if (angle < from) {
+        a = angle + 360;
+    }
+    // compare
+    return a in b1..b2;
+}
+

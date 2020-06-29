@@ -3,6 +3,7 @@ package avimarine.traccar.client.route
 import android.location.Location
 import android.util.Log
 import avimarine.traccar.client.TAG
+import avimarine.traccar.client.isBetweenAngles
 import avimarine.traccar.client.isPointInPolygon
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement.bearing
@@ -38,8 +39,7 @@ class ProofArea {
         } else if (type==ProofAreaType.QUADRANT){
             val b1 = bearing(Point.fromLngLat(portWpt.longitude,portWpt.latitude), Point.fromLngLat(loc.longitude,loc.latitude))
             val b2 = bearing(Point.fromLngLat(stbdWpt.longitude,stbdWpt.latitude), Point.fromLngLat(loc.longitude,loc.latitude))
-            if ((b1>=bearings[0] && b1<=bearings[1])||(b2>=bearings[0] && b2<=bearings[1]))
-                return true
+            return (isBetweenAngles(bearings[0], bearings[1], b1) || isBetweenAngles(bearings[0], bearings[1], b2))
         }
         Log.e(TAG,"Unknown type of ProofArea for isInProofArea")
         return false
@@ -50,8 +50,7 @@ class ProofArea {
             return isPointInPolygon(wpts,loc)
         } else if (type==ProofAreaType.QUADRANT){
             val b1 = bearing(Point.fromLngLat(wpt.longitude,wpt.latitude), Point.fromLngLat(loc.longitude,loc.latitude))
-            if (b1>=bearings[0] && b1<=bearings[1])
-                return true
+            return (isBetweenAngles(bearings[0], bearings[1], b1))
         }
         Log.e(TAG,"Unknown type of ProofArea for isInProofArea")
         return false
