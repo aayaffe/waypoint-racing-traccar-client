@@ -40,7 +40,9 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
         sharedPreferences = getDefaultSharedPreferences(this)
-        route = createTestRoute()
+        val text = resources.openRawResource(R.raw.test)
+                .bufferedReader().use { it.readText() }
+        route = Route.fromGeoJson(text)
         populateRouteElementSpinner(route)
         positionProvider = PositionProviderFactory.create(this, this)
         setButton(sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false))
@@ -61,9 +63,7 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
                 } else {
                     (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(android.R.color.black))
                 }
-
             }
-
             override fun onNothingSelected(parent: AdapterView<*>) {
                 // write code to perform some action
             }

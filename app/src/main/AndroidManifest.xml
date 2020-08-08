@@ -54,7 +54,7 @@
             android:name=".activities.StatusActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ShortcutActivity"
+            android:name=".activities.ShortcutActivity"
             android:label="@string/menu_shortcuts"
             android:screenOrientation="portrait">
             <intent-filter>

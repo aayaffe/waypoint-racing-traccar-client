@@ -1,6 +1,6 @@
 {
   "type": "FeatureCollection",
-  "properties": {
+  "routedata": {
     "name": "Achziv Regatta",
     "organizing": "CYC"
   },
@@ -9,6 +9,7 @@
       "type": "Feature",
       "properties": {
         "name": "Acco Gate",
+        "routeElementType": "GATE",
         "ordinal" : 1,
         "mandatory": true,
         "proofAreaType" : "POLYGON",
@@ -33,6 +34,7 @@
       "type": "Feature",
       "properties": {
         "name": "Nahariya Gate",
+        "routeElementType": "GATE",
         "ordinal" : 2,
         "mandatory": true,
         "proofAreaType" : "POLYGON",
@@ -57,6 +59,7 @@
       "type": "Feature",
       "properties": {
         "name": "Achziv Turning Point",
+        "routeElementType": "WAYPOINT",
         "ordinal" : 3,
         "mandatory": true,
         "proofAreaType" : "QUADRANT",
@@ -74,6 +77,7 @@
       "type": "Feature",
       "properties": {
         "name": "Finish Line",
+        "routeElementType": "FINISH",
         "ordinal" : 4,
         "mandatory": true,
         "proofAreaType" : "POLYGON",

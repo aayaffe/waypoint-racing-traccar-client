@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package avimarine.traccar.client;
+package avimarine.traccar.client.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,7 +33,13 @@ import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.drawable.IconCompat;
 
-import avimarine.traccar.client.activities.MainFragment;
+import avimarine.traccar.client.Position;
+import avimarine.traccar.client.PositionProvider;
+import avimarine.traccar.client.PositionProviderFactory;
+import avimarine.traccar.client.ProtocolFormatter;
+import avimarine.traccar.client.R;
+import avimarine.traccar.client.RequestManager;
+import avimarine.traccar.client.TrackingService;
 
 public class ShortcutActivity extends AppCompatActivity {
 

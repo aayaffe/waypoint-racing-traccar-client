@@ -1,6 +1,10 @@
 package avimarine.traccar.client.route
 
 import android.location.Location
+import com.google.gson.JsonArray
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.LineString
+import org.json.JSONException
 
 class Finish : RouteElement  {
     override val name: String
@@ -30,5 +34,28 @@ class Finish : RouteElement  {
     }
     override fun toString() : String{
         return name
+    }
+
+    companion object {
+        val TAG = "Finish"
+        fun fromGeoJson(f: Feature) : Finish{
+            val name = f.properties()?.get("name")?.asString?:throw JSONException("Failed to get name")
+            val line : LineString = f.geometry() as LineString
+            val stbdloc = Location("")
+            stbdloc.latitude = line.coordinates().get(0).latitude()
+            stbdloc.longitude = line.coordinates().get(0).longitude()
+            val portloc = Location("")
+            portloc.latitude = line.coordinates().get(1).latitude()
+            portloc.longitude = line.coordinates().get(1).longitude()
+            if (f.properties()!!.has("proofAreaBearings")!!) {
+                val b1 =  (f.properties()?.get("proofAreaBearings") as JsonArray).get(0).asDouble
+                val b2 =  (f.properties()?.get("proofAreaBearings") as JsonArray).get(1).asDouble
+                val dist =  (f.properties()?.get("proofAreaSize") as JsonArray).get(0).asDouble
+                return Finish(name, stbdloc, portloc, b1, b2, dist)
+            } else {
+                val dist = (f.properties()?.get("proofAreaSize") as JsonArray).get(0).asDouble
+                return Finish(name, stbdloc, portloc, dist)
+            }
+        }
     }
 }
