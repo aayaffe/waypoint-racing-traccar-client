@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.graphics.Color.green
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
@@ -16,12 +15,12 @@ import android.widget.AdapterView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.size
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import avimarine.traccar.client.*
 import avimarine.traccar.client.PositionProvider.PositionListener
 import avimarine.traccar.client.route.*
 import avimarine.traccar.client.ui.RouteElementAdapter
+import avimarine.traccar.client.utils.Screenshot
 import kotlinx.android.synthetic.main.activity_main2.*
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -150,6 +149,10 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
             val intent = Intent(this, StatusActivity::class.java)
             this.startActivity(intent)
             return true
+        }
+        else if (id == R.id.send_screenshot_menu_action){
+            val b = Screenshot.takescreenshotOfRootView(this.findViewById<View>(android.R.id.content).rootView)
+
         }
         return super.onOptionsItemSelected(item)
     }
