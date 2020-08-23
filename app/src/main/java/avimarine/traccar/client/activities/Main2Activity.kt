@@ -16,6 +16,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
@@ -24,6 +25,10 @@ import avimarine.traccar.client.PositionProvider.PositionListener
 import avimarine.traccar.client.route.*
 import avimarine.traccar.client.ui.RouteElementAdapter
 import avimarine.traccar.client.utils.Screenshot
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.activity_main2.*
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -83,34 +88,61 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
                     this.openFileOutput(DEFAULTFILENAME, Context.MODE_PRIVATE).use {
                         it.write(s.toByteArray())
                     }
-                    route = Route.fromGeoJson(s)
+                    loadRoute(s)
                 } else {
                     if (checkIntent(intent)) {
                         val s = handleJsonText(intent) // Handle json being sent
                         this.openFileOutput(DEFAULTFILENAME, Context.MODE_PRIVATE).use {
                             it.write(s.toByteArray())
                         }
-                        route = Route.fromGeoJson(s)
+                        loadRoute(s)
                     }
                     Log.d(TAG, "Unknown intent type: " + intent?.type)
                 }
             }
+            intent?.action == Intent.ACTION_VIEW -> {
+                Log.d(TAG, "Intent action: " + intent.action + " Intent data: " + intent.data + " Intent type: " + intent.type)
+                loadJsonfromUrl(intent.data) // Handle json being sent
+                return
+            }
             else -> {
-                Log.d(TAG, "Unknown intent action: " + intent?.action)
+                Log.d(TAG, "Unknown intent action: " + intent.action + " Intent data: " + intent.data)
             }
         }
-
+        val text: String
         if (!::route.isInitialized) {
             try {
-                val text = this.openFileInput(DEFAULTFILENAME).bufferedReader().use { it.readText() }
-                route = Route.fromGeoJson(text)
+                text = this.openFileInput(DEFAULTFILENAME).bufferedReader().use { it.readText() }
+                loadRoute(text)
             } catch (e: FileNotFoundException) {
                 Log.d(TAG, "file not found", e)
             }
-
         }
-        if (::route.isInitialized)
-            populateRouteElementSpinner(route)
+    }
+
+    private fun loadRoute(geojson: String?) {
+        geojson?: return
+        route = Route.fromGeoJson(geojson)
+        populateRouteElementSpinner(route)
+    }
+
+    private fun loadJsonfromUrl(url: Uri?) {
+        val queue = Volley.newRequestQueue(this)
+        val stringRequest = StringRequest(Request.Method.GET, url?.toString(),
+                Response.Listener<String> { response ->
+                    loadRoute(response)
+                },
+                Response.ErrorListener {
+
+                    Log.e(TAG,"Error loading json from url", it.cause)
+                    errorLoadingRoute("Unable to Load Route from given location")
+                }
+        )
+        queue.add(stringRequest)
+    }
+
+    private fun errorLoadingRoute(s: String) {
+        Toast.makeText(this,s,Toast.LENGTH_LONG).show()
     }
 
     private fun checkIntent(intent: Intent): Boolean {
@@ -149,8 +181,8 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
         }
         //Handle shared file share
         val uri = getUri(intent)
-        if (uri!=null) {
-            if (checkIntent(intent)){
+        if (uri != null) {
+            if (checkIntent(intent)) {
                 val inputPFD = try {
                     contentResolver.openFileDescriptor(uri, "r")
                 } catch (e: FileNotFoundException) {

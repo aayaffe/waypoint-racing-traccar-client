@@ -1,0 +1,76 @@
+{
+  "type": "FeatureCollection",
+  "routedata": {
+    "name": "Achziv Regatta3",
+    "organizing": "CYC"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nahariya Gate2",
+        "routeElementType": "GATE",
+        "ordinal" : 2,
+        "mandatory": true,
+        "proofAreaType" : "POLYGON",
+        "proofAreaBearings" : [315,45],
+        "proofAreaSize" : [0.25]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            35.083333,
+            33.01
+          ],
+          [
+            35.0583333,
+            33.01
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Achziv Turning Point3",
+        "routeElementType": "WAYPOINT",
+        "ordinal" : 3,
+        "mandatory": true,
+        "proofAreaType" : "QUADRANT",
+        "proofAreaBearings" : [315,45]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.086666,
+          33.05
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Finish Line4",
+        "routeElementType": "FINISH",
+        "ordinal" : 4,
+        "mandatory": true,
+        "proofAreaType" : "POLYGON",
+        "proofAreaSize" : [0.15]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            35.020067,
+            32.837167
+          ],
+          [
+            35.02455,
+            32.837167
+          ]
+        ]
+      }
+    }
+  ]
+}
