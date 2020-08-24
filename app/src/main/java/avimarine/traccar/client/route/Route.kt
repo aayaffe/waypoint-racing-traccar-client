@@ -17,7 +17,8 @@ class Route (val eventName:String, val startTime: Date, val elements: ArrayList<
     companion object {
         val TAG = "Route"
         fun fromGeoJson(geojson: String) : Route{
-            val json = JSONObject(geojson)
+
+            val json = JSONObject(convertStandardJSONString(geojson))
             val name = json.getJSONObject("routedata").getString("name")
             val features = FeatureCollection.fromJson(geojson)
                     ?: throw JSONException("Unable to parse Route")
@@ -26,6 +27,13 @@ class Route (val eventName:String, val startTime: Date, val elements: ArrayList<
                 el.add(parseRouteElement(f))
             }
             return Route(name, Date(0), el, Date(0))
+        }
+        private fun convertStandardJSONString(data_json: String): String {
+            var ret = data_json.replace("\\\\r\\\\n", "");
+            ret = ret.replace("\"{", "{");
+            ret = ret.replace("}\",", "},");
+            ret = ret.replace("}\"", "}");
+            return ret;
         }
         private fun parseRouteElement(f: Feature): RouteElement {
             return when {

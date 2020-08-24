@@ -129,11 +129,11 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
     private fun loadJsonfromUrl(url: Uri?) {
         val queue = Volley.newRequestQueue(this)
         val stringRequest = StringRequest(Request.Method.GET, url?.toString(),
-                Response.Listener<String> { response ->
+                { response ->
+                    Log.d(TAG, "URL response: $response")
                     loadRoute(response)
                 },
-                Response.ErrorListener {
-
+                {
                     Log.e(TAG,"Error loading json from url", it.cause)
                     errorLoadingRoute("Unable to Load Route from given location")
                 }

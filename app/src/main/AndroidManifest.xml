@@ -26,7 +26,8 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".activities.Main2Activity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -42,8 +43,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https"
+                    android:host="cyc.co.il"
+                    android:pathPrefix="/wp-json/routes" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
                     android:host="www.cyc.co.il"
-                    android:pathPrefix="/routes" />
+                    android:pathPrefix="/wp-json/routes" />
             </intent-filter>
         </activity>
 
