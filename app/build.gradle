@@ -7,7 +7,7 @@ android {
     compileSdkVersion 30
 
     defaultConfig {
-        applicationId 'avimarine.traccar.client'
+        applicationId 'in.avimarine.waypointracing'
         buildConfigField 'boolean', 'HIDDEN_APP', 'false'
         minSdkVersion 26
         targetSdkVersion 30
