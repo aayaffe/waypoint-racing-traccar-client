@@ -1,15 +1,12 @@
 package avimarine.traccar.client.activities
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.OpenableColumns
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -25,13 +22,7 @@ import avimarine.traccar.client.PositionProvider.PositionListener
 import avimarine.traccar.client.route.*
 import avimarine.traccar.client.ui.RouteElementAdapter
 import avimarine.traccar.client.utils.Screenshot
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.activity_main2.*
-import java.io.FileInputStream
-import java.io.FileNotFoundException
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
@@ -45,14 +36,19 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
     private lateinit var sharedPreferences: SharedPreferences
     private val PERMISSIONS_REQUEST_LOCATION = 2
     private lateinit var route: Route
-    private val MAXFILESIZE = 10000
-    private val DEFAULTFILENAME = "myRoute"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
         sharedPreferences = getDefaultSharedPreferences(this)
-        initRoute()
+        if (intent.action == Intent.ACTION_MAIN) {
+            val r = RouteLoader.loadRouteFromFile(this)
+            loadRoute(r)
+        } else {
+            RouteLoader.handleIntent(this, intent, this::loadRoute)
+        }
+
         positionProvider = PositionProviderFactory.create(this, this)
         setButton(sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false))
         if (sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false)) {
@@ -80,133 +76,31 @@ class Main2Activity : AppCompatActivity(), PositionListener, SharedPreferences.O
         }
     }
 
-    private fun initRoute() {
-        when {
-            intent?.action == Intent.ACTION_SEND -> {
-                if ("text/json" == intent.type || "application/json" == intent.type) {
-                    val s = handleJsonText(intent) // Handle json being sent
-                    this.openFileOutput(DEFAULTFILENAME, Context.MODE_PRIVATE).use {
-                        it.write(s.toByteArray())
-                    }
-                    loadRoute(s)
-                } else {
-                    if (checkIntent(intent)) {
-                        val s = handleJsonText(intent) // Handle json being sent
-                        this.openFileOutput(DEFAULTFILENAME, Context.MODE_PRIVATE).use {
-                            it.write(s.toByteArray())
-                        }
-                        loadRoute(s)
-                    }
-                    Log.d(TAG, "Unknown intent type: " + intent?.type)
-                }
-            }
-            intent?.action == Intent.ACTION_VIEW -> {
-                Log.d(TAG, "Intent action: " + intent.action + " Intent data: " + intent.data + " Intent type: " + intent.type)
-                loadJsonfromUrl(intent.data) // Handle json being sent
-                return
-            }
-            else -> {
-                Log.d(TAG, "Unknown intent action: " + intent.action + " Intent data: " + intent.data)
-            }
+    private fun loadRoute(r: Route?) {
+        if (r == null) {
+            errorLoadingRoute("Error Loading Route")
+            val r = RouteLoader.loadRouteFromFile(this)
+            r ?: return
+            loadRoute(r)
+            return
         }
-        val text: String
-        if (!::route.isInitialized) {
-            try {
-                text = this.openFileInput(DEFAULTFILENAME).bufferedReader().use { it.readText() }
-                loadRoute(text)
-            } catch (e: FileNotFoundException) {
-                Log.d(TAG, "file not found", e)
-            }
-        }
+        route = r
+        populateRouteElementSpinner(r)
+        setTitle("Waypoint Racing", r.eventName)
+
     }
 
-    private fun loadRoute(geojson: String?) {
-        geojson?: return
-        route = Route.fromGeoJson(geojson)
-        populateRouteElementSpinner(route)
+    private fun setTitle(title: String, subTitle: String) {
+        val ab = supportActionBar
+        ab?.setTitle(title)
+        ab?.setSubtitle(subTitle)
     }
 
-    private fun loadJsonfromUrl(url: Uri?) {
-        val queue = Volley.newRequestQueue(this)
-        val stringRequest = StringRequest(Request.Method.GET, url?.toString(),
-                { response ->
-                    Log.d(TAG, "URL response: $response")
-                    loadRoute(response)
-                },
-                {
-                    Log.e(TAG,"Error loading json from url", it.cause)
-                    errorLoadingRoute("Unable to Load Route from given location")
-                }
-        )
-        queue.add(stringRequest)
-    }
 
     private fun errorLoadingRoute(s: String) {
-        Toast.makeText(this,s,Toast.LENGTH_LONG).show()
+        Toast.makeText(this, s, Toast.LENGTH_LONG).show()
     }
 
-    private fun checkIntent(intent: Intent): Boolean {
-        val uri: Uri
-        intent.clipData?.let { clipData ->
-            Log.d(TAG, clipData.toString())
-            uri = clipData.getItemAt(0).uri
-            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                cursor.moveToFirst()
-                val name = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
-                val size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-                Log.d(TAG, "Json filesize: " + size)
-                Log.d(TAG, "Json filename: " + name)
-                return if ((size < MAXFILESIZE) && ("json" in name)) {
-                    true
-                } else {
-                    Log.d(TAG, "JSON File too big, or not contains json. size: $size name: $name")
-                    //TODO Check for proper file limit and add Toast
-                    false
-                }
-            }
-        }
-        return false
-    }
-
-    /**
-     * Returns text value of intent, empty string if error.
-     *
-     * @param intent
-     * @return text value of intent, empty string if error.
-     */
-    private fun handleJsonText(intent: Intent): String {
-        intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-            //Handle Simpleshare
-            return it
-        }
-        //Handle shared file share
-        val uri = getUri(intent)
-        if (uri != null) {
-            if (checkIntent(intent)) {
-                val inputPFD = try {
-                    contentResolver.openFileDescriptor(uri, "r")
-                } catch (e: FileNotFoundException) {
-                    Log.e("MainActivity", "File not found.", e)
-                    return ""
-                }
-                // Get a regular file descriptor for the file
-                val fd = inputPFD?.fileDescriptor
-                val fileStream = FileInputStream(fd)
-                return fileStream.bufferedReader().use { it.readText() }
-            } else {
-                return ""
-            }
-        }
-        return ""
-    }
-
-    private fun getUri(intent: Intent): Uri? {
-        intent.clipData?.let { clipData ->
-            Log.d(TAG, clipData.toString())
-            return clipData.getItemAt(0).uri
-        }
-        return null
-    }
 
     override fun onStart() {
         super.onStart()
