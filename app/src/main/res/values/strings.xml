@@ -42,4 +42,7 @@
     <string name="hidden_app_name">Device Settings</string>
     <string name="error_msg_invalid_url">Please enter a valid http:// or https:// URL</string>
     <string name="setting_boat_name">Boat Name</string>
+    <string name="boat_name">Boat Name</string>
+    <string name="set">Set</string>
+    <string name="later">Later</string>
 </resources>

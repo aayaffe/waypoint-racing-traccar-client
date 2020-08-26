@@ -1,8 +1,10 @@
 package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.*
-import `in`.avimarine.waypointracing.route.Finish
-import `in`.avimarine.waypointracing.route.Gate
+import `in`.avimarine.waypointracing.route.*
+import `in`.avimarine.waypointracing.ui.RouteElementAdapter
+import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
+import `in`.avimarine.waypointracing.utils.Screenshot
 import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
@@ -19,17 +21,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
-import `in`.avimarine.waypointracing.route.*
-import `in`.avimarine.waypointracing.ui.RouteElementAdapter
-import `in`.avimarine.waypointracing.utils.Screenshot
 import kotlinx.android.synthetic.main.activity_main2.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
 
-class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, SharedPreferences.OnSharedPreferenceChangeListener {
+class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, SharedPreferences.OnSharedPreferenceChangeListener, FirstTimeDialog.FirstTimeDialogListener {
 
     private val magnetic = false
     private lateinit var positionProvider: PositionProvider
@@ -48,6 +48,18 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
             loadRoute(r)
         } else {
             RouteLoader.handleIntent(this, intent, this::loadRoute)
+        }
+        val PREFS_NAME = "MyPrefsFile"
+        val settings = getSharedPreferences(PREFS_NAME, 0)
+
+        if (settings.getBoolean("my_first_time", true)) {
+            //the app is being launched for first time
+            Log.d(TAG, "First time run")
+            // first time task
+            val dialog = FirstTimeDialog()
+            dialog.show(supportFragmentManager, "FirstTimeDialogFragment")
+            // record the fact that the app has been started at least once
+            settings.edit().putBoolean("my_first_time", false).apply()
         }
 
         positionProvider = PositionProviderFactory.create(this, this)
@@ -77,6 +89,19 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
         }
     }
 
+    // The dialog fragment receives a reference to this Activity through the
+    // Fragment.onAttach() callback, which it uses to call the following methods
+    // defined by the NoticeDialogFragment.NoticeDialogListener interface
+    override fun onDialogPositiveClick(dialog: DialogFragment, boatName: String) {
+        with(sharedPreferences.edit()) {
+            putString("boat_name", boatName)
+            commit()
+        }
+    }
+
+    override fun onDialogNegativeClick(dialog: DialogFragment) {
+        // User touched the dialog's negative button
+    }
     private fun loadRoute(r: Route?) {
         if (r == null) {
             errorLoadingRoute("Error Loading Route")
