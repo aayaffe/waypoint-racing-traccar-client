@@ -35,7 +35,8 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
     private lateinit var positionProvider: PositionProvider
     private var nextWpt: RouteElement? = null
     private lateinit var sharedPreferences: SharedPreferences
-    private val PERMISSIONS_REQUEST_LOCATION = 2
+    private val PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE = 2
+    private val PERMISSIONS_REQUEST_LOCATION_UI = 4
     private lateinit var route: Route
 
 
@@ -62,7 +63,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
             settings.edit().putBoolean("my_first_time", false).apply()
         }
 
-        positionProvider = PositionProviderFactory.create(this, this)
+
         setButton(sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false))
         if (sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false)) {
             startTrackingService(true, false)
@@ -87,6 +88,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
                 // write code to perform some action
             }
         }
+    }
+
+    private fun createPositionProvider() {
+        positionProvider = PositionProviderFactory.create(this, this)
     }
 
     // The dialog fragment receives a reference to this Activity through the
@@ -131,7 +136,14 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
     override fun onStart() {
         super.onStart()
         try {
-            positionProvider.startUpdates()
+            if (arePermissionsGranted()) {
+                if (!this::positionProvider.isInitialized){
+                    createPositionProvider()
+                }
+                positionProvider.startUpdates()
+            } else {
+                askForLocationPermission(PERMISSIONS_REQUEST_LOCATION_UI)
+            }
         } catch (e: SecurityException) {
             Log.w(TAG, e)
         }
@@ -154,37 +166,6 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
             Log.w(TAG, e)
         }
         super.onStop()
-    }
-
-    private fun createTestRoute(): Route {
-        val accoEast = Location("")
-        accoEast.latitude = 32.921666667
-        accoEast.longitude = 35.05
-        val accoWest = Location("")
-        accoWest.latitude = 32.921666667
-        accoWest.longitude = 35.025
-        val nahariyaWest = Location("")
-        nahariyaWest.latitude = 33.01
-        nahariyaWest.longitude = 35.058333333
-        val nahariyaEast = Location("")
-        nahariyaEast.latitude = 33.01
-        nahariyaEast.longitude = 35.08333333
-        val achziv = Location("")
-        achziv.latitude = 33.05
-        achziv.longitude = 35.086666666
-        val finishEast = Location("")
-        finishEast.latitude = 32.8371666666667
-        finishEast.longitude = 35.02455
-        val finishWest = Location("")
-        finishWest.latitude = 32.8371666666667
-        finishWest.longitude = 35.0200666666667
-
-        val acco = Gate("Acco Gate", accoEast, accoWest, true, 315.0, 45.0, 0.25)
-        val nahariya = Gate("Nahariya Gate", nahariyaEast, nahariyaWest, true, 315.0, 45.0, 0.25)
-        val achzivWpt = Waypoint("Achziv Turning Point", achziv, true, 315.0, 45.0)
-        val finish = Finish("Finish Line", finishWest, finishEast, 0.15)
-        return Route("TestEvent", Calendar.getInstance().time, arrayListOf(acco, nahariya, achzivWpt, finish), Calendar.getInstance().time)
-
     }
 
     fun populateRouteElementSpinner(route: Route) {
@@ -305,24 +286,62 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
         }
     }
 
+    /**
+     * Checks for location permissions.
+     * returns true if permission granted or requesting permission from user.
+     */
+    private fun checkLocationPermissions(): Boolean{
+        val requiredPermissions: MutableSet<String> = HashSet()
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
+        if (requiredPermissions.isNotEmpty()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(requiredPermissions.toTypedArray(), PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE)
+            }
+            return false
+        }
+        return true
+    }
+    private fun arePermissionsGranted(): Boolean{
+        val requiredPermissions: MutableSet<String> = HashSet()
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
+        if (requiredPermissions.isNotEmpty()) {
+            return false
+        }
+        return true
+    }
+
+    private fun askForLocationPermission(permissionRequestCode: Int){
+        val requiredPermissions: MutableSet<String> = HashSet()
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
+        if (requiredPermissions.isNotEmpty()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(requiredPermissions.toTypedArray(), permissionRequestCode)
+            }
+        }
+    }
+
     private fun startTrackingService(checkPermission: Boolean, permission: Boolean) {
         var permission = permission
         if (checkPermission) {
-            val requiredPermissions: MutableSet<String> = HashSet()
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                    && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-            }
-            permission = requiredPermissions.isEmpty()
-            if (!permission) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requestPermissions(requiredPermissions.toTypedArray(), PERMISSIONS_REQUEST_LOCATION)
-                }
-                return
-            }
+            permission = checkLocationPermissions();
         }
         if (permission) {
             ContextCompat.startForegroundService(this, Intent(this, TrackingService::class.java))
@@ -336,7 +355,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
-        if (requestCode == PERMISSIONS_REQUEST_LOCATION) {
+        if (requestCode == PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE || requestCode == PERMISSIONS_REQUEST_LOCATION_UI) {
             var granted = true
             for (result in grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {
@@ -344,7 +363,17 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
                     break
                 }
             }
-            startTrackingService(false, granted)
+            Log.d(TAG,"Permissions granted: $granted")
+            if (requestCode == PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE) {
+                startTrackingService(false, granted)
+            }
+            else {
+                if (granted) {
+                    Log.d(TAG, "Started Updates after permission granted")
+                    createPositionProvider()
+                    positionProvider.startUpdates()
+                }
+            }
         }
     }
 }
