@@ -15,9 +15,11 @@
  */
 package in.avimarine.waypointracing.activities;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager;
@@ -31,26 +33,30 @@ import android.webkit.URLUtil;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.preference.EditTextPreference;
 import androidx.preference.EditTextPreferenceDialogFragmentCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
+import androidx.preference.TwoStatePreference;
 
 import in.avimarine.waypointracing.BuildConfig;
 import in.avimarine.waypointracing.MainApplication;
 import in.avimarine.waypointracing.R;
-
-import com.google.android.material.snackbar.Snackbar;
+import in.avimarine.waypointracing.TrackingService;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class MainFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener {
 
     private static final String TAG = MainFragment.class.getSimpleName();
-
+    private static final int ALARM_MANAGER_INTERVAL = 15000;
     public static final String KEY_DEVICE = "id";
     public static final String KEY_NAME = "boat_name";
     public static final String KEY_URL = "url";
@@ -62,7 +68,6 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     public static final String KEY_BUFFER = "buffer";
     public static final String KEY_WAKELOCK = "wakelock";
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
-    private static final String KEY_DISCLOSURE_SHOWN = "disclosureShown";
     private SharedPreferences sharedPreferences;
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
@@ -178,17 +183,6 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     public void onResume() {
         super.onResume();
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-        setPreferencesEnabled(!sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false));
-        if (!sharedPreferences.getBoolean(KEY_DISCLOSURE_SHOWN, false)) {
-            Snackbar.make(getView(), R.string.disclosure_location, Snackbar.LENGTH_INDEFINITE)
-                    .addCallback(new Snackbar.Callback() {
-                        @Override
-                        public void onDismissed(Snackbar transientBottomBar, int event) {
-                            sharedPreferences.edit().putBoolean(KEY_DISCLOSURE_SHOWN, true).apply();
-                        }
-                    })
-                    .show();
-        }
     }
 
     @Override
@@ -235,6 +229,53 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
             String id = "Boat_" + sharedPreferences.getString(KEY_DEVICE, null);
             sharedPreferences.edit().putString(KEY_NAME, id).apply();
             ((EditTextPreference) findPreference(KEY_NAME)).setText(id);
+        }
+    }
+
+    private void startTrackingService(boolean checkPermission, boolean permission) {
+        if (checkPermission) {
+            Set<String> requiredPermissions = new HashSet<>();
+            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            }
+            permission = requiredPermissions.isEmpty();
+            if (!permission) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestPermissions(requiredPermissions.toArray(new String[requiredPermissions.size()]), PERMISSIONS_REQUEST_LOCATION);
+                }
+                return;
+            }
+        }
+
+        if (permission) {
+            setPreferencesEnabled(false);
+            ContextCompat.startForegroundService(getContext(), new Intent(getActivity(), TrackingService.class));
+            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    ALARM_MANAGER_INTERVAL, ALARM_MANAGER_INTERVAL, alarmIntent);
+        } else {
+            sharedPreferences.edit().putBoolean(KEY_STATUS, false).apply();
+            TwoStatePreference preference = findPreference(KEY_STATUS);
+            preference.setChecked(false);
+        }
+    }
+
+    private void stopTrackingService() {
+        alarmManager.cancel(alarmIntent);
+        getActivity().stopService(new Intent(getActivity(), TrackingService.class));
+        setPreferencesEnabled(true);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST_LOCATION) {
+            boolean granted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    granted = false;
+                    break;
+                }
+            }
+            startTrackingService(false, granted);
         }
         findPreference(KEY_NAME).setSummary(sharedPreferences.getString(KEY_NAME, null));
     }
