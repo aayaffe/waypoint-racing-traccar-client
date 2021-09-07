@@ -51,4 +51,5 @@
     <string name="settings_wakelock_on_summary">Wake lock on</string>
     <string name="hidden_alert">The app has been hidden. To open it again please dial 8722227 (TRACCAR).</string>
     <string name="next_waypoint_gate">Next Waypoint\\Gate</string>
+    <string name="disclosure_location">This app collects location data to enable live tracking even when the app is closed or not in use.</string>
 </resources>

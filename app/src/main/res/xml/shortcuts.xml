@@ -11,7 +11,7 @@
         android:shortcutShortLabel="@string/shortcut_start">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="org.traccar.client"
+            android:targetPackage="in.avimarine.waypointracing"
             android:targetClass="avimarine.traccar.client.activities.ShortcutActivity">
             <extra
                 android:name="action"
@@ -26,7 +26,7 @@
         android:shortcutShortLabel="@string/shortcut_stop">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="org.traccar.client"
+            android:targetPackage="in.avimarine.waypointracing"
             android:targetClass="avimarine.traccar.client.activities.ShortcutActivity">
             <extra
                 android:name="action"

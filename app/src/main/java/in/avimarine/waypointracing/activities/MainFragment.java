@@ -17,9 +17,12 @@ package in.avimarine.waypointracing.activities;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -28,14 +31,18 @@ import android.webkit.URLUtil;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.preference.EditTextPreference;
 import androidx.preference.EditTextPreferenceDialogFragmentCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
+import in.avimarine.waypointracing.BuildConfig;
 import in.avimarine.waypointracing.MainApplication;
 import in.avimarine.waypointracing.R;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -54,15 +61,18 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     public static final String KEY_STATUS = "status";
     public static final String KEY_BUFFER = "buffer";
     public static final String KEY_WAKELOCK = "wakelock";
-
-
+    private static final int PERMISSIONS_REQUEST_LOCATION = 2;
+    private static final String KEY_DISCLOSURE_SHOWN = "disclosureShown";
     private SharedPreferences sharedPreferences;
-
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        if (BuildConfig.HIDDEN_APP && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            removeLauncherIcon();
+        }
+        setHasOptionsMenu(true);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         setPreferencesFromResource(R.xml.preferences, rootKey);
         initPreferences();
@@ -148,11 +158,37 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
         }
     }
 
+    private void removeLauncherIcon() {
+        String className = MainActivity.class.getCanonicalName().replace(".MainActivity", ".Launcher");
+        ComponentName componentName = new ComponentName(getActivity().getPackageName(), className);
+        PackageManager packageManager = getActivity().getPackageManager();
+        if (packageManager.getComponentEnabledSetting(componentName) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+            packageManager.setComponentEnabledSetting(
+                    componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setIcon(android.R.drawable.ic_dialog_alert);
+            builder.setMessage(getString(R.string.hidden_alert));
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         setPreferencesEnabled(!sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false));
+        if (!sharedPreferences.getBoolean(KEY_DISCLOSURE_SHOWN, false)) {
+            Snackbar.make(getView(), R.string.disclosure_location, Snackbar.LENGTH_INDEFINITE)
+                    .addCallback(new Snackbar.Callback() {
+                        @Override
+                        public void onDismissed(Snackbar transientBottomBar, int event) {
+                            sharedPreferences.edit().putBoolean(KEY_DISCLOSURE_SHOWN, true).apply();
+                        }
+                    })
+                    .show();
+        }
     }
 
     @Override
