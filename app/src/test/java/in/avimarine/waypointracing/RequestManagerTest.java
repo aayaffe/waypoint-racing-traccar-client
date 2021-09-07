@@ -1,6 +1,8 @@
 
 package avimarine.traccar.client;
 
+import android.os.Build;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,10 +10,11 @@ import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertTrue;
 
+@Config(sdk = Build.VERSION_CODES.P)
 @RunWith(RobolectricTestRunner.class)
 public class RequestManagerTest {
 
-    @Ignore
+    @Ignore("Not a real unit test")
     @Test
     public void testSendRequest() throws Exception {
 
