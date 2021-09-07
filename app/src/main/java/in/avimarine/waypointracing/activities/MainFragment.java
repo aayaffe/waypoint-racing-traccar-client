@@ -62,7 +62,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        addPreferencesFromResource(R.xml.preferences);
+        setPreferencesFromResource(R.xml.preferences, rootKey);
         initPreferences();
         findPreference(KEY_DEVICE).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
