@@ -1,7 +1,9 @@
 package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.*
-import `in`.avimarine.waypointracing.route.*
+import `in`.avimarine.waypointracing.route.Route
+import `in`.avimarine.waypointracing.route.RouteElement
+import `in`.avimarine.waypointracing.route.RouteLoader
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
 import `in`.avimarine.waypointracing.utils.Screenshot
@@ -9,6 +11,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
@@ -38,6 +41,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
     private val PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE = 2
     private val PERMISSIONS_REQUEST_LOCATION_UI = 4
     private lateinit var route: Route
+    private var noGPSTimer: Timer = Timer("GPSTIMER",true)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -233,13 +237,41 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
             portGate.setData(portData)
             stbdGate.setData(stbcData)
             updateIsInArea(position)
+        } else
+        {
+            portGate.setData("-----")
+            stbdGate.setData("-----")
         }
+        setUiForGPS(true)
         cog.setData(getDirString(position.course, magnetic, false, position, position.time.time))
         sog.setData(getSpeedString(position.speed)) //TODO Fix units in the conversion (probably knots)
         location.setData(getLatString(position.latitude) + "\n" + getLonString(position.longitude))
         time.setData(timeStamptoDateString(position.time.time))
+        noGPSTimer.cancel()
+        noGPSTimer.purge()
+        noGPSTimer = Timer("GPSTIMER",true)
+        val interval = (sharedPreferences.getString(MainFragment.KEY_INTERVAL, "600")?.toLong() ?:600) * 2500 //After two and half time of interval
+        noGPSTimer.schedule(interval){
+            setUiForGPS(false)
+        }
+    }
 
-
+    private fun setUiForGPS(isAvailable: Boolean) {
+        if (isAvailable) {
+            portGate.setTextColor(Color.BLACK)
+            stbdGate.setTextColor(Color.BLACK)
+            cog.setTextColor(Color.BLACK)
+            sog.setTextColor(Color.BLACK)
+            location.setTextColor(Color.BLACK)
+            time.setTextColor(Color.BLACK)
+        } else {
+            portGate.setTextColor(Color.RED)
+            stbdGate.setTextColor(Color.RED)
+            cog.setTextColor(Color.RED)
+            sog.setTextColor(Color.RED)
+            location.setTextColor(Color.RED)
+            time.setTextColor(Color.RED)
+        }
     }
 
     private fun updateIsInArea(location: Position) {
@@ -363,7 +395,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
                     break
                 }
             }
-            Log.d(TAG,"Permissions granted: $granted")
+            Log.d(TAG, "Permissions granted: $granted")
             if (requestCode == PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE) {
                 startTrackingService(false, granted)
             }

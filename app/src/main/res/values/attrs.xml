@@ -4,6 +4,7 @@
         <attr name="dataText" format="string" />
         <attr name="labelText" format="string" />
         <attr name="unitsText" format="string" />
+        <attr name="textColor" format="integer"/>
         <attr name="labelEnabled" format="boolean" />
         <attr name="unitsEnabled" format="boolean" />
         <attr name="dataTextSize" format="dimension" />

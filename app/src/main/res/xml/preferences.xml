@@ -37,7 +37,7 @@
         app:isPreferenceVisible="false"/>
 
     <EditTextPreference
-        android:defaultValue="20"
+        android:defaultValue="8"
         android:key="interval"
         android:inputType="number"
         android:summary="@string/settings_interval_summary"

@@ -10,7 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import `in`.avimarine.waypointracing.R
 import kotlinx.android.synthetic.main.navtextdrawer.view.*
 import `in`.avimarine.waypointracing.TAG
-
+import android.graphics.Color
 
 
 class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
@@ -21,6 +21,7 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
     private var dataText: String? = null
     private var unitsText: String? = null
     private var labelText: String? = null
+    private var textColor = Color.BLACK
 
     init {
         Log.d(TAG, "InInit")
@@ -52,6 +53,10 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
         }
     }
 
+    fun setTextColor(c: Int){
+        dataTV.setTextColor(c)
+    }
+
     private fun setupAttributes(attrs: AttributeSet?) {
         Log.d(TAG,"SetupAttributes")
         // Obtain a typed array of attributes
@@ -63,6 +68,7 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
         dataText = typedArray.getString(R.styleable.NavTextDrawer_dataText)
         labelEnabled = typedArray.getBoolean(R.styleable.NavTextDrawer_labelEnabled,true)
         unitsEnabled = typedArray.getBoolean(R.styleable.NavTextDrawer_unitsEnabled,true)
+        textColor = typedArray.getInt(R.styleable.NavTextDrawer_textColor, Color.BLACK)
         val dataTextSize = typedArray.getDimension(R.styleable.NavTextDrawer_dataTextSize, 12f)
         dataTV.textSize = dataTextSize
         // TypedArray objects are shared and must be recycled.
@@ -70,7 +76,7 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
         setLabel(labelText)
         setUnits(unitsText)
         setData(dataText)
-
+        setTextColor(textColor)
         if (!labelEnabled){
             labelTv.visibility = View.INVISIBLE
         }
