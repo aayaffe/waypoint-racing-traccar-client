@@ -34,6 +34,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
+import in.avimarine.waypointracing.MainApplication;
 import in.avimarine.waypointracing.R;
 
 import java.util.Arrays;
@@ -180,6 +181,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
             findPreference(KEY_NAME).setSummary(sharedPreferences.getString(KEY_NAME, null));
         } else if  (key.equals(KEY_STATUS)) {
             setPreferencesEnabled(!sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false));
+            ((MainApplication) getActivity().getApplication()).handleRatingFlow(getActivity());
         }
 
     }
