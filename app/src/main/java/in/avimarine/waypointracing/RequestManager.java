@@ -63,6 +63,7 @@ public class RequestManager {
             while (inputStream.read() != -1);
             return true;
         } catch (IOException error) {
+            Log.w(RequestManager.class.getSimpleName(), "Failed to send", error);
             return false;
         } finally {
             try {
