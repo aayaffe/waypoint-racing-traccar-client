@@ -40,7 +40,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_weight="1"
-        android:text="Next Waypoint"
+        android:text="@string/next_waypoint_gate"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
