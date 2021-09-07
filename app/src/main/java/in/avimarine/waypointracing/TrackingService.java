@@ -33,6 +33,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import in.avimarine.waypointracing.activities.Main2Activity;
+import in.avimarine.waypointracing.activities.MainFragment;
 import in.avimarine.waypointracing.activities.StatusActivity;
 
 public class TrackingService extends Service {
