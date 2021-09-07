@@ -67,4 +67,11 @@
         android:title="@string/settings_buffer"
         app:isPreferenceVisible="false"/>
 
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="wakelock"
+        android:summaryOff="@string/settings_wakelock_off_summary"
+        android:summaryOn="@string/settings_wakelock_on_summary"
+        android:title="@string/settings_wakelock" />
+
 </PreferenceScreen>
