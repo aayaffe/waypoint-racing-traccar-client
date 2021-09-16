@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 @file:Suppress("DEPRECATION", "StaticFieldLeak")
-package `in`.avimarine.waypointracing;
+package `in`.avimarine.waypointracing.database;
 
+import `in`.avimarine.waypointracing.Position
 import android.content.ContentValues
 import android.content.Context
 import android.database.SQLException

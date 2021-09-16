@@ -107,32 +107,32 @@ public class ShortcutActivity extends AppCompatActivity {
     }
 
     @SuppressWarnings("MissingPermission")
-    private void sendAlarm() {
-        PositionProviderFactory.create(this, new PositionProvider.PositionListener() {
-            @Override
-            public void onPositionUpdate(Position position) {
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ShortcutActivity.this);
-                String request = ProtocolFormatter.formatRequest(
-                        preferences.getString(MainFragment.KEY_URL, null), position, ALARM_SOS);
-
-                RequestManager.sendRequestAsync(request, new RequestManager.RequestHandler() {
-                    @Override
-                    public void onComplete(boolean success) {
-                        if (success) {
-                            Toast.makeText(ShortcutActivity.this, R.string.status_send_success, Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(ShortcutActivity.this, R.string.status_send_fail, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void onPositionError(Throwable error) {
-                Toast.makeText(ShortcutActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        }).requestSingleLocation();
-    }
+//    private void sendAlarm() {
+//        PositionProviderFactory.create(this, new PositionProvider.PositionListener() {
+//            @Override
+//            public void onPositionUpdate(Position position) {
+//                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ShortcutActivity.this);
+//                String request = ProtocolFormatter.formatRequest(
+//                        preferences.getString(MainFragment.KEY_URL, null), position, ALARM_SOS);
+//
+//                RequestManager.sendRequestAsync(request, new RequestManager.RequestHandler() {
+//                    @Override
+//                    public void onComplete(boolean success) {
+//                        if (success) {
+//                            Toast.makeText(ShortcutActivity.this, R.string.status_send_success, Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            Toast.makeText(ShortcutActivity.this, R.string.status_send_fail, Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onPositionError(Throwable error) {
+//                Toast.makeText(ShortcutActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+//            }
+//        }).requestSingleLocation();
+//    }
 
     private boolean executeAction(Intent intent) {
         String action;
@@ -156,13 +156,13 @@ public class ShortcutActivity extends AppCompatActivity {
                     stopService(new Intent(this, TrackingService.class));
                     Toast.makeText(this, R.string.status_service_destroy, Toast.LENGTH_SHORT).show();
                     break;
-                case ACTION_SOS:
-                    if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        sendAlarm();
-                    } else {
-                        Toast.makeText(this, R.string.status_send_fail, Toast.LENGTH_SHORT).show();
-                    }
-                    break;
+//                case ACTION_SOS:
+//                    if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//                        sendAlarm();
+//                    } else {
+//                        Toast.makeText(this, R.string.status_send_fail, Toast.LENGTH_SHORT).show();
+//                    }
+//                    break;
             }
             finish();
         }

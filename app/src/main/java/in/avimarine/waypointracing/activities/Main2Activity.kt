@@ -1,9 +1,7 @@
 package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.*
-import `in`.avimarine.waypointracing.route.Route
-import `in`.avimarine.waypointracing.route.RouteElement
-import `in`.avimarine.waypointracing.route.RouteLoader
+import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
 import `in`.avimarine.waypointracing.utils.Screenshot
@@ -25,6 +23,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import kotlinx.android.synthetic.main.activity_main2.*
 import java.util.*
@@ -32,7 +31,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
 
-class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, SharedPreferences.OnSharedPreferenceChangeListener, FirstTimeDialog.FirstTimeDialogListener {
+class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, TrackingController.RouteHandler,
+    SharedPreferences.OnSharedPreferenceChangeListener, FirstTimeDialog.FirstTimeDialogListener {
 
     private val magnetic = false
     private lateinit var positionProvider: PositionProvider
@@ -41,7 +41,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
     private val PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE = 2
     private val PERMISSIONS_REQUEST_LOCATION_UI = 4
     private lateinit var route: Route
-    private var noGPSTimer: Timer = Timer("GPSTIMER",true)
+    private var noGPSTimer: Timer = Timer("GPSTIMER", true)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,17 +75,25 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
         val mCalendar: Calendar = GregorianCalendar()
         val mTimeZone = mCalendar.timeZone
         val mGMTOffset = mTimeZone.getOffset(mCalendar.timeInMillis)
-        time.setLabel("UTC " + (if (mGMTOffset > 0) "+" else "") + TimeUnit.HOURS.convert(mGMTOffset.toLong(), TimeUnit.MILLISECONDS))
+        time.setLabel(
+            "UTC " + (if (mGMTOffset > 0) "+" else "") + TimeUnit.HOURS.convert(
+                mGMTOffset.toLong(),
+                TimeUnit.MILLISECONDS
+            )
+        )
         routeElementSpinner.onItemSelectedListener = object :
-                AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>,
-                                        view: View, position: Int, id: Long) {
+            AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View, position: Int, id: Long
+            ) {
                 nextWpt = route.elements[position]
                 if (nextWpt!!.firstTimeInProofArea != -1L) {
                     (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(android.R.color.holo_green_light))
                 } else {
                     (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(android.R.color.black))
                 }
+                sendRouteIntent(route)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -111,6 +119,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
     override fun onDialogNegativeClick(dialog: DialogFragment) {
         // User touched the dialog's negative button
     }
+
     private fun loadRoute(r: Route?) {
         if (r == null) {
             errorLoadingRoute("Error Loading Route")
@@ -122,7 +131,17 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
         route = r
         populateRouteElementSpinner(r)
         setTitle("Waypoint Racing", r.eventName)
+        sendRouteIntent(r)
 
+    }
+
+    private fun sendRouteIntent(r: Route) {
+        Intent().also { intent ->
+            intent.action = TrackingService.ROUTE_ACTION
+            intent.putExtra("route", r)
+            intent.putExtra("nextwpt", nextWpt)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        }
     }
 
     private fun setTitle(title: String, subTitle: String) {
@@ -141,7 +160,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
         super.onStart()
         try {
             if (arePermissionsGranted()) {
-                if (!this::positionProvider.isInitialized){
+                if (!this::positionProvider.isInitialized) {
                     createPositionProvider()
                 }
                 positionProvider.startUpdates()
@@ -173,8 +192,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
     }
 
     fun populateRouteElementSpinner(route: Route) {
-        val adapter = RouteElementAdapter(this,
-                R.layout.waypoint_spinner_item, 0, route.elements)
+        val adapter = RouteElementAdapter(
+            this,
+            R.layout.waypoint_spinner_item, 0, route.elements
+        )
         routeElementSpinner.adapter = adapter
     }
 
@@ -196,7 +217,8 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
             this.startActivity(intent)
             return true
         } else if (id == R.id.send_screenshot_menu_action) {
-            val b = Screenshot.takescreenshotOfRootView(this.findViewById<View>(android.R.id.content).rootView)
+            val b =
+                Screenshot.takescreenshotOfRootView(this.findViewById<View>(android.R.id.content).rootView)
 
         }
         return super.onOptionsItemSelected(item)
@@ -232,13 +254,24 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
             val distWptStbd = getDistance(position, nextWpt!!.stbdWpt)
             val dirWptPort = getDirection(position, nextWpt!!.portWpt)
             val dirWptStbd = getDirection(position, nextWpt!!.stbdWpt)
-            val portData = getDirString(dirWptPort, magnetic, false, position, position.time.time) + "/" + getDistString(distWptPort)
-            val stbcData = getDirString(dirWptStbd, magnetic, false, position, position.time.time) + "/" + getDistString(distWptStbd)
+            val portData = getDirString(
+                dirWptPort,
+                magnetic,
+                false,
+                position,
+                position.time.time
+            ) + "/" + getDistString(distWptPort)
+            val stbcData = getDirString(
+                dirWptStbd,
+                magnetic,
+                false,
+                position,
+                position.time.time
+            ) + "/" + getDistString(distWptStbd)
             portGate.setData(portData)
             stbdGate.setData(stbcData)
             updateIsInArea(position)
-        } else
-        {
+        } else {
             portGate.setData("-----")
             stbdGate.setData("-----")
         }
@@ -249,9 +282,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
         time.setData(timeStamptoDateString(position.time.time))
         noGPSTimer.cancel()
         noGPSTimer.purge()
-        noGPSTimer = Timer("GPSTIMER",true)
-        val interval = (sharedPreferences.getString(MainFragment.KEY_INTERVAL, "600")?.toLong() ?:600) * 2500 //After two and half time of interval
-        noGPSTimer.schedule(interval){
+        noGPSTimer = Timer("GPSTIMER", true)
+        val interval = (sharedPreferences.getString(MainFragment.KEY_INTERVAL, "600")?.toLong()
+            ?: 600) * 2500 //After two and half time of interval
+        noGPSTimer.schedule(interval) {
             setUiForGPS(false)
         }
     }
@@ -282,7 +316,11 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
             if (nextWpt!!.isInProofArea(l)) {
                 if (nextWpt!!.passedGate(location)) {
                     StatusActivity.addMessage("Passed " + nextWpt!!.name)
-                    (routeElementSpinner.selectedView as TextView).setTextColor(resources.getColor(android.R.color.holo_green_light))
+                    (routeElementSpinner.selectedView as TextView).setTextColor(
+                        resources.getColor(
+                            android.R.color.holo_green_light
+                        )
+                    )
                     Timer("AdvanceWaypoint", false).schedule(3000) {
                         runOnUiThread {
                             if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count - 1) {
@@ -322,30 +360,50 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
      * Checks for location permissions.
      * returns true if permission granted or requesting permission from user.
      */
-    private fun checkLocationPermissions(): Boolean{
+    private fun checkLocationPermissions(): Boolean {
         val requiredPermissions: MutableSet<String> = HashSet()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         }
         if (requiredPermissions.isNotEmpty()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(requiredPermissions.toTypedArray(), PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE)
+                requestPermissions(
+                    requiredPermissions.toTypedArray(),
+                    PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE
+                )
             }
             return false
         }
         return true
     }
-    private fun arePermissionsGranted(): Boolean{
+
+    private fun arePermissionsGranted(): Boolean {
         val requiredPermissions: MutableSet<String> = HashSet()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         }
         if (requiredPermissions.isNotEmpty()) {
@@ -354,13 +412,21 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
         return true
     }
 
-    private fun askForLocationPermission(permissionRequestCode: Int){
+    private fun askForLocationPermission(permissionRequestCode: Int) {
         val requiredPermissions: MutableSet<String> = HashSet()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         }
         if (requiredPermissions.isNotEmpty()) {
@@ -376,7 +442,12 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
             permission = checkLocationPermissions();
         }
         if (permission) {
-            ContextCompat.startForegroundService(this, Intent(this, TrackingService::class.java))
+            val i = Intent(this, TrackingService::class.java)
+            if (this::route.isInitialized){
+                i.putExtra("route", route)
+            }
+            i.putExtra("nextwpt", nextWpt)
+            ContextCompat.startForegroundService(this, i)
         } else {
             sharedPreferences.edit().putBoolean(MainFragment.KEY_STATUS, false).apply()
         }
@@ -386,7 +457,11 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
         this.stopService(Intent(this, TrackingService::class.java))
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
         if (requestCode == PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE || requestCode == PERMISSIONS_REQUEST_LOCATION_UI) {
             var granted = true
             for (result in grantResults) {
@@ -398,12 +473,26 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Sh
             Log.d(TAG, "Permissions granted: $granted")
             if (requestCode == PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE) {
                 startTrackingService(false, granted)
-            }
-            else {
+            } else {
                 if (granted) {
                     Log.d(TAG, "Started Updates after permission granted")
                     createPositionProvider()
                     positionProvider.startUpdates()
+                }
+            }
+        }
+    }
+
+    override fun onRouteUpdate(gatePassing: GatePassing) {
+        (routeElementSpinner.selectedView as TextView).setTextColor(
+            resources.getColor(
+                android.R.color.holo_green_light
+            )
+        )
+        Timer("AdvanceWaypoint", false).schedule(3000) {
+            runOnUiThread {
+                if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count - 1) {
+                    routeElementSpinner.setSelection(routeElementSpinner.selectedItemPosition + 1)
                 }
             }
         }

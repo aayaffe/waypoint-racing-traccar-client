@@ -6,33 +6,23 @@ import `in`.avimarine.waypointracing.isPointInPolygon
 import android.location.Location
 import android.util.Log
 import `in`.avimarine.waypointracing.route.ProofAreaType
+import android.os.Parcelable
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement.bearing
+import kotlinx.android.parcel.Parcelize
 
-class ProofArea {
-    val type : ProofAreaType
+@Parcelize
+class ProofArea  (
+    var type : ProofAreaType,
     //Bearings will be defined clockwise
-    val bearings : ArrayList<Double>
+    var bearings : ArrayList<Double>,
     //Waypoints will be defined in order, as to create a valid polygon
-    val wpts : ArrayList<Location>
+    var wpts : ArrayList<Location>
+) : Parcelable{
 
-    constructor(type: ProofAreaType, bearings: ArrayList<Double>, wpts: ArrayList<Location>) {
-        this.type = type
-        this.bearings = bearings
-        this.wpts = wpts
-    }
+    constructor(bearings: ArrayList<Double>) : this(ProofAreaType.QUADRANT, bearings, arrayListOf())
 
-    constructor(bearings: ArrayList<Double>){
-        this.type = ProofAreaType.QUADRANT
-        this.bearings = bearings
-        this.wpts = arrayListOf()
-    }
-
-    constructor(type: ProofAreaType, wpts: ArrayList<Location>){
-        this.type = ProofAreaType.POLYGON
-        this.bearings = arrayListOf()
-        this.wpts = wpts
-    }
+    constructor(type: ProofAreaType, wpts: ArrayList<Location>):this(type, arrayListOf(), wpts)
 
     fun isInProofArea(portWpt: Location, stbdWpt: Location, loc:Location):Boolean{
         if (type== ProofAreaType.POLYGON){
