@@ -50,7 +50,7 @@ class TrackingService() : Service(), TrackingController.RouteHandler {
     private var wakeLock: WakeLock? = null
     private var trackingController: TrackingController? = null
     private val br: BroadcastReceiver = RouteBroadcastReceiver()
-    private var nextWpt: RouteElement? = null
+    private var nextWpt: Int = -1
     private var route: Route? = null
 
     class HideNotificationService : Service() {
@@ -103,10 +103,7 @@ class TrackingService() : Service(), TrackingController.RouteHandler {
     @TargetApi(Build.VERSION_CODES.ECLAIR)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         WakefulBroadcastReceiver.completeWakefulIntent(intent)
-        route = intent?.getParcelableExtra<Route>("route")
-        nextWpt = intent?.getParcelableExtra("nextwpt")
-        route?.let { Log.d(TAG, it.eventName) }
-        nextWpt?.let { Log.d(TAG, it.name) }
+        parseRouteIntent(intent)
         return START_STICKY
     }
 
@@ -123,8 +120,16 @@ class TrackingService() : Service(), TrackingController.RouteHandler {
 
     }
 
-    override fun onRouteUpdate(gatePassing: GatePassing) {
-        Log.d(TAG, gatePassing.toString())
+    override fun onRouteUpdate(nextWpt: Int) {
+        this.nextWpt = nextWpt
+    }
+
+    private fun parseRouteIntent(i: Intent?){
+        route = i?.getParcelableExtra("route")
+        nextWpt = i?.getIntExtra("nextwpt",-1)!!
+        Log.d(TAG, "Recieved route: " + route.toString())
+        Log.d(TAG, "Recieved nextwpt: " + route?.elements?.elementAtOrNull(nextWpt) )
+        trackingController?.updateRoute(route, nextWpt)
     }
 
     companion object {
@@ -156,12 +161,11 @@ class TrackingService() : Service(), TrackingController.RouteHandler {
         }
     }
 
+
+
     inner class RouteBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            route = intent?.getParcelableExtra("route")
-            nextWpt = intent?.getParcelableExtra("nextwpt")
-            Log.d(TAG, "Recieved route: " + route.toString())
-            Log.d(TAG, "Recieved nextwpt: " + nextWpt.toString())
+            parseRouteIntent(intent)
         }
     }
 }

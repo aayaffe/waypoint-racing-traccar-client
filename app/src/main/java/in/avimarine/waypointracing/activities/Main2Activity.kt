@@ -36,7 +36,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
 
     private val magnetic = false
     private lateinit var positionProvider: PositionProvider
-    private var nextWpt: RouteElement? = null
+    private var nextWpt: Int = -1
     private lateinit var sharedPreferences: SharedPreferences
     private val PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE = 2
     private val PERMISSIONS_REQUEST_LOCATION_UI = 4
@@ -87,8 +87,9 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
                 parent: AdapterView<*>,
                 view: View, position: Int, id: Long
             ) {
-                nextWpt = route.elements[position]
-                if (nextWpt!!.firstTimeInProofArea != -1L) {
+                nextWpt = position
+                val wpt = route.elements[position]
+                if (wpt!!.firstTimeInProofArea != -1L) {
                     (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(android.R.color.holo_green_light))
                 } else {
                     (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(android.R.color.black))
@@ -249,11 +250,12 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
     }
 
     private fun updateUI(position: Position) {
-        if (nextWpt != null) {
-            val distWptPort = getDistance(position, nextWpt!!.portWpt)
-            val distWptStbd = getDistance(position, nextWpt!!.stbdWpt)
-            val dirWptPort = getDirection(position, nextWpt!!.portWpt)
-            val dirWptStbd = getDirection(position, nextWpt!!.stbdWpt)
+        val wpt = route.elements.elementAtOrNull(nextWpt)
+        if (wpt != null) {
+            val distWptPort = getDistance(position, wpt!!.portWpt)
+            val distWptStbd = getDistance(position, wpt!!.stbdWpt)
+            val dirWptPort = getDirection(position, wpt!!.portWpt)
+            val dirWptStbd = getDirection(position, wpt!!.stbdWpt)
             val portData = getDirString(
                 dirWptPort,
                 magnetic,
@@ -312,10 +314,11 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
         val l = Location("")
         l.latitude = location.latitude
         l.longitude = location.longitude
-        if (nextWpt != null) {
-            if (nextWpt!!.isInProofArea(l)) {
-                if (nextWpt!!.passedGate(location)) {
-                    StatusActivity.addMessage("Passed " + nextWpt!!.name)
+        val wpt = route.elements[nextWpt]
+        if (wpt != null) {
+            if (wpt!!.isInProofArea(l)) {
+                if (wpt!!.passedGate(location)) {
+                    StatusActivity.addMessage("Passed " + wpt!!.name)
                     (routeElementSpinner.selectedView as TextView).setTextColor(
                         resources.getColor(
                             android.R.color.holo_green_light
@@ -483,7 +486,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
         }
     }
 
-    override fun onRouteUpdate(gatePassing: GatePassing) {
+    override fun onRouteUpdate(index: Int) {
         (routeElementSpinner.selectedView as TextView).setTextColor(
             resources.getColor(
                 android.R.color.holo_green_light
@@ -492,9 +495,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
         Timer("AdvanceWaypoint", false).schedule(3000) {
             runOnUiThread {
                 if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count - 1) {
-                    routeElementSpinner.setSelection(routeElementSpinner.selectedItemPosition + 1)
+                    routeElementSpinner.setSelection(index)
                 }
             }
         }
+        this.nextWpt = index
     }
 }
