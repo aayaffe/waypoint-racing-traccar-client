@@ -35,6 +35,7 @@ import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.route.RouteElement
 import `in`.avimarine.waypointracing.route.Waypoint
+import android.content.SharedPreferences
 import android.location.Location
 import kotlinx.android.synthetic.main.activity_main2.*
 
@@ -43,6 +44,7 @@ class TrackingController(private val context: Context, private val routeHandler:
     private var nextWpt: Int = -1
     private var route: Route? = null
     private val handler = Handler(Looper.getMainLooper())
+    private val handlerGP = Handler(Looper.getMainLooper())
     private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
     private val positionProvider = PositionProviderFactory.create(context, this)
     private val databaseHelper = DatabaseHelper(context)
@@ -54,6 +56,11 @@ class TrackingController(private val context: Context, private val routeHandler:
     private val url: String = preferences.getString(
         MainFragment.KEY_URL,
         context.getString(R.string.settings_url_default_value)
+    )!!
+
+    private val urlGates: String = preferences.getString(
+        MainFragment.KEY_URL_GATES,
+        context.getString(R.string.settings_url_gates_default_value)
     )!!
     private val buffer: Boolean = preferences.getBoolean(MainFragment.KEY_BUFFER, true)
 
@@ -75,6 +82,7 @@ class TrackingController(private val context: Context, private val routeHandler:
     fun start() {
         if (isOnline) {
             read()
+            readGatePass()
         }
         try {
             positionProvider.startUpdates()
@@ -92,6 +100,7 @@ class TrackingController(private val context: Context, private val routeHandler:
             Log.w(TAG, e)
         }
         handler.removeCallbacksAndMessages(null)
+        handlerGP.removeCallbacksAndMessages(null)
     }
 
     override fun onPositionUpdate(position: Position) {
@@ -104,8 +113,9 @@ class TrackingController(private val context: Context, private val routeHandler:
                     deviceId!!,
                     boatName!!, route!!.elements?.get(nextWpt)?.name,position.time, position)
                 write(gp)
-                nextWpt = nextWpt++
-                routeHandler?.onRouteUpdate(nextWpt)
+                nextWpt += 1
+                setNextWpt(nextWpt)
+//                routeHandler?.onRouteUpdate(nextWpt)
             }
         } else {
             send(position)
@@ -114,9 +124,17 @@ class TrackingController(private val context: Context, private val routeHandler:
                     deviceId!!,
                     boatName!!, route!!.elements?.get(nextWpt)?.name,position.time, position)
                 send(gp)
-                nextWpt = nextWpt++
-                routeHandler?.onRouteUpdate(nextWpt)
+                nextWpt += 1
+                setNextWpt(nextWpt)
+//                routeHandler?.onRouteUpdate(nextWpt)
             }
+        }
+    }
+    fun setNextWpt(n: Int){
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+        with(sharedPref.edit()) {
+            putInt(MainFragment.KEY_NEXT_WPT, n)
+            commit()
         }
     }
 
@@ -256,7 +274,7 @@ class TrackingController(private val context: Context, private val routeHandler:
 
     private fun delete(gatePass: GatePassing) {
         log("deleteGatePass", gatePass)
-        databaseHelper.deletePositionAsync(gatePass.id, object : DatabaseHandler<Unit?> {
+        gatePassDatabaseHelper.deleteGatePassAsync(gatePass.id, object : GatePassesDatabaseHelper.DatabaseHandler<Unit?> {
             override fun onComplete(success: Boolean, result: Unit?) {
                 if (success) {
                     readGatePass()
@@ -288,7 +306,7 @@ class TrackingController(private val context: Context, private val routeHandler:
 
     private fun send(gatePass: GatePassing) {
         log("sendGatePass", gatePass)
-        val request = formatRequest(url, gatePass)
+        val request = formatRequest(urlGates, gatePass)
         sendRequestAsync(request, object : RequestHandler {
             override fun onComplete(success: Boolean) {
                 if (success) {
@@ -316,7 +334,7 @@ class TrackingController(private val context: Context, private val routeHandler:
 
     private fun retryGatePass() {
         log("retryGatePass", null)
-        handler.postDelayed({ //TODO: Might need to use a different handler!
+        handlerGP.postDelayed({ //TODO: Might need to use a different handler!
             if (isOnline) {
                 readGatePass()
             }

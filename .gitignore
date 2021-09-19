@@ -88,3 +88,4 @@ lint/outputs/
 lint/tmp/
 # lint/reports/
 private_key.pepk
+app/regular/release/output-metadata.json

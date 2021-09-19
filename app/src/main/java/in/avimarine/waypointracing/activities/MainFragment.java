@@ -60,6 +60,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     public static final String KEY_DEVICE = "id";
     public static final String KEY_NAME = "boat_name";
     public static final String KEY_URL = "url";
+    public static final String KEY_URL_GATES = "urlgates";
     public static final String KEY_INTERVAL = "interval";
     public static final String KEY_DISTANCE = "distance";
     public static final String KEY_ANGLE = "angle";
@@ -67,6 +68,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     public static final String KEY_STATUS = "status";
     public static final String KEY_BUFFER = "buffer";
     public static final String KEY_WAKELOCK = "wakelock";
+    public static final String KEY_NEXT_WPT = "nextwpt";
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
     private SharedPreferences sharedPreferences;
     private AlarmManager alarmManager;
@@ -99,6 +101,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
                 return (newValue != null) && validateServerURL(newValue.toString());
             }
         });
+
 
         findPreference(KEY_INTERVAL).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override

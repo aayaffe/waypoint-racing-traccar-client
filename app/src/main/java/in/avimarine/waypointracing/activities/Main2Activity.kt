@@ -31,7 +31,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
 
-class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, TrackingController.RouteHandler,
+class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
+    TrackingController.RouteHandler,
     SharedPreferences.OnSharedPreferenceChangeListener, FirstTimeDialog.FirstTimeDialogListener {
 
     private val magnetic = false
@@ -47,7 +48,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
-        sharedPreferences = getDefaultSharedPreferences(this)
+        sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
         if (intent.action == Intent.ACTION_MAIN) {
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
@@ -66,7 +67,6 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
             // record the fact that the app has been started at least once
             settings.edit().putBoolean("my_first_time", false).apply()
         }
-
 
         setButton(sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false))
         if (sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false)) {
@@ -88,6 +88,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
                 view: View, position: Int, id: Long
             ) {
                 nextWpt = position
+                setNextWpt(nextWpt)
                 val wpt = route.elements[position]
                 if (wpt!!.firstTimeInProofArea != -1L) {
                     (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(android.R.color.holo_green_light))
@@ -176,6 +177,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
     override fun onResume() {
         super.onResume()
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+        if (route==null){
+            val r = RouteLoader.loadRouteFromFile(this)
+            loadRoute(r)
+        }
     }
 
     override fun onPause() {
@@ -227,12 +232,19 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
 
     fun startButtonClick(view: View) {
         val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
-        val checked = sharedPref.getBoolean("status", true)
+        val checked = sharedPref.getBoolean(MainFragment.KEY_STATUS, true)
         with(sharedPref.edit()) {
-            putBoolean("status", checked.not())
+            putBoolean(MainFragment.KEY_STATUS, checked.not())
             commit()
         }
+    }
 
+    fun setNextWpt(n: Int){
+        val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
+        with(sharedPref.edit()) {
+            putInt(MainFragment.KEY_NEXT_WPT, n)
+            commit()
+        }
     }
 
     override fun onPositionError(error: Throwable?) {
@@ -241,10 +253,14 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
 
     override fun onPositionUpdate(position: Position?) {
 //        StatusActivity.addMessage(context.getString(R.string.status_location_update))
-        if (position != null) {
-            updateUI(position)
+        if (this::route.isInitialized) {
+            if (position != null) {
+                updateUI(position)
+            } else {
+                Log.w(TAG, "Error: position is null")
+            }
         } else {
-            Log.w(TAG, "Error: position is null")
+            Log.w(TAG, "Error: route not initialized")
         }
 
     }
@@ -272,7 +288,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
             ) + "/" + getDistString(distWptStbd)
             portGate.setData(portData)
             stbdGate.setData(stbcData)
-            updateIsInArea(position)
+//            updateIsInArea(position)
         } else {
             portGate.setData("-----")
             stbdGate.setData("-----")
@@ -345,6 +361,11 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
                 startTrackingService(true, false)
             } else {
                 stopTrackingService()
+            }
+        } else if (key == MainFragment.KEY_NEXT_WPT) {
+            nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT,0)
+            if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count - 1) {
+                routeElementSpinner.setSelection(nextWpt)
             }
         }
     }
@@ -446,7 +467,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
         }
         if (permission) {
             val i = Intent(this, TrackingService::class.java)
-            if (this::route.isInitialized){
+            if (this::route.isInitialized) {
                 i.putExtra("route", route)
             }
             i.putExtra("nextwpt", nextWpt)
@@ -499,6 +520,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener, Tr
                 }
             }
         }
-        this.nextWpt = index
+        nextWpt = index
+        setNextWpt(nextWpt)
     }
 }
