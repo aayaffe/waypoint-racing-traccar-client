@@ -37,8 +37,9 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private val magnetic = false
     private lateinit var positionProvider: PositionProvider
-    private var nextWpt: Int = -1
+
     private lateinit var sharedPreferences: SharedPreferences
+    private var nextWpt: Int = -1
     private val PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE = 2
     private val PERMISSIONS_REQUEST_LOCATION_UI = 4
     private lateinit var route: Route
@@ -47,8 +48,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main2)
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
+        nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT, -1)
+        setContentView(R.layout.activity_main2)
+
         if (intent.action == Intent.ACTION_MAIN) {
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
@@ -81,6 +84,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
                 TimeUnit.MILLISECONDS
             )
         )
+        if (isValidWpt(route,nextWpt)){
+            routeElementSpinner.setSelection(nextWpt)
+        }
+
         routeElementSpinner.onItemSelectedListener = object :
             AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
@@ -102,6 +109,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
                 // write code to perform some action
             }
         }
+    }
+
+    private fun isValidWpt(route: Route, nextWpt: Int): Boolean {
+        return nextWpt<route.elements.size && nextWpt > -1
     }
 
     private fun createPositionProvider() {
@@ -177,7 +188,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
     override fun onResume() {
         super.onResume()
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-        if (route==null){
+        if (this::route.isInitialized){
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
         }
@@ -225,7 +236,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         } else if (id == R.id.send_screenshot_menu_action) {
             val b =
                 Screenshot.takescreenshotOfRootView(this.findViewById<View>(android.R.id.content).rootView)
-
+//            throw RuntimeException("Test Crash") // Force a crash
         }
         return super.onOptionsItemSelected(item)
     }
@@ -247,18 +258,14 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-    override fun onPositionError(error: Throwable?) {
+    override fun onPositionError(error: Throwable) {
         Log.e(TAG, "Position Error: ", error)
     }
 
-    override fun onPositionUpdate(position: Position?) {
+    override fun onPositionUpdate(position: Position) {
 //        StatusActivity.addMessage(context.getString(R.string.status_location_update))
         if (this::route.isInitialized) {
-            if (position != null) {
-                updateUI(position)
-            } else {
-                Log.w(TAG, "Error: position is null")
-            }
+            updateUI(position)
         } else {
             Log.w(TAG, "Error: route not initialized")
         }

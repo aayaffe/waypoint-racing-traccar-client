@@ -1,9 +1,18 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.gms.google-services'
 
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('C:\\programing\\AndroidKeyStore.jks')
+            storePassword 'Aay4241d'
+            keyAlias 'myKeys'
+            keyPassword 'Aay4241d'
+        }
+    }
     compileSdkVersion 30
 
     defaultConfig {
@@ -13,6 +22,7 @@ android {
         targetSdkVersion 30
         versionCode 5
         versionName '1.2'
+        signingConfig signingConfigs.debug
 //        multiDexEnabled true
 
     }
@@ -57,9 +67,10 @@ android {
 }
 
 dependencies {
+    // Import the BoM for the Firebase platform
+    implementation platform('com.google.firebase:firebase-bom:28.4.1')
     implementation 'com.google.android.material:material:1.5.0-alpha01'
     implementation 'androidx.multidex:multidex:2.0.1'
-//    implementation 'androidx.preference:preference:1.1.1'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0'
     implementation 'net.sf.geographiclib:GeographicLib-Java:1.49'
@@ -74,15 +85,17 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.preference:preference-ktx:1.1.1'
     testImplementation 'junit:junit:4.13.2'
-    googleImplementation 'com.google.firebase:firebase-core:19.0.0'
-    googleImplementation 'com.google.firebase:firebase-crashlytics-gradle:2.7.1'
-    googleImplementation 'com.google.firebase:firebase-analytics:19.0.0'
+    googleImplementation 'com.google.firebase:firebase-core'
+    googleImplementation 'com.google.firebase:firebase-crashlytics-gradle'
+    googleImplementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
     googleImplementation 'com.google.android.gms:play-services-location:18.0.0'
     googleImplementation 'com.google.android.play:core:1.10.0'
     implementation "androidx.core:core-ktx:1.6.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
-
+apply plugin: 'com.google.firebase.crashlytics'
 if (getGradle().getStartParameter().getTaskRequests().toString().contains('Google')) {
     apply plugin: 'com.google.gms.google-services'
     apply plugin: 'com.google.firebase.crashlytics'
