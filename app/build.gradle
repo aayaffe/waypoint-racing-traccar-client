@@ -20,8 +20,8 @@ android {
         buildConfigField 'boolean', 'HIDDEN_APP', 'false'
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 5
-        versionName '1.2'
+        versionCode 7
+        versionName '1.6'
         signingConfig signingConfigs.debug
 //        multiDexEnabled true
 

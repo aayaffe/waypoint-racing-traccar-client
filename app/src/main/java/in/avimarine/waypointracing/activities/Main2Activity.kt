@@ -381,6 +381,14 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         } else {
             mockPosition.visibility = View.INVISIBLE
         }
+        if (Utils.timeDiffInSeconds(sharedPreferences.getLong(MainFragment.KEY_LAST_SEND, Long.MAX_VALUE),Date().time) < (sharedPreferences.getString(MainFragment.KEY_INTERVAL,
+                8.toString()
+            )
+                ?.toInt() ?: 8)*1.5) {
+            lastSend.setImageResource(R.drawable.btn_rnd_grn)
+        } else {
+            lastSend.setImageResource(R.drawable.btn_rnd_red)
+        }
     }
 
     private fun setUiForGPS(isAvailable: Boolean) {
