@@ -8,6 +8,7 @@ import com.mapbox.geojson.Polygon
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfJoins.inside
 import com.mapbox.turf.TurfMeasurement
+import com.mapbox.turf.TurfMisc
 import net.sf.geographiclib.Geodesic
 import net.sf.geographiclib.GeodesicLine
 import net.sf.geographiclib.GeodesicMask
@@ -102,6 +103,11 @@ fun getDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double 
     )
     return line.Distance()
 }
+
+private fun getDistance(p1: Point, p2: Point):Double{
+    return getDistance(p1.latitude(),p1.longitude(),p2.latitude(),p2.longitude())
+}
+
 /***
  * Returns Distance in meters
  */
@@ -165,6 +171,14 @@ fun Location.toPoint() : Point {
     return Point.fromLngLat(this.longitude,this.latitude)
 }
 
+fun Position.toLocation() : Location {
+    val l = Location("")
+    l.latitude = this.latitude
+    l.longitude = this.longitude
+    return l
+}
+
+
 /**
  * Returns Error in degrees (total error equals +/- ret)
  */
@@ -200,6 +214,19 @@ fun getLocFromDirDist(loc: Location, dir: Double, dist: Double) : Location{
     ret.longitude = gd.lon2
     return ret
 
+}
+
+/**
+ * Get the distance between a point and a line.
+ * @param loc Point's location
+ * @param firstLocation Line first location
+ * @param secondLocation Line's second location
+ * @return Distance between the point and the line in meters
+ */
+fun pointToLineDist(loc: Location, firstLocation : Location, secondLocation: Location): Double{
+    val pointList = arrayListOf(firstLocation.toPoint(),secondLocation.toPoint())
+    val p = TurfMisc.nearestPointOnLine(loc.toPoint(),pointList)
+    return getDistance(loc.toPoint(),p.geometry() as Point)
 }
 
 fun isPointInPolygon(wpts : ArrayList<Location>, loc: Location) : Boolean{

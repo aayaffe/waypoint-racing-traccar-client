@@ -9,6 +9,7 @@ import `in`.avimarine.waypointracing.TAG
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import org.json.JSONException
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 
@@ -49,14 +50,18 @@ class RouteLoader {
             }
         }
 
-        fun loadRouteFromFile(context: Context): Route? {
+        fun loadRouteFromFile(context: Context): Route {
             try {
                 val text = context.openFileInput(DEFAULT_FILE_NAME).bufferedReader().use { it.readText() }
                 return Route.fromGeoJson(text)
             } catch (e: FileNotFoundException) {
-                Log.d(TAG, "file not found", e)
+                Log.w(TAG, "file not found", e)
+            } catch (e: JSONException){
+                Log.w(TAG, "Failed to parse JSON", e)
+            } catch (e: Exception){
+                Log.w(TAG, "Failed to load Route", e)
             }
-            return null
+            return Route.emptyRoute()
         }
 
         private fun loadJsonfromUrl(context: Context, url: Uri?, loadRoute: (r: Route?) -> Unit) {

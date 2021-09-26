@@ -29,19 +29,23 @@ import kotlin.math.abs
 abstract class PositionProvider(
         protected val context: Context,
         protected val listener: PositionListener,
-        ) {
+        ) : SharedPreferences.OnSharedPreferenceChangeListener {
+
 
     interface PositionListener {
         fun onPositionUpdate(position: Position)
         fun onPositionError(error: Throwable)
     }
 
-    protected var preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-    protected var deviceId = preferences.getString(MainFragment.KEY_DEVICE, "undefined")!!
-    protected var boatName = preferences.getString(MainFragment.KEY_NAME, "boat_undefined")!!
-    protected var interval = preferences.getString(MainFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
-    protected var distance: Double = preferences.getString(MainFragment.KEY_DISTANCE, "0")!!.toInt().toDouble()
-    protected var angle: Double = preferences.getString(MainFragment.KEY_ANGLE, "0")!!.toInt().toDouble()
+    protected var sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    init{
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+    }
+    protected var deviceId = sharedPreferences.getString(MainFragment.KEY_DEVICE, "undefined")!!
+    protected var boatName = sharedPreferences.getString(MainFragment.KEY_NAME, "boat_undefined")!!
+    protected var interval = sharedPreferences.getString(MainFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
+    protected var distance: Double = sharedPreferences.getString(MainFragment.KEY_DISTANCE, "0")!!.toInt().toDouble()
+    protected var angle: Double = sharedPreferences.getString(MainFragment.KEY_ANGLE, "0")!!.toInt().toDouble()
     private var lastLocation: Location? = null
 
     abstract fun startUpdates()
@@ -71,7 +75,14 @@ abstract class PositionProvider(
         }
         return 0.0
     }
-
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        Log.d(TAG, "Changed Preference: " + key)
+        if (key == MainFragment.KEY_INTERVAL) {
+            interval = sharedPreferences.getString(MainFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
+            stopUpdates()
+            startUpdates()
+        }
+    }
     companion object {
         private val TAG = PositionProvider::class.java.simpleName
         const val MINIMUM_INTERVAL: Long = 1000

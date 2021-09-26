@@ -4,8 +4,12 @@ import `in`.avimarine.waypointracing.*
 import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
+import `in`.avimarine.waypointracing.utils.LocationPermissions
 import `in`.avimarine.waypointracing.utils.Screenshot
+import `in`.avimarine.waypointracing.utils.Utils
 import android.Manifest
+import android.R.attr
+import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -22,13 +26,31 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.allViews
 import androidx.fragment.app.DialogFragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
+import eu.bolt.screenshotty.ScreenshotActionOrder
+import eu.bolt.screenshotty.ScreenshotBitmap
+import eu.bolt.screenshotty.ScreenshotManagerBuilder
 import kotlinx.android.synthetic.main.activity_main2.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
+import android.content.pm.PackageInfo
+
+import android.provider.MediaStore
+
+import android.graphics.Bitmap
+import android.net.Uri
+import eu.bolt.screenshotty.ScreenshotManager
+import java.io.ByteArrayOutputStream
+import java.lang.Exception
+import android.R.attr.bitmap
+import androidx.core.content.FileProvider
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 
 class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
@@ -37,21 +59,23 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private val magnetic = false
     private lateinit var positionProvider: PositionProvider
-
     private lateinit var sharedPreferences: SharedPreferences
-    private var nextWpt: Int = -1
+    private var nextWpt: Int = 0
     private val PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE = 2
     private val PERMISSIONS_REQUEST_LOCATION_UI = 4
-    private lateinit var route: Route
+    private var route = Route.emptyRoute()
     private var noGPSTimer: Timer = Timer("GPSTIMER", true)
+    private var isFirstSpinnerLoad = true
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        screenshotManager = ScreenshotManagerBuilder(this)
+            .withCustomActionOrder(ScreenshotActionOrder.pixelCopyFirst()) //optional, ScreenshotActionOrder.pixelCopyFirst() by default
+            .withPermissionRequestCode(REQUEST_SCREENSHOT_PERMISSION) //optional, 888 by default
+            .build()
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
-        nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT, -1)
         setContentView(R.layout.activity_main2)
-
         if (intent.action == Intent.ACTION_MAIN) {
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
@@ -85,7 +109,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             )
         )
         if (isValidWpt(route,nextWpt)){
-            routeElementSpinner.setSelection(nextWpt)
+            getNextWpt()
         }
 
         routeElementSpinner.onItemSelectedListener = object :
@@ -94,8 +118,14 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
                 parent: AdapterView<*>,
                 view: View, position: Int, id: Long
             ) {
-                nextWpt = position
-                setNextWpt(nextWpt)
+                if (isFirstSpinnerLoad) {
+                    isFirstSpinnerLoad = false
+                    if (isValidWpt(route,nextWpt)){
+                        routeElementSpinner.setSelection(nextWpt)
+                    }
+                    return
+                }
+                setNextWpt(position)
                 val wpt = route.elements[position]
                 if (wpt!!.firstTimeInProofArea != -1L) {
                     (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(android.R.color.holo_green_light))
@@ -110,6 +140,14 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             }
         }
     }
+
+    override fun onNewIntent(i: Intent){
+        super.onNewIntent(i)
+        RouteLoader.handleIntent(this, i, this::loadRoute)
+        setNextWpt(0)
+    }
+
+
 
     private fun isValidWpt(route: Route, nextWpt: Int): Boolean {
         return nextWpt<route.elements.size && nextWpt > -1
@@ -172,7 +210,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
     override fun onStart() {
         super.onStart()
         try {
-            if (arePermissionsGranted()) {
+            if (LocationPermissions.arePermissionsGranted(this)) {
                 if (!this::positionProvider.isInitialized) {
                     createPositionProvider()
                 }
@@ -188,15 +226,23 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
     override fun onResume() {
         super.onResume()
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-        if (this::route.isInitialized){
+        if (route.isEmpty()){
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
         }
+        getNextWpt()
+        setGPSInterval(1)
+    }
+
+    private fun getNextWpt() {
+        nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT, 0)
+        routeElementSpinner.setSelection(nextWpt)
     }
 
     override fun onPause() {
         super.onPause()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+        setGPSInterval(9)
     }
 
     override fun onStop() {
@@ -208,7 +254,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         super.onStop()
     }
 
-    fun populateRouteElementSpinner(route: Route) {
+    private fun populateRouteElementSpinner(route: Route) {
         val adapter = RouteElementAdapter(
             this,
             R.layout.waypoint_spinner_item, 0, route.elements
@@ -223,22 +269,30 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.getItemId()
-        if (id == R.id.settings_menu_action) {
-            val intent = Intent(this, MainActivity::class.java)
-            this.startActivity(intent)
-            return true
-        }
-        if (id == R.id.history_menu_action) {
-            val intent = Intent(this, StatusActivity::class.java)
-            this.startActivity(intent)
-            return true
-        } else if (id == R.id.send_screenshot_menu_action) {
-            val b =
-                Screenshot.takescreenshotOfRootView(this.findViewById<View>(android.R.id.content).rootView)
-//            throw RuntimeException("Test Crash") // Force a crash
+        when (item.itemId) {
+            R.id.settings_menu_action -> {
+                val intent = Intent(this, MainActivity::class.java)
+                this.startActivity(intent)
+                return true
+            }
+            R.id.history_menu_action -> {
+                val intent = Intent(this, StatusActivity::class.java)
+                this.startActivity(intent)
+                return true
+            }
+            R.id.send_screenshot_menu_action -> {
+                takeScreenshot()
+            }
+            R.id.reset_route_menu_action -> {
+                resetRoute()
+            }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun resetRoute() {
+        setNextWpt(0)
+        populateRouteElementSpinner(route)
     }
 
     fun startButtonClick(view: View) {
@@ -251,9 +305,18 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     fun setNextWpt(n: Int){
+        nextWpt = n
         val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
         with(sharedPref.edit()) {
             putInt(MainFragment.KEY_NEXT_WPT, n)
+            commit()
+        }
+    }
+
+    fun setGPSInterval(i: Int){
+        val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
+        with(sharedPref.edit()) {
+            putString(MainFragment.KEY_INTERVAL, i.toString())
             commit()
         }
     }
@@ -264,7 +327,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
 
     override fun onPositionUpdate(position: Position) {
 //        StatusActivity.addMessage(context.getString(R.string.status_location_update))
-        if (this::route.isInitialized) {
+        if (!route.isEmpty()) {
             updateUI(position)
         } else {
             Log.w(TAG, "Error: route not initialized")
@@ -295,7 +358,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             ) + "/" + getDistString(distWptStbd)
             portGate.setData(portData)
             stbdGate.setData(stbcData)
-//            updateIsInArea(position)
+            shortestDistanceToGate.setData(getDistString(pointToLineDist(position.toLocation(),wpt.portWpt,wpt.stbdWpt)))
         } else {
             portGate.setData("-----")
             stbdGate.setData("-----")
@@ -309,9 +372,14 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         noGPSTimer.purge()
         noGPSTimer = Timer("GPSTIMER", true)
         val interval = (sharedPreferences.getString(MainFragment.KEY_INTERVAL, "600")?.toLong()
-            ?: 600) * 2500 //After two and half time of interval
+            ?: 600) * 4000 //After four times interval
         noGPSTimer.schedule(interval) {
             setUiForGPS(false)
+        }
+        if (position.mock){
+            mockPosition.visibility = View.VISIBLE
+        } else {
+            mockPosition.visibility = View.INVISIBLE
         }
     }
 
@@ -323,6 +391,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             sog.setTextColor(Color.BLACK)
             location.setTextColor(Color.BLACK)
             time.setTextColor(Color.BLACK)
+            shortestDistanceToGate.setTextColor(Color.BLACK)
         } else {
             portGate.setTextColor(Color.RED)
             stbdGate.setTextColor(Color.RED)
@@ -330,35 +399,36 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             sog.setTextColor(Color.RED)
             location.setTextColor(Color.RED)
             time.setTextColor(Color.RED)
+            shortestDistanceToGate.setTextColor(Color.RED)
         }
     }
 
-    private fun updateIsInArea(location: Position) {
-        val l = Location("")
-        l.latitude = location.latitude
-        l.longitude = location.longitude
-        val wpt = route.elements[nextWpt]
-        if (wpt != null) {
-            if (wpt!!.isInProofArea(l)) {
-                if (wpt!!.passedGate(location)) {
-                    StatusActivity.addMessage("Passed " + wpt!!.name)
-                    (routeElementSpinner.selectedView as TextView).setTextColor(
-                        resources.getColor(
-                            android.R.color.holo_green_light
-                        )
-                    )
-                    Timer("AdvanceWaypoint", false).schedule(3000) {
-                        runOnUiThread {
-                            if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count - 1) {
-                                routeElementSpinner.setSelection(routeElementSpinner.selectedItemPosition + 1)
-                            }
-                        }
-                    }
-                }
-            } else {
-            }
-        }
-    }
+//    private fun updateIsInArea(location: Position) {
+//        val l = Location("")
+//        l.latitude = location.latitude
+//        l.longitude = location.longitude
+//        val wpt = route.elements[nextWpt]
+//        if (wpt != null) {
+//            if (wpt!!.isInProofArea(l)) {
+//                if (wpt!!.passedGate(location)) {
+//                    StatusActivity.addMessage("Passed " + wpt!!.name)
+//                    (routeElementSpinner.selectedView as TextView).setTextColor(
+//                        resources.getColor(
+//                            android.R.color.holo_green_light
+//                        )
+//                    )
+//                    Timer("AdvanceWaypoint", false).schedule(3000) {
+//                        runOnUiThread {
+//                            if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count - 1) {
+//                                routeElementSpinner.setSelection(routeElementSpinner.selectedItemPosition + 1)
+//                            }
+//                        }
+//                    }
+//                }
+//            } else {
+//            }
+//        }
+//    }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         Log.d(TAG, "Changed Preference: " + key)
@@ -370,9 +440,15 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
                 stopTrackingService()
             }
         } else if (key == MainFragment.KEY_NEXT_WPT) {
-            nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT,0)
-            if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count - 1) {
-                routeElementSpinner.setSelection(nextWpt)
+            getNextWpt()
+        } else if (key == MainFragment.KEY_LAST_SEND) {
+            if (Utils.timeDiffInSeconds(sharedPreferences.getLong(MainFragment.KEY_LAST_SEND, Long.MAX_VALUE),Date().time) < (sharedPreferences.getString(MainFragment.KEY_INTERVAL,
+                    8.toString()
+                )
+                    ?.toInt() ?: 8)*1.5) {
+                lastSend.setImageResource(R.drawable.btn_rnd_grn)
+            } else {
+                lastSend.setImageResource(R.drawable.btn_rnd_red)
             }
         }
     }
@@ -420,28 +496,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         return true
     }
 
-    private fun arePermissionsGranted(): Boolean {
-        val requiredPermissions: MutableSet<String> = HashSet()
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-            && ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        }
-        if (requiredPermissions.isNotEmpty()) {
-            return false
-        }
-        return true
-    }
+
 
     private fun askForLocationPermission(permissionRequestCode: Int) {
         val requiredPermissions: MutableSet<String> = HashSet()
@@ -474,7 +529,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         if (permission) {
             val i = Intent(this, TrackingService::class.java)
-            if (this::route.isInitialized) {
+            if (!route.isEmpty()) {
                 i.putExtra("route", route)
             }
             i.putExtra("nextwpt", nextWpt)
@@ -527,7 +582,56 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
                 }
             }
         }
-        nextWpt = index
-        setNextWpt(nextWpt)
+        setNextWpt(index)
     }
+    private val REQUEST_SCREENSHOT_PERMISSION: Int = 1234
+    private lateinit var screenshotManager : ScreenshotManager
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        screenshotManager.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun takeScreenshot(){
+        val screenshotResult = screenshotManager.makeScreenshot()
+        val subscription = screenshotResult.observe(
+            onSuccess = { processScreenshot(it) },
+            onError = { /*onMakeScreenshotFailed(it)*/ }
+        )
+    }
+
+    private fun processScreenshot(it: eu.bolt.screenshotty.Screenshot) {
+        val bitmap = when (it) {
+            is ScreenshotBitmap -> it.bitmap
+        }
+        sendSnapshot( bitmap)
+    }
+
+    private fun sendSnapshot(bitmap: Bitmap) {
+        try {
+            val cachePath = File(this.getCacheDir(), "images")
+            cachePath.mkdirs() // don't forget to make the directory
+            val stream =
+                FileOutputStream(cachePath.toString() + "/image.png") // overwrites this image every time
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            stream.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        val imagePath: File = File(this.getCacheDir(), "images")
+        val newFile = File(imagePath, "image.png")
+        val contentUri: Uri =
+            FileProvider.getUriForFile(this, "com.example.myapp.fileprovider", newFile)
+
+        if (contentUri != null) {
+            val shareIntent = Intent()
+            shareIntent.action = Intent.ACTION_SEND
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // temp permission for receiving app to read this file
+            shareIntent.setDataAndType(contentUri, contentResolver.getType(contentUri))
+            shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri)
+            startActivity(Intent.createChooser(shareIntent, "Choose an app"))
+        }
+    }
+
 }

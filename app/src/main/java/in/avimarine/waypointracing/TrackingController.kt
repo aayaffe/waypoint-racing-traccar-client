@@ -26,43 +26,43 @@ import androidx.preference.PreferenceManager
 import android.util.Log
 import `in`.avimarine.waypointracing.database.DatabaseHelper.DatabaseHandler
 import `in`.avimarine.waypointracing.RequestManager.RequestHandler
-import `in`.avimarine.waypointracing.activities.Main2Activity
 import `in`.avimarine.waypointracing.activities.MainFragment
 import `in`.avimarine.waypointracing.activities.StatusActivity
 import `in`.avimarine.waypointracing.database.DatabaseHelper
 import `in`.avimarine.waypointracing.database.GatePassesDatabaseHelper
 import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.Route
-import `in`.avimarine.waypointracing.route.RouteElement
-import `in`.avimarine.waypointracing.route.Waypoint
 import android.content.SharedPreferences
 import android.location.Location
-import kotlinx.android.synthetic.main.activity_main2.*
+import java.util.*
 
-class TrackingController(private val context: Context, private val routeHandler: RouteHandler?) : PositionListener, NetworkHandler {
+class TrackingController(private val context: Context, private val routeHandler: RouteHandler?) :
+    PositionListener, NetworkHandler, SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private var nextWpt: Int = -1
+
     private var route: Route? = null
     private val handler = Handler(Looper.getMainLooper())
     private val handlerGP = Handler(Looper.getMainLooper())
-    private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+    private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    private var nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT, -1)
     private val positionProvider = PositionProviderFactory.create(context, this)
     private val databaseHelper = DatabaseHelper(context)
     private val gatePassDatabaseHelper = GatePassesDatabaseHelper(context)
     private val networkManager = NetworkManager(context, this)
-    private val deviceId = preferences.getString(MainFragment.KEY_DEVICE, "undefined")
-    private val boatName = preferences.getString(MainFragment.KEY_NAME, "boat_undefined")
+    private val deviceId = sharedPreferences.getString(MainFragment.KEY_DEVICE, "undefined")
+    private val boatName = sharedPreferences.getString(MainFragment.KEY_NAME, "boat_undefined")
 
-    private val url: String = preferences.getString(
+
+    private val url: String = sharedPreferences.getString(
         MainFragment.KEY_URL,
         context.getString(R.string.settings_url_default_value)
     )!!
 
-    private val urlGates: String = preferences.getString(
+    private val urlGates: String = sharedPreferences.getString(
         MainFragment.KEY_URL_GATES,
         context.getString(R.string.settings_url_gates_default_value)
     )!!
-    private val buffer: Boolean = preferences.getBoolean(MainFragment.KEY_BUFFER, true)
+    private val buffer: Boolean = sharedPreferences.getBoolean(MainFragment.KEY_BUFFER, true)
 
     private var isOnline = networkManager.isOnline
     private var isWaiting = false
@@ -80,6 +80,8 @@ class TrackingController(private val context: Context, private val routeHandler:
 
 
     fun start() {
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+        nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT, 0)
         if (isOnline) {
             read()
             readGatePass()
@@ -93,6 +95,7 @@ class TrackingController(private val context: Context, private val routeHandler:
     }
 
     fun stop() {
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
         networkManager.stop()
         try {
             positionProvider.stopUpdates()
@@ -104,14 +107,16 @@ class TrackingController(private val context: Context, private val routeHandler:
     }
 
     override fun onPositionUpdate(position: Position) {
-        StatusActivity.addMessage(context.getString(R.string.status_location_update))
+//        StatusActivity.addMessage(context.getString(R.string.status_location_update))
         val inArea = updateIsInArea(position, nextWpt)
         if (buffer) {
             write(position)
             if (inArea && route != null) {
-                val gp = GatePassing(route!!.eventName,
+                val gp = GatePassing(
+                    route!!.eventName,
                     deviceId!!,
-                    boatName!!, route!!.elements?.get(nextWpt)?.name,position.time, position)
+                    boatName!!, route!!.elements?.get(nextWpt)?.name, position.time, position
+                )
                 write(gp)
                 nextWpt += 1
                 setNextWpt(nextWpt)
@@ -120,9 +125,11 @@ class TrackingController(private val context: Context, private val routeHandler:
         } else {
             send(position)
             if (inArea && route != null) {
-                val gp = GatePassing(route!!.eventName,
+                val gp = GatePassing(
+                    route!!.eventName,
                     deviceId!!,
-                    boatName!!, route!!.elements?.get(nextWpt)?.name,position.time, position)
+                    boatName!!, route!!.elements?.get(nextWpt)?.name, position.time, position
+                )
                 send(gp)
                 nextWpt += 1
                 setNextWpt(nextWpt)
@@ -130,8 +137,10 @@ class TrackingController(private val context: Context, private val routeHandler:
             }
         }
     }
-    fun setNextWpt(n: Int){
-        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+
+    fun setNextWpt(n: Int) {
+        val sharedPref: SharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(sharedPref.edit()) {
             putInt(MainFragment.KEY_NEXT_WPT, n)
             commit()
@@ -197,16 +206,18 @@ class TrackingController(private val context: Context, private val routeHandler:
 
     private fun write(gatePass: GatePassing) {
         log("writeGatePass", gatePass)
-        gatePassDatabaseHelper.insertGatePassAsync(gatePass, object : GatePassesDatabaseHelper.DatabaseHandler<Unit?> {
-            override fun onComplete(success: Boolean, result: Unit?) {
-                if (success) {
-                    if (isOnline && isWaitingGP) {
-                        readGatePass()
-                        isWaitingGP = false
+        gatePassDatabaseHelper.insertGatePassAsync(
+            gatePass,
+            object : GatePassesDatabaseHelper.DatabaseHandler<Unit?> {
+                override fun onComplete(success: Boolean, result: Unit?) {
+                    if (success) {
+                        if (isOnline && isWaitingGP) {
+                            readGatePass()
+                            isWaitingGP = false
+                        }
                     }
                 }
-            }
-        })
+            })
     }
 
     private fun read() {
@@ -215,7 +226,7 @@ class TrackingController(private val context: Context, private val routeHandler:
             override fun onComplete(success: Boolean, result: Position?) {
                 if (success) {
                     if (result != null) {
-                        if (result.deviceId == preferences.getString(
+                        if (result.deviceId == sharedPreferences.getString(
                                 MainFragment.KEY_DEVICE,
                                 null
                             )
@@ -236,11 +247,12 @@ class TrackingController(private val context: Context, private val routeHandler:
 
     private fun readGatePass() {
         log("readGatePass", null)
-        gatePassDatabaseHelper.selectGatePassAsync(object : GatePassesDatabaseHelper.DatabaseHandler<GatePassing?> {
+        gatePassDatabaseHelper.selectGatePassAsync(object :
+            GatePassesDatabaseHelper.DatabaseHandler<GatePassing?> {
             override fun onComplete(success: Boolean, result: GatePassing?) {
                 if (success) {
                     if (result != null) {
-                        if (result.deviceId == preferences.getString(
+                        if (result.deviceId == sharedPreferences.getString(
                                 MainFragment.KEY_DEVICE,
                                 null
                             )
@@ -274,15 +286,17 @@ class TrackingController(private val context: Context, private val routeHandler:
 
     private fun delete(gatePass: GatePassing) {
         log("deleteGatePass", gatePass)
-        gatePassDatabaseHelper.deleteGatePassAsync(gatePass.id, object : GatePassesDatabaseHelper.DatabaseHandler<Unit?> {
-            override fun onComplete(success: Boolean, result: Unit?) {
-                if (success) {
-                    readGatePass()
-                } else {
-                    retryGatePass()
+        gatePassDatabaseHelper.deleteGatePassAsync(
+            gatePass.id,
+            object : GatePassesDatabaseHelper.DatabaseHandler<Unit?> {
+                override fun onComplete(success: Boolean, result: Unit?) {
+                    if (success) {
+                        readGatePass()
+                    } else {
+                        retryGatePass()
+                    }
                 }
-            }
-        })
+            })
     }
 
     private fun send(position: Position) {
@@ -293,6 +307,10 @@ class TrackingController(private val context: Context, private val routeHandler:
                 if (success) {
                     if (buffer) {
                         delete(position)
+                    }
+                    with(sharedPreferences.edit()) {
+                        putLong(MainFragment.KEY_LAST_SEND, Date().time)
+                        commit()
                     }
                 } else {
                     StatusActivity.addMessage(context.getString(R.string.status_send_fail))
@@ -342,16 +360,14 @@ class TrackingController(private val context: Context, private val routeHandler:
     }
 
 
-    private fun updateIsInArea(location: Position, nextWpt: Int) : Boolean {
-        val l = Location("")
-        l.latitude = location.latitude
-        l.longitude = location.longitude
+    private fun updateIsInArea(location: Position, nextWpt: Int): Boolean {
+        val l = location.toLocation()
         val wpt = route?.elements?.elementAtOrNull(nextWpt)
         if (wpt != null) {
             if (wpt!!.isInProofArea(l)) {
                 if (wpt!!.passedGate(location)) {
                     StatusActivity.addMessage("Passed " + wpt!!.name)
-                    if (wpt!!.isInProofArea(l)){
+                    if (wpt!!.isInProofArea(l)) {
                         return true
                     }
                 }
@@ -365,13 +381,19 @@ class TrackingController(private val context: Context, private val routeHandler:
 
     fun updateRoute(route: Route?, nextWpt: Int) {
         this.route = route
-        this.nextWpt = nextWpt
+//        this.nextWpt = nextWpt
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        Log.d(TAG, "Changed Preference: " + key)
+        if (key == MainFragment.KEY_NEXT_WPT) {
+            nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT, 0)
+        }
     }
 
     companion object {
         private const val RETRY_DELAY = 30 * 1000
     }
-
 
 
 }

@@ -1,7 +1,5 @@
 package `in`.avimarine.waypointracing.route
 
-import `in`.avimarine.waypointracing.route.Finish
-import `in`.avimarine.waypointracing.route.Gate
 import android.os.Parcelable
 import com.google.gson.JsonParseException
 import com.mapbox.geojson.Feature
@@ -10,7 +8,7 @@ import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
-import kotlin.collections.ArrayList
+
 @Parcelize
 class Route(
     val eventName: String,
@@ -18,10 +16,12 @@ class Route(
     val elements: ArrayList<RouteElement>,
     val lastUpdate: Date
 ): Parcelable {
+    fun isEmpty(): Boolean{
+        return elements.size == 0
+    }
     companion object {
         val TAG = "Route"
         fun fromGeoJson(geojson: String): Route {
-
             val json = JSONObject(convertStandardJSONString(geojson))
             val name = json.getJSONObject("routedata").getString("name")
             val features = FeatureCollection.fromJson(geojson)
@@ -57,5 +57,11 @@ class Route(
                 }
             }
         }
+
+        fun emptyRoute(): Route {
+            return Route("", Date(), arrayListOf(), Date())
+        }
+
+
     }
 }

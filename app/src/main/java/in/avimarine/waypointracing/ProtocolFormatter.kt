@@ -17,6 +17,7 @@ package `in`.avimarine.waypointracing;
 
 import `in`.avimarine.waypointracing.route.GatePassing
 import android.net.Uri
+import java.util.*
 
 object ProtocolFormatter {
 
@@ -45,7 +46,7 @@ object ProtocolFormatter {
     fun formatRequest(url: String, gatePass: GatePassing): String {
         val serverUrl = Uri.parse(url)
         val builder = serverUrl.buildUpon()
-            .appendQueryParameter("id", gatePass.deviceId)
+            .appendQueryParameter("id", UUID.randomUUID().toString())
             .appendQueryParameter("eventname", gatePass.eventName)
             .appendQueryParameter("deviceid", gatePass.deviceId)
             .appendQueryParameter("gatename", gatePass.gateName)
