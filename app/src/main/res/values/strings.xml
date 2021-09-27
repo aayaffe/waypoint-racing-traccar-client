@@ -15,8 +15,8 @@
     <string name="settings_angle_title">Angle</string>
     <string name="settings_angle_summary">Reporting angle in degrees</string>
     <string name="settings_status_title">Service status</string>
-    <string name="settings_status_off">Start</string>
-    <string name="settings_status_on">Stop</string>
+    <string name="settings_status_off">Start Tracking</string>
+    <string name="settings_status_on">Stop Tracking</string>
     <string name="settings_status_off_summary">Service stopped</string>
     <string name="settings_status_on_summary">Service running</string>
     <string name="settings_buffer">Offline buffering</string>

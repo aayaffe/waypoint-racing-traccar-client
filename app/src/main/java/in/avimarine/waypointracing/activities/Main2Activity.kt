@@ -1,20 +1,19 @@
 package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.*
-import `in`.avimarine.waypointracing.route.*
+import `in`.avimarine.waypointracing.route.Route
+import `in`.avimarine.waypointracing.route.RouteLoader
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
 import `in`.avimarine.waypointracing.utils.LocationPermissions
-import `in`.avimarine.waypointracing.utils.Screenshot
 import `in`.avimarine.waypointracing.utils.Utils
 import android.Manifest
-import android.R.attr
-import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
-import android.location.Location
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -26,31 +25,21 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.allViews
+import androidx.core.content.FileProvider
 import androidx.fragment.app.DialogFragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotBitmap
+import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
 import kotlinx.android.synthetic.main.activity_main2.*
-import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.schedule
-import android.content.pm.PackageInfo
-
-import android.provider.MediaStore
-
-import android.graphics.Bitmap
-import android.net.Uri
-import eu.bolt.screenshotty.ScreenshotManager
-import java.io.ByteArrayOutputStream
-import java.lang.Exception
-import android.R.attr.bitmap
-import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.schedule
 
 
 class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
@@ -464,10 +453,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
     private fun setButton(isRunning: Boolean) {
         if (isRunning) {
             start_btn.background = ContextCompat.getDrawable(this, R.drawable.btn_rnd_red)
-            start_btn.text = "Stop"
+            start_btn.text = getString(R.string.settings_status_on)
         } else {
             start_btn.background = ContextCompat.getDrawable(this, R.drawable.btn_rnd_grn)
-            start_btn.text = "Start"
+            start_btn.text = getString(R.string.settings_status_off)
         }
     }
 
@@ -556,6 +545,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         permissions: Array<String?>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE || requestCode == PERMISSIONS_REQUEST_LOCATION_UI) {
             var granted = true
             for (result in grantResults) {

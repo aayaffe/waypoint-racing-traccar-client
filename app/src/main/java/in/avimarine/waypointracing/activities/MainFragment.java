@@ -76,7 +76,6 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     private SharedPreferences sharedPreferences;
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
-    @Nullable
 
 
     @Override
@@ -88,26 +87,12 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         setPreferencesFromResource(R.xml.preferences, rootKey);
         initPreferences();
-        findPreference(KEY_DEVICE).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                return newValue != null && !newValue.equals("");
-            }
-        });
-        findPreference(KEY_NAME).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                return newValue != null && !newValue.equals("");
-            }
-        });
         findPreference(KEY_URL).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 return (newValue != null) && validateServerURL(newValue.toString());
             }
         });
-
-
         findPreference(KEY_INTERVAL).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -137,6 +122,16 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
                 return false;
             }
         };
+
+        Preference.OnPreferenceChangeListener nonEmptyStringValidationListener = new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                return newValue != null && !newValue.equals("");
+            }
+        };
+        findPreference(KEY_DEVICE).setOnPreferenceChangeListener(nonEmptyStringValidationListener);
+        findPreference(KEY_NAME).setOnPreferenceChangeListener(nonEmptyStringValidationListener);
+
         findPreference(KEY_DISTANCE).setOnPreferenceChangeListener(numberValidationListener);
         findPreference(KEY_ANGLE).setOnPreferenceChangeListener(numberValidationListener);
     }
@@ -238,6 +233,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
             sharedPreferences.edit().putString(KEY_NAME, id).apply();
             ((EditTextPreference) findPreference(KEY_NAME)).setText(id);
         }
+        findPreference(KEY_NAME).setSummary(sharedPreferences.getString(KEY_NAME, ""));
     }
 
     private void startTrackingService(boolean checkPermission, boolean permission) {

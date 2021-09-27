@@ -14,7 +14,7 @@
         android:layout_marginTop="32dp"
         android:background="@drawable/btn_rnd_grn"
         android:onClick="startButtonClick"
-        android:text="Start"
+        android:text="@string/settings_status_off"
         android:textAllCaps="false"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"

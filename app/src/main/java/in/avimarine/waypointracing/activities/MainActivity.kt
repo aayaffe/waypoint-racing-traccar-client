@@ -13,20 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package in.avimarine.waypointracing.activities;
+package `in`.avimarine.waypointracing.activities;
 
-import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 
-import in.avimarine.waypointracing.R;
+import `in`.avimarine.waypointracing.R;
 
-public class MainActivity extends AppCompatActivity {
+class MainActivity : AppCompatActivity() {
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.main)
     }
 
 }
