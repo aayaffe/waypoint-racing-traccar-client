@@ -184,26 +184,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/location"
         app:unitsText="NM" />
-<!--    <in.avimarine.waypointracing.ui.NavTextDrawer-->
-<!--        android:id="@+id/distanceToGateOnCOG"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginStart="1dp"-->
-<!--        android:layout_marginLeft="1dp"-->
-<!--        android:layout_marginTop="1dp"-->
-<!--        android:layout_marginEnd="1dp"-->
-<!--        android:layout_marginRight="1dp"-->
-<!--        android:layout_marginBottom="1dp"-->
-<!--        app:textColor="-65536"-->
-<!--        app:dataText="-&#45;&#45;&#45;&#45;"-->
-<!--        app:dataTextSize="16sp"-->
-<!--        app:labelText="Distance to gate on COG"-->
-<!--        app:layout_constraintBottom_toBottomOf="@+id/shortestDistanceToGate"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintHorizontal_weight="1"-->
-<!--        app:layout_constraintStart_toEndOf="@+id/shortestDistanceToGate"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/time"-->
-<!--        app:unitsText="NM" />-->
 
     <ImageView
         android:id="@+id/mockPosition"

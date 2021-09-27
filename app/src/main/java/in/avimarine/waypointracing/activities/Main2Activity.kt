@@ -128,6 +128,22 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
                 // write code to perform some action
             }
         }
+        with(sharedPreferences.edit()) {
+            putBoolean(MainFragment.KEY_EXPERT_MODE, false)
+            commit()
+        }
+        lastSend.setOnLongClickListener {
+            toggleExperMode()
+            true
+        }
+    }
+
+    private fun toggleExperMode() {
+        val mode = sharedPreferences.getBoolean(MainFragment.KEY_EXPERT_MODE,true)
+        with(sharedPreferences.edit()) {
+            putBoolean(MainFragment.KEY_EXPERT_MODE, !mode)
+            commit()
+        }
     }
 
     override fun onNewIntent(i: Intent){

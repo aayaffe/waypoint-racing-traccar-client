@@ -72,6 +72,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     public static final String KEY_WAKELOCK = "wakelock";
     public static final String KEY_NEXT_WPT = "nextwpt";
     public static final String KEY_LAST_SEND = "lastsend";
+    public static final String KEY_EXPERT_MODE = "expert";
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
     private SharedPreferences sharedPreferences;
     private AlarmManager alarmManager;
@@ -186,6 +187,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     public void onResume() {
         super.onResume();
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        expertMode(sharedPreferences.getBoolean(KEY_EXPERT_MODE, false));
     }
 
     @Override
@@ -292,6 +294,17 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
         }
         Toast.makeText(getActivity(), R.string.error_msg_invalid_url, Toast.LENGTH_LONG).show();
         return false;
+    }
+
+    private void expertMode(Boolean b){
+        findPreference(KEY_DEVICE).setEnabled(b);
+        findPreference(KEY_URL).setVisible(b);
+        findPreference(KEY_INTERVAL).setVisible(b);
+        findPreference(KEY_DISTANCE).setVisible(b);
+        findPreference(KEY_ANGLE).setVisible(b);
+        findPreference(KEY_ACCURACY).setVisible(b);
+        findPreference(KEY_BUFFER).setVisible(b);
+        findPreference(KEY_WAKELOCK).setVisible(b);
     }
 
 }
