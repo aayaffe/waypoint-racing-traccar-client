@@ -6,11 +6,17 @@ apply plugin: 'com.google.gms.google-services'
 
 android {
     signingConfigs {
-        debug {
-            storeFile file('C:\\programing\\AndroidKeyStore.jks')
-            storePassword 'Aay4241d'
-            keyAlias 'myKeys'
-            keyPassword 'Aay4241d'
+        if (!System.getenv("TRAVIS")) {
+            debug {
+                // Load keystore
+                def keystorePropertiesFile = rootProject.file("keystore.properties");
+                def keystoreProperties = new Properties()
+                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+                storeFile = file(keystoreProperties['storeFile'])
+                storePassword = keystoreProperties['storePassword']
+                keyAlias = keystoreProperties['keyAlias']
+                keyPassword = keystoreProperties['keyPassword']
+            }
         }
     }
     compileSdkVersion 30

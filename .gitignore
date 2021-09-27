@@ -90,3 +90,4 @@ lint/tmp/
 private_key.pepk
 app/regular/release/output-metadata.json
 .idea/misc.xml
+keystore.properties
