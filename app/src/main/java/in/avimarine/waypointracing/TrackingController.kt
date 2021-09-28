@@ -31,12 +31,13 @@ import `in`.avimarine.waypointracing.activities.StatusActivity
 import `in`.avimarine.waypointracing.database.DatabaseHelper
 import `in`.avimarine.waypointracing.database.GatePassesDatabaseHelper
 import `in`.avimarine.waypointracing.route.GatePassing
+import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import android.content.SharedPreferences
 import android.location.Location
 import java.util.*
 
-class TrackingController(private val context: Context, private val routeHandler: RouteHandler?) :
+class TrackingController(private val context: Context) :
     PositionListener, NetworkHandler, SharedPreferences.OnSharedPreferenceChangeListener {
 
 
@@ -74,11 +75,6 @@ class TrackingController(private val context: Context, private val routeHandler:
         fun onPositionError(error: Throwable?)
     }
 
-    interface RouteHandler {
-        fun onRouteUpdate(nextWpt: Int)
-    }
-
-
     fun start() {
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT, 0)
@@ -113,27 +109,27 @@ class TrackingController(private val context: Context, private val routeHandler:
             write(position)
             if (inArea && route != null) {
                 val gp = GatePassing(
-                    route!!.eventName,
+                    route!!.eventName, route!!.id,
                     deviceId!!,
                     boatName!!, route!!.elements?.get(nextWpt)?.name, position.time, position
                 )
+                GatePassings.addGatePass(context, gp)
                 write(gp)
                 nextWpt += 1
                 setNextWpt(nextWpt)
-//                routeHandler?.onRouteUpdate(nextWpt)
             }
         } else {
             send(position)
             if (inArea && route != null) {
                 val gp = GatePassing(
-                    route!!.eventName,
+                    route!!.eventName, route!!.id,
                     deviceId!!,
                     boatName!!, route!!.elements?.get(nextWpt)?.name, position.time, position
                 )
+                GatePassings.addGatePass(context, gp)
                 send(gp)
                 nextWpt += 1
                 setNextWpt(nextWpt)
-//                routeHandler?.onRouteUpdate(nextWpt)
             }
         }
     }

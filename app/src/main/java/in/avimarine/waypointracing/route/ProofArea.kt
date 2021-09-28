@@ -1,3 +1,4 @@
+@file:UseSerializers(Serializers.Companion.LocationSerializer::class)
 package `in`.avimarine.waypointracing.route
 
 import `in`.avimarine.waypointracing.TAG
@@ -5,18 +6,22 @@ import `in`.avimarine.waypointracing.isBetweenAngles
 import `in`.avimarine.waypointracing.isPointInPolygon
 import android.location.Location
 import android.util.Log
-import `in`.avimarine.waypointracing.route.ProofAreaType
+import `in`.avimarine.waypointracing.utils.Serializers
 import android.os.Parcelable
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement.bearing
 import kotlinx.android.parcel.Parcelize
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 
 @Parcelize
+@Serializable
 class ProofArea  (
     var type : ProofAreaType,
     //Bearings will be defined clockwise
     var bearings : ArrayList<Double>,
     //Waypoints will be defined in order, as to create a valid polygon
+//    @Serializable(with = Serializers.Companion.LocationSerializer::class)
     var wpts : ArrayList<Location>
 ) : Parcelable{
 

@@ -1,6 +1,7 @@
 package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.*
+import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.route.RouteLoader
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
@@ -26,6 +27,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.size
 import androidx.fragment.app.DialogFragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
@@ -43,7 +45,6 @@ import kotlin.concurrent.schedule
 
 
 class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
-    TrackingController.RouteHandler,
     SharedPreferences.OnSharedPreferenceChangeListener, FirstTimeDialog.FirstTimeDialogListener {
 
     private val magnetic = false
@@ -100,27 +101,20 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         if (isValidWpt(route,nextWpt)){
             getNextWpt()
         }
-
         routeElementSpinner.onItemSelectedListener = object :
             AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
-                parent: AdapterView<*>,
+                parent: AdapterView<*>?,
                 view: View, position: Int, id: Long
             ) {
                 if (isFirstSpinnerLoad) {
                     isFirstSpinnerLoad = false
                     if (isValidWpt(route,nextWpt)){
-                        routeElementSpinner.setSelection(nextWpt)
+                        parent?.setSelection(nextWpt)
                     }
                     return
                 }
                 setNextWpt(position)
-                val wpt = route.elements[position]
-                if (wpt!!.firstTimeInProofArea != -1L) {
-                    (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(android.R.color.holo_green_light))
-                } else {
-                    (parent.getChildAt(0) as TextView).setTextColor(resources.getColor(android.R.color.black))
-                }
                 sendRouteIntent(route)
             }
 
@@ -188,6 +182,23 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         populateRouteElementSpinner(r)
         setTitle("Waypoint Racing", r.eventName)
         sendRouteIntent(r)
+        val s = sharedPreferences.getString(MainFragment.KEY_GATE_PASSES, "")
+        var gp = GatePassings("")
+        if (s != null) {
+            try {
+                gp = GatePassings.fromJson(s)
+            } catch (e: Exception) {
+                Log.d(TAG, "Failed to load gate passings", e)
+            } finally {
+                GatePassings("")
+            }
+        }
+        if (gp?.eventId != route.id){
+            with(sharedPreferences.edit()) {
+                putString(MainFragment.KEY_GATE_PASSES, GatePassings(route.id).toJson())
+                commit()
+            }
+        }
 
     }
 
@@ -237,10 +248,14 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         getNextWpt()
         setGPSInterval(1)
+        updateLastPass()
     }
 
     private fun getNextWpt() {
         nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT, 0)
+        if (nextWpt >= route.elements.size){
+            setNextWpt(0)
+        }
         routeElementSpinner.setSelection(nextWpt)
     }
 
@@ -297,7 +312,11 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private fun resetRoute() {
         setNextWpt(0)
+        GatePassings.reset(this, route)
         populateRouteElementSpinner(route)
+        for (el in route.elements){
+            el.firstTimeInProofArea = -1
+        }
     }
 
     fun startButtonClick(view: View) {
@@ -416,33 +435,6 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-//    private fun updateIsInArea(location: Position) {
-//        val l = Location("")
-//        l.latitude = location.latitude
-//        l.longitude = location.longitude
-//        val wpt = route.elements[nextWpt]
-//        if (wpt != null) {
-//            if (wpt!!.isInProofArea(l)) {
-//                if (wpt!!.passedGate(location)) {
-//                    StatusActivity.addMessage("Passed " + wpt!!.name)
-//                    (routeElementSpinner.selectedView as TextView).setTextColor(
-//                        resources.getColor(
-//                            android.R.color.holo_green_light
-//                        )
-//                    )
-//                    Timer("AdvanceWaypoint", false).schedule(3000) {
-//                        runOnUiThread {
-//                            if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count - 1) {
-//                                routeElementSpinner.setSelection(routeElementSpinner.selectedItemPosition + 1)
-//                            }
-//                        }
-//                    }
-//                }
-//            } else {
-//            }
-//        }
-//    }
-
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         Log.d(TAG, "Changed Preference: " + key)
         if (key == MainFragment.KEY_STATUS) {
@@ -463,6 +455,15 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             } else {
                 lastSend.setImageResource(R.drawable.btn_rnd_red)
             }
+        } else if (key == MainFragment.KEY_GATE_PASSES) {
+            updateLastPass()
+        }
+    }
+
+    private fun updateLastPass() {
+        val gp = GatePassings.getLastGatePass(this)
+        if (gp!=null) {
+            lastPassTextView.text = "Last gate pass: " + gp.gateName + " at: " + timeStamptoDateString(gp.time.time)
         }
     }
 
@@ -583,21 +584,21 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-    override fun onRouteUpdate(index: Int) {
-        (routeElementSpinner.selectedView as TextView).setTextColor(
-            resources.getColor(
-                android.R.color.holo_green_light
-            )
-        )
-        Timer("AdvanceWaypoint", false).schedule(3000) {
-            runOnUiThread {
-                if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count - 1) {
-                    routeElementSpinner.setSelection(index)
-                }
-            }
-        }
-        setNextWpt(index)
-    }
+//    override fun onRouteUpdate(index: Int) {
+//        (routeElementSpinner.selectedView as TextView).setTextColor(
+//            resources.getColor(
+//                android.R.color.holo_green_light
+//            )
+//        )
+//        Timer("AdvanceWaypoint", false).schedule(3000) {
+//            runOnUiThread {
+//                if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count - 1) {
+//                    routeElementSpinner.setSelection(index)
+//                }
+//            }
+//        }
+//        setNextWpt(index)
+//    }
     private val REQUEST_SCREENSHOT_PERMISSION: Int = 1234
     private lateinit var screenshotManager : ScreenshotManager
 

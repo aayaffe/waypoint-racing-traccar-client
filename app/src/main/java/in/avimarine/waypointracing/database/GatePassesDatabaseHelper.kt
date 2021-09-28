@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 @file:Suppress("DEPRECATION", "StaticFieldLeak")
-package `in`.avimarine.waypointracing.database;
+package `in`.avimarine.waypointracing.database
 
 import `in`.avimarine.waypointracing.route.GatePassing
 import android.content.ContentValues
@@ -58,6 +58,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
             "CREATE TABLE gatepasses (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "eventName TEXT, " +
+                    "routeId TEXT, " +
                     "deviceId TEXT," +
                     "boatname TEXT," +
                     "gateName TEXT," +
@@ -85,6 +86,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
     fun insertGatePass(gatePass: GatePassing) {
         val values = ContentValues()
         values.put("eventName", gatePass.eventName)
+        values.put("routeId", gatePass.routeId)
         values.put("deviceId", gatePass.deviceId)
         values.put("boatname", gatePass.boatName)
         values.put("gateName", gatePass.gateName)
@@ -114,6 +116,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
                 return GatePassing(
                     id = cursor.getLong(cursor.getColumnIndex("id")),
                     eventName = cursor.getString(cursor.getColumnIndex("eventName")),
+                    routeId = cursor.getString(cursor.getColumnIndex("routeId")),
                     deviceId = cursor.getString(cursor.getColumnIndex("deviceId")),
                     boatName = cursor.getString(cursor.getColumnIndex("boatname")),
                     gateName = cursor.getString(cursor.getColumnIndex("gateName")),
@@ -154,7 +157,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
     }
 
     companion object {
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
         const val DATABASE_NAME = "traccar.gatepasses.db"
     }
 

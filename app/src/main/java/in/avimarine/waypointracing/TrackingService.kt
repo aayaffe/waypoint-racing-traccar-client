@@ -44,7 +44,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 
 
-class TrackingService() : Service(), TrackingController.RouteHandler {
+class TrackingService() : Service() {
 
 
     private var wakeLock: WakeLock? = null
@@ -83,7 +83,7 @@ class TrackingService() : Service(), TrackingController.RouteHandler {
                 wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, javaClass.name)
                 wakeLock?.acquire()
             }
-            trackingController = TrackingController(this,this)
+            trackingController = TrackingController(this)
             trackingController?.start()
         }
 
@@ -118,10 +118,6 @@ class TrackingService() : Service(), TrackingController.RouteHandler {
         }
         trackingController?.stop()
 
-    }
-
-    override fun onRouteUpdate(nextWpt: Int) {
-        this.nextWpt = nextWpt
     }
 
     private fun parseRouteIntent(i: Intent?){

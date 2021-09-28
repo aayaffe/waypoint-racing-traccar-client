@@ -1,13 +1,11 @@
 package `in`.avimarine.waypointracing.route
 
-import `in`.avimarine.waypointracing.route.ProofArea
-import android.location.Location
 import `in`.avimarine.waypointracing.Position
+import android.location.Location
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.serialization.Serializable
 
-
-interface RouteElement :Parcelable {
+sealed interface RouteElement :Parcelable {
     val name : String
     val type : RouteElementType
     val stbdWpt : Location

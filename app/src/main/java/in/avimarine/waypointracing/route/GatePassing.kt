@@ -1,17 +1,19 @@
 package `in`.avimarine.waypointracing.route
 
 import `in`.avimarine.waypointracing.Position
-import android.location.Location
-import android.location.LocationManager
-import android.os.Build
+import `in`.avimarine.waypointracing.utils.Serializers
+import kotlinx.serialization.Serializable
 import java.util.*
 
+@Serializable
 data class GatePassing(
     val id: Long = 0,
     val eventName: String,
+    val routeId: String,
     val deviceId: String,
     val boatName: String = "",
     val gateName: String = "",
+    @Serializable(with = Serializers.Companion.DateSerializer::class)
     val time: Date,
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
@@ -22,8 +24,11 @@ data class GatePassing(
     val mock: Boolean = false,
 ) {
 
-    constructor(eventName: String, deviceId: String, boatName: String, gateName: String, time: Date, position: Position) : this(
+
+
+    constructor(eventName: String, routeId: String, deviceId: String, boatName: String, gateName: String, time: Date, position: Position) : this(
         eventName = eventName,
+        routeId = routeId,
         deviceId = deviceId,
         boatName = boatName,
         gateName = gateName,

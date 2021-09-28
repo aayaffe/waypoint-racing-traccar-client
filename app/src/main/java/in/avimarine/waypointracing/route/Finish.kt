@@ -3,18 +3,23 @@ package `in`.avimarine.waypointracing.route
 import android.location.Location
 import `in`.avimarine.waypointracing.route.RouteElement
 import `in`.avimarine.waypointracing.route.RouteElementType
+import `in`.avimarine.waypointracing.utils.Serializers
 import android.os.Parcelable
 import com.google.gson.JsonArray
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.LineString
 import kotlinx.android.parcel.Parcelize
+import kotlinx.serialization.Serializable
 import org.json.JSONException
 
+@Serializable
 @Parcelize
 class Finish(
     override val name: String,
     override val type: RouteElementType = RouteElementType.FINISH,
+    @Serializable(with = Serializers.Companion.LocationSerializer::class)
     override val stbdWpt: Location,
+    @Serializable(with = Serializers.Companion.LocationSerializer::class)
     override val portWpt: Location,
     override val mandatory: Boolean,
     override val proofArea: ProofArea,

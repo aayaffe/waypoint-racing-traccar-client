@@ -43,6 +43,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.TwoStatePreference;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import in.avimarine.waypointracing.BuildConfig;
@@ -73,11 +74,11 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     public static final String KEY_NEXT_WPT = "nextwpt";
     public static final String KEY_LAST_SEND = "lastsend";
     public static final String KEY_EXPERT_MODE = "expert";
+    public static final String KEY_GATE_PASSES = "gatepasses";
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
     private SharedPreferences sharedPreferences;
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
-
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
