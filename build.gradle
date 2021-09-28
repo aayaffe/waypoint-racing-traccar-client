@@ -1,11 +1,9 @@
 buildscript {
-
     ext.kotlin_version = '1.5.31'
-
     repositories {
         google()
         mavenCentral()
-        jcenter()
+//        jcenter()
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
@@ -23,7 +21,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        jcenter()
+//        jcenter()
 
     }
 }

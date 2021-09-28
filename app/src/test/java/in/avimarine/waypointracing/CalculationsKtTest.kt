@@ -1,5 +1,6 @@
-package avimarine.traccar.client
+package `in`.avimarine.waypointracing
 
+import `in`.avimarine.waypointracing.getLocFromDirDist
 import android.location.Location
 import org.junit.Assert
 import org.junit.Test
@@ -10,7 +11,7 @@ import org.robolectric.RobolectricTestRunner
 class CalculationsKtTest {
 
     @Test
-    fun getLocFromDirDist() {
+    fun testGetLocFromDirDist() {
         val loc1 = Location("")
         val distInNms = 1.0
         loc1.latitude = 32.0
