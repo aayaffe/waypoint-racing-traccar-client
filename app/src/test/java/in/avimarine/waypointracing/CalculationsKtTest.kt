@@ -1,6 +1,5 @@
 package `in`.avimarine.waypointracing
 
-import `in`.avimarine.waypointracing.getLocFromDirDist
 import android.location.Location
 import org.junit.Assert
 import org.junit.Test
