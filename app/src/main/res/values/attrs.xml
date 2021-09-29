@@ -7,6 +7,7 @@
         <attr name="textColor" format="integer"/>
         <attr name="labelEnabled" format="boolean" />
         <attr name="unitsEnabled" format="boolean" />
+        <attr name="autoTextSize" format="boolean" />
         <attr name="dataTextSize" format="dimension" />
     </declare-styleable>
 

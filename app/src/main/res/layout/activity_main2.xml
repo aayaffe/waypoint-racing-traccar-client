@@ -63,7 +63,8 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/routeElementSpinner"
-        app:unitsText="NM" />
+        app:unitsText="NM"
+        app:autoTextSize="true"/>
 
     <in.avimarine.waypointracing.ui.NavTextDrawer
         android:id="@+id/stbdGate"
@@ -84,7 +85,8 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toEndOf="@+id/portGate"
         app:layout_constraintTop_toTopOf="@+id/portGate"
-        app:unitsText="NM" />
+        app:unitsText="NM"
+        app:autoTextSize="true"/>
 
     <in.avimarine.waypointracing.ui.NavTextDrawer
         android:id="@+id/cog"
@@ -105,7 +107,8 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/portGate"
-        app:unitsText="\u00B0" />
+        app:unitsText="\u00B0"
+        app:autoTextSize="true"/>
 
 
     <in.avimarine.waypointracing.ui.NavTextDrawer
@@ -125,7 +128,8 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toEndOf="@+id/cog"
         app:layout_constraintTop_toTopOf="@+id/cog"
-        app:unitsText="Kt" />
+        app:unitsText="Kt"
+        app:autoTextSize="true"/>
 
     <in.avimarine.waypointracing.ui.NavTextDrawer
         android:id="@+id/location"
@@ -140,6 +144,7 @@
         app:textColor="-65536"
         app:dataTextSize="9sp"
         app:labelText="Location"
+        app:autoTextSize="false"
         app:layout_constraintEnd_toStartOf="@+id/sog"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toStartOf="parent"
@@ -164,7 +169,8 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toEndOf="@+id/location"
         app:layout_constraintTop_toBottomOf="@+id/cog"
-        app:unitsEnabled="false" />
+        app:unitsEnabled="false"
+        app:autoTextSize="true"/>
     <in.avimarine.waypointracing.ui.NavTextDrawer
         android:id="@+id/shortestDistanceToGate"
         android:layout_width="0dp"
@@ -183,7 +189,8 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/location"
-        app:unitsText="NM" />
+        app:unitsText="NM"
+        app:autoTextSize="true"/>
 
     <ImageView
         android:id="@+id/mockPosition"

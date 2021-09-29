@@ -11,6 +11,9 @@ import `in`.avimarine.waypointracing.R
 import kotlinx.android.synthetic.main.navtextdrawer.view.*
 import `in`.avimarine.waypointracing.TAG
 import android.graphics.Color
+import android.os.Build
+import android.widget.TextView.AUTO_SIZE_TEXT_TYPE_NONE
+import android.widget.TextView.AUTO_SIZE_TEXT_TYPE_UNIFORM
 
 
 class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
@@ -71,8 +74,7 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
         textColor = typedArray.getInt(R.styleable.NavTextDrawer_textColor, Color.BLACK)
         val dataTextSize = typedArray.getDimension(R.styleable.NavTextDrawer_dataTextSize, 12f)
         dataTV.textSize = dataTextSize
-        // TypedArray objects are shared and must be recycled.
-        typedArray.recycle()
+
         setLabel(labelText)
         setUnits(unitsText)
         setData(dataText)
@@ -83,6 +85,21 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
         if (!unitsEnabled){
             unitsTv.visibility = View.INVISIBLE
         }
+        if (typedArray.getBoolean(R.styleable.NavTextDrawer_unitsEnabled,false)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                dataTV.setAutoSizeTextTypeWithDefaults(AUTO_SIZE_TEXT_TYPE_UNIFORM)
+                unitsTv.setAutoSizeTextTypeWithDefaults(AUTO_SIZE_TEXT_TYPE_UNIFORM)
+                labelTv.setAutoSizeTextTypeWithDefaults(AUTO_SIZE_TEXT_TYPE_UNIFORM)
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                dataTV.setAutoSizeTextTypeWithDefaults(AUTO_SIZE_TEXT_TYPE_NONE)
+                unitsTv.setAutoSizeTextTypeWithDefaults(AUTO_SIZE_TEXT_TYPE_NONE)
+                labelTv.setAutoSizeTextTypeWithDefaults(AUTO_SIZE_TEXT_TYPE_NONE)
+            }
+        }
+        // TypedArray objects are shared and must be recycled.
+        typedArray.recycle()
     }
 
     override fun onDraw(canvas: Canvas?) {
