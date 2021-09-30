@@ -105,7 +105,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
-                view: View, position: Int, id: Long
+                view: View?, position: Int, id: Long
             ) {
                 if (isFirstSpinnerLoad) {
                     isFirstSpinnerLoad = false
