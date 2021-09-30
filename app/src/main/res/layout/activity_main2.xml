@@ -100,7 +100,7 @@
         android:layout_marginBottom="1dp"
         app:textColor="-65536"
         app:dataText="\???"
-        app:dataTextSize="18sp"
+        app:dataTextSize="16sp"
         app:labelText="COG"
         app:layout_constraintBottom_toTopOf="@+id/location"
         app:layout_constraintEnd_toStartOf="@+id/sog"
@@ -121,7 +121,7 @@
         android:layout_marginRight="1dp"
         app:textColor="-65536"
         app:dataText="\???"
-        app:dataTextSize="18sp"
+        app:dataTextSize="16sp"
         app:labelText="SOG"
         app:layout_constraintBottom_toBottomOf="@+id/cog"
         app:layout_constraintEnd_toEndOf="parent"
@@ -149,7 +149,7 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cog"
-        app:unitsEnabled="false" />
+        app:unitsEnabled="true" />
 
     <in.avimarine.waypointracing.ui.NavTextDrawer
         android:id="@+id/time"
@@ -161,7 +161,7 @@
         android:layout_marginEnd="1dp"
         android:layout_marginRight="1dp"
         app:textColor="-65536"
-        app:dataText="\?\?:\?\?:\?\?"
+        app:dataText="(\?\?)\?\?:\?\?:\?\?"
         app:dataTextSize="14sp"
         app:labelText="UTC + ?"
         app:layout_constraintBottom_toBottomOf="@+id/location"

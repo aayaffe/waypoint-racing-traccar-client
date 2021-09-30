@@ -85,7 +85,7 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
         if (!unitsEnabled){
             unitsTv.visibility = View.INVISIBLE
         }
-        if (typedArray.getBoolean(R.styleable.NavTextDrawer_unitsEnabled,false)) {
+        if (typedArray.getBoolean(R.styleable.NavTextDrawer_autoTextSize,false)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 dataTV.setAutoSizeTextTypeWithDefaults(AUTO_SIZE_TEXT_TYPE_UNIFORM)
                 unitsTv.setAutoSizeTextTypeWithDefaults(AUTO_SIZE_TEXT_TYPE_UNIFORM)
