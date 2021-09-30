@@ -18,7 +18,7 @@
     <string name="settings_status_off">Start Tracking</string>
     <string name="settings_status_on">Stop Tracking</string>
     <string name="settings_status_off_summary">Service stopped</string>
-    <string name="settings_status_on_summary">Service running</string>
+    <string name="settings_status_on_summary">Tracking in progress</string>
     <string name="settings_buffer">Offline buffering</string>
     <string name="settings_buffer_off_summary">Buffering off</string>
     <string name="settings_buffer_on_summary">Buffering on</string>
