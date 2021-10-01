@@ -189,6 +189,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
         super.onResume();
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         expertMode(sharedPreferences.getBoolean(KEY_EXPERT_MODE, false));
+        setPreferencesEnabled(!sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false));
     }
 
     @Override
@@ -198,7 +199,9 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     }
 
     private void setPreferencesEnabled(boolean enabled) {
-        findPreference(KEY_DEVICE).setEnabled(enabled);
+        if (sharedPreferences.getBoolean(KEY_EXPERT_MODE, false)) {
+            findPreference(KEY_DEVICE).setEnabled(enabled);
+        }
         findPreference(KEY_NAME).setEnabled(enabled);
         findPreference(KEY_URL).setEnabled(enabled);
         findPreference(KEY_INTERVAL).setEnabled(enabled);
@@ -239,53 +242,8 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
         findPreference(KEY_NAME).setSummary(sharedPreferences.getString(KEY_NAME, ""));
     }
 
-    private void startTrackingService(boolean checkPermission, boolean permission) {
-        if (checkPermission) {
-            Set<String> requiredPermissions = new HashSet<>();
-            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-            }
-            permission = requiredPermissions.isEmpty();
-            if (!permission) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requestPermissions(requiredPermissions.toArray(new String[requiredPermissions.size()]), PERMISSIONS_REQUEST_LOCATION);
-                }
-                return;
-            }
-        }
 
-        if (permission) {
-            setPreferencesEnabled(false);
-            ContextCompat.startForegroundService(getContext(), new Intent(getActivity(), TrackingService.class));
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    ALARM_MANAGER_INTERVAL, ALARM_MANAGER_INTERVAL, alarmIntent);
-        } else {
-            sharedPreferences.edit().putBoolean(KEY_STATUS, false).apply();
-            TwoStatePreference preference = findPreference(KEY_STATUS);
-            preference.setChecked(false);
-        }
-    }
 
-    private void stopTrackingService() {
-        alarmManager.cancel(alarmIntent);
-        getActivity().stopService(new Intent(getActivity(), TrackingService.class));
-        setPreferencesEnabled(true);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_LOCATION) {
-            boolean granted = true;
-            for (int result : grantResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    granted = false;
-                    break;
-                }
-            }
-            startTrackingService(false, granted);
-        }
-        findPreference(KEY_NAME).setSummary(sharedPreferences.getString(KEY_NAME, null));
-    }
 
     private boolean validateServerURL(String userUrl) {
         int port = Uri.parse(userUrl).getPort();

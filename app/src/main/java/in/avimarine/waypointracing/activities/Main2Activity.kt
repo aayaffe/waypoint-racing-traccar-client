@@ -9,6 +9,9 @@ import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
 import `in`.avimarine.waypointracing.utils.LocationPermissions
 import `in`.avimarine.waypointracing.utils.Utils
 import android.Manifest
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -51,11 +54,12 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
     private lateinit var positionProvider: PositionProvider
     private lateinit var sharedPreferences: SharedPreferences
     private var nextWpt: Int = 0
-    private val PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE = 2
     private val PERMISSIONS_REQUEST_LOCATION_UI = 4
     private var route = Route.emptyRoute()
     private var noGPSTimer: Timer = Timer("GPSTIMER", true)
     private var isFirstSpinnerLoad = true
+    private lateinit var alarmManager: AlarmManager
+    private lateinit var alarmIntent: PendingIntent
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +70,11 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             .build()
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
         setContentView(R.layout.activity_main2)
+
+        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val originalIntent = Intent(this, AutostartReceiver::class.java)
+        originalIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+        alarmIntent = PendingIntent.getBroadcast(this, 0, originalIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         if (intent.action == Intent.ACTION_MAIN) {
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
@@ -98,7 +107,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
                 TimeUnit.MILLISECONDS
             )
         )
-        if (isValidWpt(route,nextWpt)){
+        if (route.isValidWpt(nextWpt)){
             getNextWpt()
         }
         routeElementSpinner.onItemSelectedListener = object :
@@ -109,7 +118,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             ) {
                 if (isFirstSpinnerLoad) {
                     isFirstSpinnerLoad = false
-                    if (isValidWpt(route,nextWpt)){
+                    if (route.isValidWpt(nextWpt)){
                         parent?.setSelection(nextWpt)
                     }
                     return
@@ -146,12 +155,6 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         setNextWpt(0)
     }
 
-
-
-    private fun isValidWpt(route: Route, nextWpt: Int): Boolean {
-        return nextWpt<route.elements.size && nextWpt > -1
-    }
-
     private fun createPositionProvider() {
         positionProvider = PositionProviderFactory.create(this, this)
     }
@@ -174,7 +177,6 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         if (r == null) {
             errorLoadingRoute("Error Loading Route")
             val r = RouteLoader.loadRouteFromFile(this)
-            r ?: return
             loadRoute(r)
             return
         }
@@ -185,15 +187,14 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         val s = sharedPreferences.getString(MainFragment.KEY_GATE_PASSES, "")
         var gp = GatePassings("")
         if (s != null) {
-            try {
-                gp = GatePassings.fromJson(s)
+            gp = try {
+                GatePassings.fromJson(s)
             } catch (e: Exception) {
                 Log.d(TAG, "Failed to load gate passings", e)
-            } finally {
                 GatePassings("")
             }
         }
-        if (gp?.eventId != route.id){
+        if (gp.eventId != route.id){
             with(sharedPreferences.edit()) {
                 putString(MainFragment.KEY_GATE_PASSES, GatePassings(route.id).toJson())
                 commit()
@@ -322,12 +323,8 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     fun startButtonClick(view: View) {
-        val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
-        val checked = sharedPref.getBoolean(MainFragment.KEY_STATUS, true)
-        with(sharedPref.edit()) {
-            putBoolean(MainFragment.KEY_STATUS, checked.not())
-            commit()
-        }
+        val checked = sharedPreferences.getBoolean(MainFragment.KEY_STATUS, true)
+        sharedPreferences.edit().putBoolean(MainFragment.KEY_STATUS,  checked.not()).apply()
     }
 
     fun setNextWpt(n: Int){
@@ -358,16 +355,15 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         } else {
             Log.w(TAG, "Error: route not initialized")
         }
-
     }
 
     private fun updateUI(position: Position) {
         val wpt = route.elements.elementAtOrNull(nextWpt)
         if (wpt != null) {
-            val distWptPort = getDistance(position, wpt!!.portWpt)
-            val distWptStbd = getDistance(position, wpt!!.stbdWpt)
-            val dirWptPort = getDirection(position, wpt!!.portWpt)
-            val dirWptStbd = getDirection(position, wpt!!.stbdWpt)
+            val distWptPort = getDistance(position, wpt.portWpt)
+            val distWptStbd = getDistance(position, wpt.stbdWpt)
+            val dirWptPort = getDirection(position, wpt.portWpt)
+            val dirWptStbd = getDirection(position, wpt.stbdWpt)
             val portData = getDirString(
                 dirWptPort,
                 magnetic,
@@ -504,7 +500,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(
                     requiredPermissions.toTypedArray(),
-                    PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE
+                    PERMISSIONS_REQUEST_LOCATION
                 )
             }
             return false
@@ -538,10 +534,23 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-    private fun startTrackingService(checkPermission: Boolean, permission: Boolean) {
-        var permission = permission
+    private fun startTrackingService(checkPermission: Boolean, initialPermission: Boolean) {
+        var permission = initialPermission
         if (checkPermission) {
-            permission = checkLocationPermissions();
+            val requiredPermissions: MutableSet<String> = HashSet()
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            permission = requiredPermissions.isEmpty()
+            if (!permission) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestPermissions(
+                        requiredPermissions.toTypedArray(),
+                        PERMISSIONS_REQUEST_LOCATION
+                    )
+                }
+                return
+            }
         }
         if (permission) {
             val i = Intent(this, TrackingService::class.java)
@@ -550,22 +559,28 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             }
             i.putExtra("nextwpt", nextWpt)
             ContextCompat.startForegroundService(this, i)
+            alarmManager.setInexactRepeating(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                ALARM_MANAGER_INTERVAL.toLong(), ALARM_MANAGER_INTERVAL.toLong(), alarmIntent
+            )
+            BatteryOptimizationHelper().requestException(this)
         } else {
             sharedPreferences.edit().putBoolean(MainFragment.KEY_STATUS, false).apply()
         }
     }
 
     private fun stopTrackingService() {
+        alarmManager.cancel(alarmIntent)
         this.stopService(Intent(this, TrackingService::class.java))
     }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<String?>,
+        permissions: Array<String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE || requestCode == PERMISSIONS_REQUEST_LOCATION_UI) {
+        if (requestCode == PERMISSIONS_REQUEST_LOCATION || requestCode == PERMISSIONS_REQUEST_LOCATION_UI) {
             var granted = true
             for (result in grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {
@@ -574,7 +589,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
                 }
             }
             Log.d(TAG, "Permissions granted: $granted")
-            if (requestCode == PERMISSIONS_REQUEST_LOCATION_TRACKING_SERVICE) {
+            if (requestCode == PERMISSIONS_REQUEST_LOCATION) {
                 startTrackingService(false, granted)
             } else {
                 if (granted) {
@@ -586,21 +601,6 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-//    override fun onRouteUpdate(index: Int) {
-//        (routeElementSpinner.selectedView as TextView).setTextColor(
-//            resources.getColor(
-//                android.R.color.holo_green_light
-//            )
-//        )
-//        Timer("AdvanceWaypoint", false).schedule(3000) {
-//            runOnUiThread {
-//                if (routeElementSpinner.selectedItemPosition < routeElementSpinner.adapter.count - 1) {
-//                    routeElementSpinner.setSelection(index)
-//                }
-//            }
-//        }
-//        setNextWpt(index)
-//    }
     private val REQUEST_SCREENSHOT_PERMISSION: Int = 1234
     private lateinit var screenshotManager : ScreenshotManager
 
@@ -649,6 +649,11 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri)
             startActivity(Intent.createChooser(shareIntent, "Choose an app"))
         }
+    }
+
+    companion object{
+        private const val PERMISSIONS_REQUEST_LOCATION = 2
+        private const val ALARM_MANAGER_INTERVAL = 15000
     }
 
 }

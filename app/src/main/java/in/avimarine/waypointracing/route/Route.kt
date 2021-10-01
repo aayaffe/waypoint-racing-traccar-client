@@ -31,6 +31,10 @@ class Route(
     fun toGeoJson():String{
         return Json.encodeToString(this)
     }
+
+    fun isValidWpt(nextWpt: Int): Boolean {
+        return nextWpt<elements.size && nextWpt > -1
+    }
     companion object {
         val TAG = "Route"
         fun fromGeoJson(geojson: String): Route {
