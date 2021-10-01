@@ -219,7 +219,7 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/btn_rnd_ylw" />
+        app:srcCompat="@drawable/btn_rnd_red" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -267,8 +267,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
 
     override fun onStop() {
         try {
-            positionProvider.stopUpdates()
-        } catch (e: SecurityException) {
+            if (this::positionProvider.isInitialized){
+                positionProvider.stopUpdates()
+            }
+        } catch (e: Exception) {
             Log.w(TAG, e)
         }
         super.onStop()
