@@ -21,8 +21,12 @@
         app:iconTint="@color/light"/>
     <item
         android:id="@+id/reset_route_menu_action"
-        android:icon="@drawable/ic_baseline_restore_24"
         app:showAsAction="ifRoom"
         android:title="Restart Route"
+        app:iconTint="@color/light"/>
+    <item
+        android:id="@+id/route_activity_menu_action"
+        app:showAsAction="ifRoom"
+        android:title="View Route"
         app:iconTint="@color/light"/>
 </menu>

@@ -12,6 +12,7 @@ data class GatePassing(
     val routeId: String,
     val deviceId: String,
     val boatName: String = "",
+    val gateId: Int,
     val gateName: String = "",
     @Serializable(with = Serializers.Companion.DateSerializer::class)
     val time: Date,
@@ -26,11 +27,12 @@ data class GatePassing(
 
 
 
-    constructor(eventName: String, routeId: String, deviceId: String, boatName: String, gateName: String, time: Date, position: Position) : this(
+    constructor(eventName: String, routeId: String, deviceId: String, boatName: String, gateId: Int, gateName: String, time: Date, position: Position) : this(
         eventName = eventName,
         routeId = routeId,
         deviceId = deviceId,
         boatName = boatName,
+        gateId = gateId,
         gateName = gateName,
         time = time,
         latitude = position.latitude,

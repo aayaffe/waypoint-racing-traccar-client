@@ -23,7 +23,6 @@ class Waypoint(
     override val portWpt: Location,
     override val mandatory: Boolean,
     override val proofArea: ProofArea,
-    override var firstTimeInProofArea: Long = -1
 ) : RouteElement, Parcelable {
     constructor(
         name: String,

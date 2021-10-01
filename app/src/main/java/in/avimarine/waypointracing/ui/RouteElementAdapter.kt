@@ -50,10 +50,6 @@ class RouteElementAdapter(context: Context,
 
     private fun bindData(value: RouteElement, view: TextView): TextView {
         view.text = value.name
-        if (value.firstTimeInProofArea!=-1L)
-            view.setTextColor(context.resources.getColor(R.color.holo_green_light))
-        else
-            view.setTextColor(context.resources.getColor(R.color.black))
         return view
     }
 }

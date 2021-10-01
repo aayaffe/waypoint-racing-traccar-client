@@ -111,7 +111,7 @@ class TrackingController(private val context: Context) :
                 val gp = GatePassing(
                     route!!.eventName, route!!.id,
                     deviceId!!,
-                    boatName!!, route!!.elements?.get(nextWpt)?.name, position.time, position
+                    boatName!!, nextWpt, route!!.elements.get(nextWpt).name, position.time, position
                 )
                 GatePassings.addGatePass(context, gp)
                 write(gp)
@@ -124,7 +124,7 @@ class TrackingController(private val context: Context) :
                 val gp = GatePassing(
                     route!!.eventName, route!!.id,
                     deviceId!!,
-                    boatName!!, route!!.elements?.get(nextWpt)?.name, position.time, position
+                    boatName!!, nextWpt, route!!.elements.get(nextWpt).name, position.time, position
                 )
                 GatePassings.addGatePass(context, gp)
                 send(gp)
@@ -360,15 +360,11 @@ class TrackingController(private val context: Context) :
         val l = location.toLocation()
         val wpt = route?.elements?.elementAtOrNull(nextWpt)
         if (wpt != null) {
-            if (wpt!!.isInProofArea(l)) {
-                if (wpt!!.passedGate(location)) {
-                    StatusActivity.addMessage("Passed " + wpt!!.name)
-                    if (wpt!!.isInProofArea(l)) {
-                        return true
-                    }
-                }
+            return if (wpt.isInProofArea(l)) {
+                StatusActivity.addMessage("Passed " + wpt.name)
+                true
             } else {
-                return false
+                false
             }
         }
         return false

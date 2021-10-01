@@ -305,9 +305,17 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             }
             R.id.send_screenshot_menu_action -> {
                 takeScreenshot()
+                return true
             }
             R.id.reset_route_menu_action -> {
                 resetRoute()
+                return true
+            }
+            R.id.route_activity_menu_action -> {
+                val intent = Intent(this, RouteActivity::class.java)
+                intent.putExtra("route", route)
+                this.startActivity(intent)
+                return true
             }
         }
         return super.onOptionsItemSelected(item)
@@ -317,9 +325,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         setNextWpt(0)
         GatePassings.reset(this, route)
         populateRouteElementSpinner(route)
-        for (el in route.elements){
-            el.firstTimeInProofArea = -1
-        }
+        lastPassTextView.text = ""
     }
 
     fun startButtonClick(view: View) {

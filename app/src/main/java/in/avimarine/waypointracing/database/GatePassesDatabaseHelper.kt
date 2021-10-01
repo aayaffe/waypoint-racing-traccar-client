@@ -61,6 +61,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
                     "routeId TEXT, " +
                     "deviceId TEXT," +
                     "boatname TEXT," +
+                    "gateId INTEGER," +
                     "gateName TEXT," +
                     "time INTEGER," +
                     "latitude REAL," +
@@ -89,6 +90,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
         values.put("routeId", gatePass.routeId)
         values.put("deviceId", gatePass.deviceId)
         values.put("boatname", gatePass.boatName)
+        values.put("gateId", gatePass.gateId)
         values.put("gateName", gatePass.gateName)
         values.put("time", gatePass.time.time)
         values.put("latitude", gatePass.latitude)
@@ -119,6 +121,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
                     routeId = cursor.getString(cursor.getColumnIndex("routeId")),
                     deviceId = cursor.getString(cursor.getColumnIndex("deviceId")),
                     boatName = cursor.getString(cursor.getColumnIndex("boatname")),
+                    gateId = cursor.getInt(cursor.getColumnIndex("gateId")),
                     gateName = cursor.getString(cursor.getColumnIndex("gateName")),
                     time = Date(cursor.getLong(cursor.getColumnIndex("time"))),
                     latitude = cursor.getDouble(cursor.getColumnIndex("latitude")),
@@ -157,7 +160,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
     }
 
     companion object {
-        const val DATABASE_VERSION = 2
+        const val DATABASE_VERSION = 3
         const val DATABASE_NAME = "traccar.gatepasses.db"
     }
 
