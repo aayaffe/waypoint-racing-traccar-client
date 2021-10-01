@@ -15,7 +15,7 @@
  */
 package `in`.avimarine.waypointracing
 
-import `in`.avimarine.waypointracing.activities.MainFragment
+import `in`.avimarine.waypointracing.activities.SettingsFragment
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -41,11 +41,11 @@ abstract class PositionProvider(
     init{
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
-    protected var deviceId = sharedPreferences.getString(MainFragment.KEY_DEVICE, "undefined")!!
-    protected var boatName = sharedPreferences.getString(MainFragment.KEY_NAME, "boat_undefined")!!
-    protected var interval = sharedPreferences.getString(MainFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
-    protected var distance: Double = sharedPreferences.getString(MainFragment.KEY_DISTANCE, "0")!!.toInt().toDouble()
-    protected var angle: Double = sharedPreferences.getString(MainFragment.KEY_ANGLE, "0")!!.toInt().toDouble()
+    protected var deviceId = sharedPreferences.getString(SettingsFragment.KEY_DEVICE, "undefined")!!
+    protected var boatName = sharedPreferences.getString(SettingsFragment.KEY_NAME, "boat_undefined")!!
+    protected var interval = sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
+    protected var distance: Double = sharedPreferences.getString(SettingsFragment.KEY_DISTANCE, "0")!!.toInt().toDouble()
+    protected var angle: Double = sharedPreferences.getString(SettingsFragment.KEY_ANGLE, "0")!!.toInt().toDouble()
     private var lastLocation: Location? = null
 
     abstract fun startUpdates()
@@ -77,8 +77,8 @@ abstract class PositionProvider(
     }
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         Log.d(TAG, "Changed Preference: " + key)
-        if (key == MainFragment.KEY_INTERVAL) {
-            interval = sharedPreferences.getString(MainFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
+        if (key == SettingsFragment.KEY_INTERVAL) {
+            interval = sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
             stopUpdates()
             startUpdates()
         }

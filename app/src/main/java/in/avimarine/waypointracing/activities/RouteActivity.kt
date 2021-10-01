@@ -2,11 +2,9 @@ package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.TAG
-import `in`.avimarine.waypointracing.TrackingService
 import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
-import `in`.avimarine.waypointracing.route.RouteElement
 import `in`.avimarine.waypointracing.ui.RouteElementConcat
 import `in`.avimarine.waypointracing.ui.RouteElementFullAdapter
 import android.content.Intent
@@ -14,6 +12,7 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -25,21 +24,34 @@ class RouteActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_route)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)// showing the back button in action bar
+
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
 
         parseRouteIntent(intent)
-        val routeElementAdapter = RouteElementFullAdapter ()
+        val routeElementAdapter = RouteElementFullAdapter()
 
         val recyclerView: RecyclerView = findViewById(R.id.recycler_view)
         recyclerView.adapter = routeElementAdapter
 
         routeElementAdapter.submitList(createRecList())
 
+        route?.let { setTitle(it.eventName, "") }
+
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                finish()
+                return true
+            }
+        }
+        return super.onContextItemSelected(item)
     }
 
-    private fun createRecList(): MutableList<RouteElementConcat>? {
+    private fun createRecList(): MutableList<RouteElementConcat> {
         val ret = mutableListOf<RouteElementConcat>()
-        val s = sharedPreferences.getString(MainFragment.KEY_GATE_PASSES, "")
+        val s = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES, "")
         var gp = GatePassings("")
         if (s != null) {
             gp = try {
@@ -66,5 +78,13 @@ class RouteActivity : AppCompatActivity() {
         route = i?.getParcelableExtra("route")
         Log.d(TAG, "Recieved route: " + route.toString())
     }
+
+    private fun setTitle(title: String, subTitle: String) {
+        val ab = supportActionBar
+        ab?.setTitle(title)
+        ab?.setSubtitle(subTitle)
+    }
+
+
 
 }

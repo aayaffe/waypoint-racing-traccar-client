@@ -26,7 +26,7 @@ import androidx.preference.PreferenceManager
 import android.util.Log
 import `in`.avimarine.waypointracing.database.DatabaseHelper.DatabaseHandler
 import `in`.avimarine.waypointracing.RequestManager.RequestHandler
-import `in`.avimarine.waypointracing.activities.MainFragment
+import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.activities.StatusActivity
 import `in`.avimarine.waypointracing.database.DatabaseHelper
 import `in`.avimarine.waypointracing.database.GatePassesDatabaseHelper
@@ -34,7 +34,6 @@ import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import android.content.SharedPreferences
-import android.location.Location
 import java.util.*
 
 class TrackingController(private val context: Context) :
@@ -45,25 +44,25 @@ class TrackingController(private val context: Context) :
     private val handler = Handler(Looper.getMainLooper())
     private val handlerGP = Handler(Looper.getMainLooper())
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-    private var nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT, -1)
+    private var nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, -1)
     private val positionProvider = PositionProviderFactory.create(context, this)
     private val databaseHelper = DatabaseHelper(context)
     private val gatePassDatabaseHelper = GatePassesDatabaseHelper(context)
     private val networkManager = NetworkManager(context, this)
-    private val deviceId = sharedPreferences.getString(MainFragment.KEY_DEVICE, "undefined")
-    private val boatName = sharedPreferences.getString(MainFragment.KEY_NAME, "boat_undefined")
+    private val deviceId = sharedPreferences.getString(SettingsFragment.KEY_DEVICE, "undefined")
+    private val boatName = sharedPreferences.getString(SettingsFragment.KEY_NAME, "boat_undefined")
 
 
     private val url: String = sharedPreferences.getString(
-        MainFragment.KEY_URL,
+        SettingsFragment.KEY_URL,
         context.getString(R.string.settings_url_default_value)
     )!!
 
     private val urlGates: String = sharedPreferences.getString(
-        MainFragment.KEY_URL_GATES,
+        SettingsFragment.KEY_URL_GATES,
         context.getString(R.string.settings_url_gates_default_value)
     )!!
-    private val buffer: Boolean = sharedPreferences.getBoolean(MainFragment.KEY_BUFFER, true)
+    private val buffer: Boolean = sharedPreferences.getBoolean(SettingsFragment.KEY_BUFFER, true)
 
     private var isOnline = networkManager.isOnline
     private var isWaiting = false
@@ -77,7 +76,7 @@ class TrackingController(private val context: Context) :
 
     fun start() {
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-        nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT, 0)
+        nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
         if (isOnline) {
             read()
             readGatePass()
@@ -138,7 +137,7 @@ class TrackingController(private val context: Context) :
         val sharedPref: SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(sharedPref.edit()) {
-            putInt(MainFragment.KEY_NEXT_WPT, n)
+            putInt(SettingsFragment.KEY_NEXT_WPT, n)
             commit()
         }
     }
@@ -223,7 +222,7 @@ class TrackingController(private val context: Context) :
                 if (success) {
                     if (result != null) {
                         if (result.deviceId == sharedPreferences.getString(
-                                MainFragment.KEY_DEVICE,
+                                SettingsFragment.KEY_DEVICE,
                                 null
                             )
                         ) {
@@ -249,7 +248,7 @@ class TrackingController(private val context: Context) :
                 if (success) {
                     if (result != null) {
                         if (result.deviceId == sharedPreferences.getString(
-                                MainFragment.KEY_DEVICE,
+                                SettingsFragment.KEY_DEVICE,
                                 null
                             )
                         ) {
@@ -305,7 +304,7 @@ class TrackingController(private val context: Context) :
                         delete(position)
                     }
                     with(sharedPreferences.edit()) {
-                        putLong(MainFragment.KEY_LAST_SEND, Date().time)
+                        putLong(SettingsFragment.KEY_LAST_SEND, Date().time)
                         commit()
                     }
                 } else {
@@ -373,13 +372,12 @@ class TrackingController(private val context: Context) :
 
     fun updateRoute(route: Route?, nextWpt: Int) {
         this.route = route
-//        this.nextWpt = nextWpt
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         Log.d(TAG, "Changed Preference: " + key)
-        if (key == MainFragment.KEY_NEXT_WPT) {
-            nextWpt = sharedPreferences.getInt(MainFragment.KEY_NEXT_WPT, 0)
+        if (key == SettingsFragment.KEY_NEXT_WPT) {
+            nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
         }
     }
 

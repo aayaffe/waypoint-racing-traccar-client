@@ -15,7 +15,7 @@
  */
 package `in`.avimarine.waypointracing
 
-import `in`.avimarine.waypointracing.activities.MainFragment
+import `in`.avimarine.waypointracing.activities.SettingsFragment
 import android.content.Context
 import android.content.Intent
 import androidx.preference.PreferenceManager
@@ -25,7 +25,7 @@ class AutostartReceiver : WakefulBroadcastReceiver() {
     @Suppress("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context, intent: Intent) {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        if (sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false)) {
+        if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false)) {
             startWakefulForegroundService(context, Intent(context, TrackingService::class.java))
         }
     }

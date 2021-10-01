@@ -15,12 +15,10 @@
  */
 package `in`.avimarine.waypointracing;
 
-import `in`.avimarine.waypointracing.activities.Main2Activity
-import `in`.avimarine.waypointracing.activities.MainFragment
+import `in`.avimarine.waypointracing.activities.MainActivity
+import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.activities.StatusActivity
-import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.Route
-import `in`.avimarine.waypointracing.route.RouteElement
 import android.Manifest
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
@@ -78,7 +76,7 @@ class TrackingService() : Service() {
         startForeground(NOTIFICATION_ID, createNotification(this))
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(MainFragment.KEY_WAKELOCK, true)) {
+            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.KEY_WAKELOCK, true)) {
                 val powerManager = getSystemService(POWER_SERVICE) as PowerManager
                 wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, javaClass.name)
                 wakeLock?.acquire()
@@ -144,7 +142,7 @@ class TrackingService() : Service() {
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
             val intent: Intent
             if (!BuildConfig.HIDDEN_APP) {
-                intent = Intent(context, Main2Activity::class.java)
+                intent = Intent(context, MainActivity::class.java)
                 builder
                     .setContentTitle(context.getString(R.string.settings_status_on_summary))
                     .setTicker(context.getString(R.string.settings_status_on_summary))

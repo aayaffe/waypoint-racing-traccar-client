@@ -1,7 +1,7 @@
 package `in`.avimarine.waypointracing.route
 
 import `in`.avimarine.waypointracing.TAG
-import `in`.avimarine.waypointracing.activities.MainFragment
+import `in`.avimarine.waypointracing.activities.SettingsFragment
 import android.content.Context
 import android.util.Log
 import androidx.preference.PreferenceManager
@@ -32,7 +32,7 @@ class GatePassings {
         fun addGatePass(context: Context, gp: GatePassing) {
             val sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-            val gps = sharedPreferences.getString(MainFragment.KEY_GATE_PASSES,"")?.let {
+            val gps = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES,"")?.let {
                 try {
                     fromJson(
                         it
@@ -44,7 +44,7 @@ class GatePassings {
             }
             gps?.passes?.add(gp)
             with(sharedPreferences.edit()) {
-                putString(MainFragment.KEY_GATE_PASSES, gps?.toJson())
+                putString(SettingsFragment.KEY_GATE_PASSES, gps?.toJson())
                 commit()
             }
         }
@@ -52,7 +52,7 @@ class GatePassings {
         fun getLastGatePass(context: Context): GatePassing? {
             val sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-            val gps = sharedPreferences.getString(MainFragment.KEY_GATE_PASSES,"")?.let {
+            val gps = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES,"")?.let {
                 try {
                     fromJson(
                         it
@@ -72,7 +72,8 @@ class GatePassings {
             val sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
             with(sharedPreferences.edit()) {
-                putString(MainFragment.KEY_GATE_PASSES,
+                putString(
+                    SettingsFragment.KEY_GATE_PASSES,
                     gps.toJson()
                 )
                 commit()

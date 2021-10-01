@@ -15,7 +15,7 @@
  */
 package `in`.avimarine.waypointracing
 
-import `in`.avimarine.waypointracing.activities.MainFragment
+import `in`.avimarine.waypointracing.activities.SettingsFragment
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
@@ -29,7 +29,7 @@ class AndroidPositionProvider(context: Context, listener: PositionListener) :
 
     private val locationManager =
         context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    private val provider = getProvider(sharedPreferences.getString(MainFragment.KEY_ACCURACY, "medium"))
+    private val provider = getProvider(sharedPreferences.getString(SettingsFragment.KEY_ACCURACY, "medium"))
 
     @SuppressLint("MissingPermission")
     override fun startUpdates() {

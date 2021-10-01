@@ -33,6 +33,7 @@ class StatusActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.list)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)// showing the back button in action bar
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, android.R.id.text1, messages)
         val listView = findViewById<ListView>(android.R.id.list)
         listView.adapter = adapter
@@ -51,9 +52,15 @@ class StatusActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.clear) {
-            clearMessages()
-            return true
+        when (item.itemId) {
+            android.R.id.home -> {
+                finish()
+                return true
+            }
+            R.id.clear -> {
+                clearMessages()
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }

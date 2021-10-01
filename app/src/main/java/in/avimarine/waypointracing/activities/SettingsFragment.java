@@ -15,11 +15,7 @@
  */
 package in.avimarine.waypointracing.activities;
 
-import android.Manifest;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager;
@@ -33,33 +29,23 @@ import android.webkit.URLUtil;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
 import androidx.preference.EditTextPreference;
 import androidx.preference.EditTextPreferenceDialogFragmentCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
-import androidx.preference.TwoStatePreference;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import in.avimarine.waypointracing.BuildConfig;
 import in.avimarine.waypointracing.MainApplication;
 import in.avimarine.waypointracing.R;
-import in.avimarine.waypointracing.TrackingService;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
-public class MainFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener {
+public class SettingsFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener {
 
-    private static final String TAG = MainFragment.class.getSimpleName();
-    private static final int ALARM_MANAGER_INTERVAL = 15000;
+    private static final String TAG = SettingsFragment.class.getSimpleName();
     public static final String KEY_DEVICE = "id";
     public static final String KEY_NAME = "boat_name";
     public static final String KEY_URL = "url";
@@ -75,10 +61,8 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     public static final String KEY_LAST_SEND = "lastsend";
     public static final String KEY_EXPERT_MODE = "expert";
     public static final String KEY_GATE_PASSES = "gatepasses";
-    private static final int PERMISSIONS_REQUEST_LOCATION = 2;
     private SharedPreferences sharedPreferences;
-    private AlarmManager alarmManager;
-    private PendingIntent alarmIntent;
+
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -169,7 +153,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
     }
 
     private void removeLauncherIcon() {
-        String className = MainActivity.class.getCanonicalName().replace(".MainActivity", ".Launcher");
+        String className = SettingsActivity.class.getCanonicalName().replace(".MainActivity", ".Launcher");
         ComponentName componentName = new ComponentName(getActivity().getPackageName(), className);
         PackageManager packageManager = getActivity().getPackageManager();
         if (packageManager.getComponentEnabledSetting(componentName) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
@@ -189,7 +173,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
         super.onResume();
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         expertMode(sharedPreferences.getBoolean(KEY_EXPERT_MODE, false));
-        setPreferencesEnabled(!sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false));
+        setPreferencesEnabled(!sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false));
     }
 
     @Override
@@ -219,7 +203,7 @@ public class MainFragment extends PreferenceFragmentCompat implements OnSharedPr
         } else if (key.equals(KEY_NAME)) {
             findPreference(KEY_NAME).setSummary(sharedPreferences.getString(KEY_NAME, null));
         } else if  (key.equals(KEY_STATUS)) {
-            setPreferencesEnabled(!sharedPreferences.getBoolean(MainFragment.KEY_STATUS, false));
+            setPreferencesEnabled(!sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false));
             ((MainApplication) getActivity().getApplication()).handleRatingFlow(getActivity());
         }
 
