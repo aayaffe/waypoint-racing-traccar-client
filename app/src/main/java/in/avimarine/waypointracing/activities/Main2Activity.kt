@@ -58,8 +58,8 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
     private var route = Route.emptyRoute()
     private var noGPSTimer: Timer = Timer("GPSTIMER", true)
     private var isFirstSpinnerLoad = true
-    private lateinit var alarmManager: AlarmManager
-    private lateinit var alarmIntent: PendingIntent
+//    private lateinit var alarmManager: AlarmManager
+//    private lateinit var alarmIntent: PendingIntent
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,10 +71,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
         setContentView(R.layout.activity_main2)
 
-        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val originalIntent = Intent(this, AutostartReceiver::class.java)
-        originalIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-        alarmIntent = PendingIntent.getBroadcast(this, 0, originalIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+//        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//        val originalIntent = Intent(this, AutostartReceiver::class.java)
+//        originalIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+//        alarmIntent = PendingIntent.getBroadcast(this, 0, originalIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         if (intent.action == Intent.ACTION_MAIN) {
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
@@ -559,10 +559,10 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
             }
             i.putExtra("nextwpt", nextWpt)
             ContextCompat.startForegroundService(this, i)
-            alarmManager.setInexactRepeating(
-                AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                ALARM_MANAGER_INTERVAL.toLong(), ALARM_MANAGER_INTERVAL.toLong(), alarmIntent
-            )
+//            alarmManager.setInexactRepeating(
+//                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+//                ALARM_MANAGER_INTERVAL.toLong(), ALARM_MANAGER_INTERVAL.toLong(), alarmIntent
+//            )
             BatteryOptimizationHelper().requestException(this)
         } else {
             sharedPreferences.edit().putBoolean(MainFragment.KEY_STATUS, false).apply()
@@ -570,7 +570,7 @@ class Main2Activity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun stopTrackingService() {
-        alarmManager.cancel(alarmIntent)
+//        alarmManager.cancel(alarmIntent)
         this.stopService(Intent(this, TrackingService::class.java))
     }
 
