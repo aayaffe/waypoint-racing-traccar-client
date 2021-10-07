@@ -76,6 +76,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else {
             RouteLoader.handleIntent(this, intent, this::loadRoute)
         }
+        setEmptyRouteUI(route.isEmpty())
         val PREFS_NAME = "MyPrefsFile"
         val settings = getSharedPreferences(PREFS_NAME, 0)
 
@@ -177,6 +178,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         route = r
         populateRouteElementSpinner(r)
+        setEmptyRouteUI(route.isEmpty())
         setTitle("Waypoint Racing", r.eventName)
         sendRouteIntent(r)
         val s = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES, "")
@@ -351,11 +353,12 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     override fun onPositionUpdate(position: Position) {
 //        StatusActivity.addMessage(context.getString(R.string.status_location_update))
-        if (!route.isEmpty()) {
-            updateUI(position)
-        } else {
-            Log.w(TAG, "Error: route not initialized")
-        }
+        updateUI(position)
+//        if (!route.isEmpty()) {
+//            updateUI(position)
+//        } else {
+//            Log.w(TAG, "Error: route not initialized")
+//        }
     }
 
     private fun updateUI(position: Position) {
@@ -404,7 +407,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else {
             mockPosition.visibility = View.INVISIBLE
         }
-        if (Utils.timeDiffInSeconds(sharedPreferences.getLong(SettingsFragment.KEY_LAST_SEND, Long.MAX_VALUE),Date().time) < (sharedPreferences.getString(
+        val lastLocationSentTime = sharedPreferences.getLong(SettingsFragment.KEY_LAST_SEND, -1)
+        if (lastLocationSentTime > 0 && Utils.timeDiffInSeconds(lastLocationSentTime,Date().time) < (sharedPreferences.getString(
                 SettingsFragment.KEY_INTERVAL,
                 8.toString()
             )
@@ -412,6 +416,22 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             lastSend.setImageResource(R.drawable.btn_rnd_grn)
         } else {
             lastSend.setImageResource(R.drawable.btn_rnd_red)
+        }
+    }
+
+    private fun setEmptyRouteUI(isEmpty: Boolean) {
+        if (isEmpty){
+            routeElementSpinner.visibility = View.INVISIBLE
+            nextWptHeader.text = getString(R.string.no_route_loaded)
+            portGate.visibility = View.GONE
+            stbdGate.visibility = View.GONE
+            shortestDistanceToGate.visibility = View.GONE
+        } else {
+            routeElementSpinner.visibility = View.VISIBLE
+            nextWptHeader.text = getString(R.string.next_waypoint_gate)
+            portGate.visibility = View.VISIBLE
+            stbdGate.visibility = View.VISIBLE
+            shortestDistanceToGate.visibility = View.VISIBLE
         }
     }
 

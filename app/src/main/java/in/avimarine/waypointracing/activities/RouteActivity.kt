@@ -13,12 +13,14 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.activity_route.*
 
 class RouteActivity : AppCompatActivity() {
 
-    private var route: Route? = null
+    private var route = Route.emptyRoute()
     private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +38,15 @@ class RouteActivity : AppCompatActivity() {
 
         routeElementAdapter.submitList(createRecList())
 
-        route?.let { setTitle(it.eventName, "") }
+        setTitle(route.eventName, "")
+
+        if (route.isEmpty()){
+            recyclerView.visibility = View.GONE
+            no_route_header.visibility = View.VISIBLE
+        } else {
+            recyclerView.visibility = View.VISIBLE
+            no_route_header.visibility = View.GONE
+        }
 
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -75,7 +85,10 @@ class RouteActivity : AppCompatActivity() {
     }
 
     private fun parseRouteIntent(i: Intent?){
-        route = i?.getParcelableExtra("route")
+        val r : Route? = i?.getParcelableExtra("route")
+        if (r!=null){
+            route = r
+        }
         Log.d(TAG, "Recieved route: " + route.toString())
     }
 
