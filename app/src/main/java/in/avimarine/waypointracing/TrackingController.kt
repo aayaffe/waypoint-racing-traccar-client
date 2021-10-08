@@ -33,6 +33,7 @@ import `in`.avimarine.waypointracing.database.GatePassesDatabaseHelper
 import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
+import `in`.avimarine.waypointracing.utils.toLocation
 import android.content.SharedPreferences
 import java.util.*
 

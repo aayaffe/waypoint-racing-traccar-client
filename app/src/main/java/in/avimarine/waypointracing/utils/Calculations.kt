@@ -1,8 +1,11 @@
-package `in`.avimarine.waypointracing
+package `in`.avimarine.waypointracing.utils
 
+import `in`.avimarine.waypointracing.Position
 import android.hardware.GeomagneticField
 import android.location.Location
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.turf.TurfConstants
@@ -161,6 +164,7 @@ fun getDirection(firstLocation: Position, secondLocation: Location): Double {
     return getDirection(firstLocation.latitude,firstLocation.longitude,secondLocation.latitude,secondLocation.longitude)
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun timeStamptoDateString(timestamp: Long): String {
     val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
     val formatter = DateTimeFormatter.ofPattern("(dd)HH:mm:ss")
@@ -243,16 +247,15 @@ fun toListOfListOfLocs(wpts : ArrayList<Location>):List<List<Point>>{
 }
 
 fun isBetweenAngles(from: Double, to:Double, angle:Double): Boolean{
-    var b1 = from
     var b2 = to
     var a = angle
     if (to < from) {
         b2 = to + 360.0
     }
     if (angle < from) {
-        a = angle + 360;
+        a = angle + 360
     }
     // compare
-    return a in b1..b2;
+    return a in from..b2
 }
 

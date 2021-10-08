@@ -53,4 +53,11 @@
     <string name="next_waypoint_gate">Next Waypoint\\Gate</string>
     <string name="request_exception">To continuously collect location data please turn off battery optimization for the app.</string>
     <string name="no_route_loaded">No Route Loaded</string>
+    <string name="port_gate">Port Gate</string>
+    <string name="distance_to_gate">Distance to gate</string>
+    <string name="stbd_gate">Stbd Gate</string>
+    <string name="nm">NM</string>
+    <string name="pass_wpt_from">Pass waypoint from</string>
+    <string name="dist_to_wpt">Distance to waypoint</string>
+    <string name="waypoint">Waypoint</string>
 </resources>

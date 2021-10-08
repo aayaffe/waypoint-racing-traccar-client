@@ -1,12 +1,14 @@
 package `in`.avimarine.waypointracing.ui
 
 import `in`.avimarine.waypointracing.R
-import `in`.avimarine.waypointracing.timeStamptoDateString
+import `in`.avimarine.waypointracing.utils.timeStamptoDateString
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +27,7 @@ class RouteElementFullAdapter() :
         private var currentRec: RouteElementConcat? = null
 
         /* Bind Route Element particulars. */
+        @RequiresApi(Build.VERSION_CODES.O)
         fun bind(rec: RouteElementConcat) {
             currentRec = rec
             nameTextView.text = rec.re.name
@@ -46,6 +49,7 @@ class RouteElementFullAdapter() :
     }
 
     /* Gets current flower and uses it to bind view. */
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: RouteElementConcatViewHolder, position: Int) {
         val rec = getItem(position)
         holder.bind(rec)

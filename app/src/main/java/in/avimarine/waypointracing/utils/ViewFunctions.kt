@@ -1,9 +1,11 @@
-package `in`.avimarine.waypointracing
+package `in`.avimarine.waypointracing.utils
 
 import android.location.Location
+import android.os.Build
 import android.widget.TextView
-import java.lang.Math.abs
-import java.lang.Math.floor
+import androidx.annotation.RequiresApi
+import java.lang.Math.*
+import kotlin.math.roundToInt
 
 /**
  * This file is part of an
@@ -99,4 +101,27 @@ fun getLonString(lon: Double): String {
     if (lon > 180 || lon < -180)
         return "Error"
     return String.format("%03d", abs(floor(lon)).toInt()) + "\u00B0 " + String.format("%06.3f", abs(lon - floor(lon)) * 60) + "' "+ if (lon > 0) "E" else "W"
+}
+
+val compassPoints = mapOf<Int, String>(
+    0 to "N",
+    45 to "NE",
+    90 to "E",
+    135 to "SE",
+    180 to "S",
+    225 to "SW",
+    270 to "W",
+    315 to "NW",
+    360 to "N",
+)
+
+@RequiresApi(Build.VERSION_CODES.N)
+fun getPointOfCompass(dir1:Double, dir2: Double):String {
+    var b2 = dir2
+    if (dir2<dir1){
+        b2 = dir2+360
+    }
+    val dir = ((b2 - dir1)/2 + dir1) % 360
+    val closestDir  = (dir / 45.0).roundToInt() * 45
+    return compassPoints.getOrDefault(closestDir,"?")
 }

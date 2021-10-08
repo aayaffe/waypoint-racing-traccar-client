@@ -27,8 +27,8 @@ android {
         buildConfigField 'boolean', 'HIDDEN_APP', 'false'
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 14
-        versionName '2.4'
+        versionCode 15
+        versionName '2.5'
         signingConfig signingConfigs.debug
     }
 

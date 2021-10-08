@@ -1,13 +1,10 @@
 package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.*
-import `in`.avimarine.waypointracing.route.GatePassings
-import `in`.avimarine.waypointracing.route.Route
-import `in`.avimarine.waypointracing.route.RouteLoader
+import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
-import `in`.avimarine.waypointracing.utils.LocationPermissions
-import `in`.avimarine.waypointracing.utils.Utils
+import `in`.avimarine.waypointracing.utils.*
 import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
@@ -23,6 +20,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -57,6 +55,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 //    private lateinit var alarmIntent: PendingIntent
 
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         screenshotManager = ScreenshotManagerBuilder(this)
@@ -238,6 +237,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume() {
         super.onResume()
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
@@ -250,12 +250,31 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         updateLastPass()
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun getNextWpt() {
         nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
-        if (nextWpt >= route.elements.size){
+        if (nextWpt >= route.elements.size) {
             setNextWpt(0)
         }
         routeElementSpinner.setSelection(nextWpt)
+        route.elements.elementAtOrNull(nextWpt)?.let { setNextWaypointUI(it) }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun setNextWaypointUI(wpt: RouteElement) {
+        if (wpt.type == RouteElementType.WAYPOINT) {
+            stbdGate.setLabel(getString(R.string.pass_wpt_from))
+            stbdGate.setUnits("")
+            stbdGate.setData(getPointOfCompass(wpt.proofArea.bearings[0],wpt.proofArea.bearings[1]))
+            portGate.setLabel(getString(R.string.waypoint))
+            shortestDistanceToGate.setLabel(getString(R.string.dist_to_wpt))
+        } else {
+            stbdGate.setData("-----")
+            stbdGate.setUnits(getString(R.string.nm))
+            stbdGate.setLabel(getString(R.string.stbd_gate))
+            portGate.setLabel(getString(R.string.port_gate))
+            shortestDistanceToGate.setLabel(getString(R.string.distance_to_gate))
+        }
     }
 
     override fun onPause() {
@@ -356,6 +375,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         Log.e(TAG, "Position Error: ", error)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onPositionUpdate(position: Position) {
 //        StatusActivity.addMessage(context.getString(R.string.status_location_update))
         updateUI(position)
@@ -366,6 +386,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 //        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun updateUI(position: Position) {
         val wpt = route.elements.elementAtOrNull(nextWpt)
         if (wpt != null) {
@@ -388,7 +409,9 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 position.time.time
             ) + "/" + getDistString(distWptStbd)
             portGate.setData(portData)
-            stbdGate.setData(stbcData)
+            if (wpt.type != RouteElementType.WAYPOINT) {
+                stbdGate.setData(stbcData)
+            }
             shortestDistanceToGate.setData(getDistString(pointToLineDist(position.toLocation(),wpt.portWpt,wpt.stbdWpt)))
         } else {
             portGate.setData("-----")
@@ -396,7 +419,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         setUiForGPS(true)
         cog.setData(getDirString(position.course, magnetic, false, position, position.time.time))
-        sog.setData(getSpeedString(position.speed)) //TODO Fix units in the conversion (probably knots)
+        sog.setData(getSpeedString(position.speed))
         location.setData(getLatString(position.latitude) + "\n" + getLonString(position.longitude))
         time.setData(timeStamptoDateString(position.time.time))
         noGPSTimer.cancel()
@@ -431,6 +454,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             portGate.visibility = View.GONE
             stbdGate.visibility = View.GONE
             shortestDistanceToGate.visibility = View.GONE
+
         } else {
             routeElementSpinner.visibility = View.VISIBLE
             nextWptHeader.text = getString(R.string.next_waypoint_gate)
@@ -460,6 +484,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         Log.d(TAG, "Changed Preference: " + key)
         if (key == SettingsFragment.KEY_STATUS) {
@@ -486,6 +511,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun updateLastPass() {
         val gp = GatePassings.getLastGatePass(this)
         if (gp!=null) {
@@ -502,41 +528,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             start_btn.text = getString(R.string.settings_status_off)
         }
     }
-
-    /**
-     * Checks for location permissions.
-     * returns true if permission granted or requesting permission from user.
-     */
-    private fun checkLocationPermissions(): Boolean {
-        val requiredPermissions: MutableSet<String> = HashSet()
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-            && ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        }
-        if (requiredPermissions.isNotEmpty()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(
-                    requiredPermissions.toTypedArray(),
-                    PERMISSIONS_REQUEST_LOCATION
-                )
-            }
-            return false
-        }
-        return true
-    }
-
-
 
     private fun askForLocationPermission(permissionRequestCode: Int) {
         val requiredPermissions: MutableSet<String> = HashSet()

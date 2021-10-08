@@ -59,7 +59,7 @@
         app:textColor="-65536"
         app:dataText="-----"
         app:dataTextSize="16sp"
-        app:labelText="Port Gate"
+        app:labelText="@string/port_gate"
         app:layout_constraintBottom_toTopOf="@+id/cog"
         app:layout_constraintEnd_toStartOf="@+id/stbdGate"
         app:layout_constraintHorizontal_weight="1"
@@ -81,13 +81,13 @@
         app:textColor="-65536"
         app:dataText="-----"
         app:dataTextSize="16sp"
-        app:labelText="Stbd Gate"
+        app:labelText="@string/stbd_gate"
         app:layout_constraintBottom_toBottomOf="@+id/portGate"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toEndOf="@+id/portGate"
         app:layout_constraintTop_toTopOf="@+id/portGate"
-        app:unitsText="NM"
+        app:unitsText="@string/nm"
         app:autoTextSize="true"/>
 
     <in.avimarine.waypointracing.ui.NavTextDrawer
@@ -186,7 +186,7 @@
         app:textColor="-65536"
         app:dataText="-----"
         app:dataTextSize="16sp"
-        app:labelText="Distance to gate"
+        app:labelText="@string/distance_to_gate"
         app:layout_constraintEnd_toStartOf="@+id/time"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toStartOf="parent"

@@ -1,4 +1,4 @@
-package `in`.avimarine.waypointracing
+package `in`.avimarine.waypointracing.utils
 
 import android.location.Location
 import org.junit.Assert
