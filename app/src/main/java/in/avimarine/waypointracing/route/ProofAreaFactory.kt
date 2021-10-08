@@ -16,7 +16,7 @@ class ProofAreaFactory {
          * @param bearing1, bearing2 - bearings in degrees north in a clockwise order
          * @return ProofArea
          */
-        fun createProofArea(portWpt: Location, stbdWpt: Location, bearing1: Double, bearing2: Double): ProofArea {
+        fun createProofArea(stbdWpt: Location, portWpt: Location, bearing1: Double, bearing2: Double): ProofArea {
             return ProofArea(arrayListOf(bearing1, bearing2))
         }
 
@@ -60,7 +60,7 @@ class ProofAreaFactory {
          * @param dist - in Nautical miles
          * @return ProofArea
          */
-        fun createProofArea(portWpt: Location, stbdWpt: Location, dist: Double): ProofArea {
+        fun createProofArea(stbdWpt: Location, portWpt: Location, dist: Double): ProofArea {
             val wpts = arrayListOf(portWpt)
             val gateDir = getDirection(portWpt, stbdWpt)
             wpts.add(getLocFromDirDist(portWpt, gateDir - 90, dist))
