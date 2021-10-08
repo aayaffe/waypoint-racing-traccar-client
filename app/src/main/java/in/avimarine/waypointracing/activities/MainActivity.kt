@@ -147,8 +147,9 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     override fun onNewIntent(i: Intent){
         super.onNewIntent(i)
-        RouteLoader.handleIntent(this, i, this::loadRoute)
-        setNextWpt(0)
+        if (RouteLoader.handleIntent(this, i, this::loadRoute)){
+            setNextWpt(0)
+        }
     }
 
     private fun createPositionProvider() {
@@ -284,7 +285,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.main2, menu)
+        menuInflater.inflate(R.menu.main, menu)
         return true
     }
 
@@ -312,6 +313,10 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 val intent = Intent(this, RouteActivity::class.java)
                 intent.putExtra("route", route)
                 this.startActivity(intent)
+                return true
+            }
+            R.id.download_latest_menu_action -> {
+                RouteLoader.loadRouteFromUrl(this, getString(R.string.current_route), this::loadRoute)
                 return true
             }
         }

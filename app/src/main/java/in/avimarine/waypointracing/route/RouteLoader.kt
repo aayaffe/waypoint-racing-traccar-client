@@ -18,18 +18,24 @@ class RouteLoader {
     companion object {
         private const val DEFAULT_FILE_NAME = "myRoute"
         private const val MAX_FILE_SIZE = 10000
-        fun handleIntent(context: Context, intent: Intent, loadRoute: (r: Route?) -> Unit) {
+        /** Handles intent of new route from file or url.
+            return true if intent handles and route loaded. false otherwise
+        */
+        fun handleIntent(context: Context, intent: Intent, loadRoute: (r: Route?) -> Unit) : Boolean{
+            var ret = false
             when (intent.action) {
                 Intent.ACTION_SEND -> { //From file/string
                     if ("text/json" == intent.type || "application/json" == intent.type) {
                         val s = handleJsonText(context, intent) // Handle json being sent
                         saveRoute(context, s)
                         loadRoute(Route.fromGeoJson(s))
+                        ret = true
                     } else {
                         if (checkIntent(context, intent)) {
                             val s = handleJsonText(context, intent) // Handle json being sent
                             saveRoute(context, s)
                             loadRoute(Route.fromGeoJson(s))
+                            ret = true
                         }
                         Log.d(TAG, "Unknown intent type: " + intent.type)
                     }
@@ -37,11 +43,19 @@ class RouteLoader {
                 Intent.ACTION_VIEW -> { //From URL
                     Log.d(TAG, "Intent action: " + intent.action + " Intent data: " + intent.data + " Intent type: " + intent.type)
                     loadJsonfromUrl(context, intent.data, loadRoute) // Handle json being sent
+                    ret = true
                 }
                 else -> {
                     Log.d(TAG, "Unknown intent action: " + intent.action + " Intent data: " + intent.data)
                 }
             }
+            return ret
+        }
+
+        fun loadRouteFromUrl(context: Context, url:String , loadRoute: (r: Route?) -> Unit){
+            Log.d(TAG, "Loading route from url: $url")
+            val uri = Uri.parse(url)
+            loadJsonfromUrl(context, uri, loadRoute)
         }
 
         private fun saveRoute(context: Context, s: String) {

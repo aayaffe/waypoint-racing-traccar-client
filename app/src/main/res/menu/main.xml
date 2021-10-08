@@ -1,11 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <item
-        android:id="@+id/status"
-        android:title="@string/menu_status"
-        app:showAsAction="ifRoom" />
-
+        android:id="@+id/settings_menu_action"
+        android:icon="@drawable/ic_settings_black_24dp"
+        app:showAsAction="always"
+        android:title="Settings"
+        app:iconTint="@color/light"/>
+    <item
+        android:id="@+id/send_screenshot_menu_action"
+        android:icon="@drawable/ic_baseline_mobile_screen_share_24"
+        app:showAsAction="ifRoom"
+        android:title="Send Screenshot"
+        app:iconTint="@color/light"/>
+    <item
+        android:id="@+id/history_menu_action"
+        android:icon="@drawable/ic_history_black_24dp"
+        app:showAsAction="ifRoom"
+        android:title="History"
+        app:iconTint="@color/light"/>
+    <item
+        android:id="@+id/reset_route_menu_action"
+        app:showAsAction="never"
+        android:title="Restart Route"
+        app:iconTint="@color/light"/>
+    <item
+        android:id="@+id/route_activity_menu_action"
+        app:showAsAction="never"
+        android:title="View Route"
+        app:iconTint="@color/light"/>
+    <item
+        android:id="@+id/download_latest_menu_action"
+        app:showAsAction="never"
+        android:title="Download Latest Route"
+        app:iconTint="@color/light"/>
 </menu>
