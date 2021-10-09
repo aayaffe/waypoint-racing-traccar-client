@@ -18,14 +18,14 @@ class LocationPermissions {
             ) {
                 requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                && ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-            }
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+//                && ContextCompat.checkSelfPermission(
+//                    context,
+//                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+//                ) != PackageManager.PERMISSION_GRANTED
+//            ) {
+//                requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+//            }
             if (requiredPermissions.isNotEmpty()) {
                 return false
             }

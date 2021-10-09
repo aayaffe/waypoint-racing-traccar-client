@@ -115,7 +115,6 @@ val compassPoints = mapOf<Int, String>(
     360 to "N",
 )
 
-@RequiresApi(Build.VERSION_CODES.N)
 fun getPointOfCompass(dir1:Double, dir2: Double):String {
     var b2 = dir2
     if (dir2<dir1){

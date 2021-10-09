@@ -14,13 +14,14 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -49,13 +50,13 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private var nextWpt: Int = 0
     private val PERMISSIONS_REQUEST_LOCATION_UI = 4
     private var route = Route.emptyRoute()
-    private var noGPSTimer: Timer = Timer("GPSTIMER", true)
+//    private var noGPSTimer: Timer = Timer("GPSTIMER", true)
+    val delayedHandler = Handler(Looper.getMainLooper())
     private var isFirstSpinnerLoad = true
 //    private lateinit var alarmManager: AlarmManager
 //    private lateinit var alarmIntent: PendingIntent
 
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         screenshotManager = ScreenshotManagerBuilder(this)
@@ -237,7 +238,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume() {
         super.onResume()
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
@@ -250,7 +250,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         updateLastPass()
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun getNextWpt() {
         nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
         if (nextWpt >= route.elements.size) {
@@ -260,7 +259,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         route.elements.elementAtOrNull(nextWpt)?.let { setNextWaypointUI(it) }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun setNextWaypointUI(wpt: RouteElement) {
         if (wpt.type == RouteElementType.WAYPOINT) {
             stbdGate.setLabel(getString(R.string.pass_wpt_from))
@@ -375,7 +373,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         Log.e(TAG, "Position Error: ", error)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onPositionUpdate(position: Position) {
 //        StatusActivity.addMessage(context.getString(R.string.status_location_update))
         updateUI(position)
@@ -386,7 +383,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 //        }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun updateUI(position: Position) {
         val wpt = route.elements.elementAtOrNull(nextWpt)
         if (wpt != null) {
@@ -422,14 +418,21 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         sog.setData(getSpeedString(position.speed))
         location.setData(getLatString(position.latitude) + "\n" + getLonString(position.longitude))
         time.setData(timeStamptoDateString(position.time.time))
-        noGPSTimer.cancel()
-        noGPSTimer.purge()
-        noGPSTimer = Timer("GPSTIMER", true)
+
+
+//        noGPSTimer.cancel()
+//        noGPSTimer.purge()
+//        noGPSTimer = Timer("GPSTIMER", true)
         val interval = (sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")?.toLong()
             ?: 600) * 4000 //After four times interval
-        noGPSTimer.schedule(interval) {
+//        noGPSTimer.schedule(interval) {
+//            setUiForGPS(false)
+//        }
+
+        delayedHandler.removeCallbacksAndMessages(null)
+        delayedHandler.postDelayed({
             setUiForGPS(false)
-        }
+        }, interval)
         if (position.mock){
             mockPosition.visibility = View.VISIBLE
         } else {
@@ -484,7 +487,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         Log.d(TAG, "Changed Preference: " + key)
         if (key == SettingsFragment.KEY_STATUS) {
@@ -511,7 +513,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun updateLastPass() {
         val gp = GatePassings.getLastGatePass(this)
         if (gp!=null) {

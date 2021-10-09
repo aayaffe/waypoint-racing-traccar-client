@@ -120,7 +120,7 @@ class TrackingService() : Service() {
 
     private fun parseRouteIntent(i: Intent?){
         route = i?.getParcelableExtra("route")
-        nextWpt = i?.getIntExtra("nextwpt",-1)!!
+        nextWpt = i?.getIntExtra("nextwpt",-1) ?: -1
         Log.d(TAG, "Recieved route: " + route.toString())
         Log.d(TAG, "Recieved nextwpt: " + route?.elements?.elementAtOrNull(nextWpt) )
         trackingController?.updateRoute(route, nextWpt)

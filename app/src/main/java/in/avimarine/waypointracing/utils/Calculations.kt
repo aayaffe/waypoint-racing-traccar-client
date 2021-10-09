@@ -4,6 +4,8 @@ import `in`.avimarine.waypointracing.Position
 import android.hardware.GeomagneticField
 import android.location.Location
 import android.os.Build
+import android.text.format.DateFormat
+import android.text.format.DateFormat.format
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.mapbox.geojson.Point
@@ -19,6 +21,8 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 /**
@@ -164,11 +168,16 @@ fun getDirection(firstLocation: Position, secondLocation: Location): Double {
     return getDirection(firstLocation.latitude,firstLocation.longitude,secondLocation.latitude,secondLocation.longitude)
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun timeStamptoDateString(timestamp: Long): String {
-    val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
-    val formatter = DateTimeFormatter.ofPattern("(dd)HH:mm:ss")
-    return date.format(formatter)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
+        val formatter = DateTimeFormatter.ofPattern("(dd)HH:mm:ss")
+        return date.format(formatter)
+    }
+    val calendar = Calendar.getInstance(Locale.getDefault())
+    calendar.timeInMillis = timestamp// * 1000L
+    val date = format("(dd)HH:mm:ss",calendar).toString()
+    return date
 }
 
 fun Location.toPoint() : Point {
