@@ -78,11 +78,11 @@ fun getSpeedString(speed: Double, units:String="knots") : String{
 }
 
 /***
- * Expects distance in meters, returns in Nautical miles
+ * Expects [distance] in meters, returns in Nautical miles
  */
-fun getDistString(dist: Double, units:String="nms") : String{
-    val nms = dist * 0.000539957
-    return String.format("%.2f", nms)
+fun getDistString(distance: Double, units:String="nms") : String{
+    val nms = distance * 0.000539957
+    return if (nms < 100) String.format("%.2f", nms) else String.format("%.0f", nms)
 }
 
 fun getTimerString(milliseconds: Long): String {
@@ -122,5 +122,5 @@ fun getPointOfCompass(dir1:Double, dir2: Double):String {
     }
     val dir = ((b2 - dir1)/2 + dir1) % 360
     val closestDir  = (dir / 45.0).roundToInt() * 45
-    return compassPoints.getOrDefault(closestDir,"?")
+    return compassPoints.get(closestDir)?:"?"
 }

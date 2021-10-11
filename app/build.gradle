@@ -10,7 +10,7 @@ android {
         if (!System.getenv("TRAVIS")) {
             debug {
                 // Load keystore
-                def keystorePropertiesFile = rootProject.file("keystore.properties");
+                def keystorePropertiesFile = rootProject.file("keystore.properties")
                 def keystoreProperties = new Properties()
                 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
                 storeFile = file(keystoreProperties['storeFile'])
@@ -27,8 +27,8 @@ android {
         buildConfigField 'boolean', 'HIDDEN_APP', 'false'
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 16
-        versionName '2.6'
+        versionCode 17
+        versionName '2.7'
         signingConfig signingConfigs.debug
     }
 
