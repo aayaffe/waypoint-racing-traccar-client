@@ -1,14 +1,18 @@
-# [Traccar Client for Android](https://www.traccar.org/client)
+# Waypoint Racing ([based on Traccar](https://www.traccar.org/))
 
-[![Get it on Google Play](http://www.tananaev.com/badges/google-play.svg)](https://play.google.com/store/apps/details?id=org.traccar.client) [![Get it on F-Droid](http://www.tananaev.com/badges/f-droid.svg)](https://f-droid.org/repository/browse/?fdid=org.traccar.client)
+Available to selected tester only:
+
+[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="200" alt="Get it on Google Play"/>](https://play.google.com/store/apps/details?id=in.avimarine.waypointracing)
+
 
 ## Overview
 
-Traccar Client is an Android GPS tracking application. It can work with Traccar open source server software.
+Waypoint Racing is an application used in waypoint sailing events.
+The application is based on the [Traccar Client for Android](https://github.com/traccar/traccar-client-android).
+The application doubles as a Tracking client used with the Traccar open source server software and
+as a waypoint racing logger that shows the next racing waypoint or gate and logs the passing of those
+gates to a custom logging server.
 
-## Team
-
-- Anton Tananaev ([anton@traccar.org](mailto:anton@traccar.org))
 
 ## License
 
