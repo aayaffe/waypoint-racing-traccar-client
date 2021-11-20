@@ -29,3 +29,7 @@ gates to a custom logging server.
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+This application was also developed using free software from Jetbrains for OpenSource projects.
+
+[<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_square.png" alt="JetBrains Black Box Logo logo." width=100>](https://www.jetbrains.com)
