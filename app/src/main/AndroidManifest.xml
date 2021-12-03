@@ -5,6 +5,7 @@
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -12,7 +13,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="oppo.permission.OPPO_COMPONENT_SAFE" />
     <uses-permission android:name="com.huawei.permission.external_app_settings.USE_COMPONENT" />
-
+    <uses-permission android:name="oppo.permission.OPPO_COMPONENT_SAFE" />
+    <uses-permission android:name="com.huawei.permission.external_app_settings.USE_COMPONENT" />
     <uses-feature android:name="android.hardware.location.network" />
     <uses-feature android:name="android.hardware.location.gps" />
 
@@ -74,6 +76,7 @@
             android:name=".Launcher"
             android:exported="true"
             android:targetActivity=".activities.MainActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -93,14 +96,19 @@
             android:name=".activities.StatusActivity"
             android:screenOrientation="portrait" />
 
+
         <service
             android:name=".TrackingService"
+            android:exported="false"
             android:foregroundServiceType="location" />
-        <service android:name=".TrackingService$HideNotificationService" />
 
+
+        <service
+            android:name=".TrackingService$HideNotificationService"
+            android:exported="false" />
         <receiver
             android:name=".AutostartReceiver"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
