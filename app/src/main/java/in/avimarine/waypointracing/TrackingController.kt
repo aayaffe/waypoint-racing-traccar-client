@@ -102,35 +102,34 @@ class TrackingController(private val context: Context) :
         handlerGP.removeCallbacksAndMessages(null)
     }
 
+    private fun sendPosition(position: Position){
+        if (buffer) {
+            write(position)
+        } else {
+            send(position)
+        }
+    }
+
     override fun onPositionUpdate(position: Position) {
 //        StatusActivity.addMessage(context.getString(R.string.status_location_update))
         val inArea = updateIsInArea(position, nextWpt)
-        if (buffer) {
-            write(position)
-            if (inArea && route != null) {
-                val gp = GatePassing(
-                    route!!.eventName, route!!.id,
-                    deviceId!!,
-                    boatName!!, nextWpt, route!!.elements.get(nextWpt).name, position.time, position
-                )
-                GatePassings.addGatePass(context, gp)
+        if (sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)){
+            sendPosition(position)
+        }
+        if (inArea && route != null) {
+            val gp = GatePassing(
+                route!!.eventName, route!!.id,
+                deviceId!!,
+                boatName!!, nextWpt, route!!.elements.get(nextWpt).name, position.time, position
+            )
+            GatePassings.addGatePass(context, gp)
+            if (buffer) {
                 write(gp)
-                nextWpt += 1
-                setNextWpt(nextWpt)
-            }
-        } else {
-            send(position)
-            if (inArea && route != null) {
-                val gp = GatePassing(
-                    route!!.eventName, route!!.id,
-                    deviceId!!,
-                    boatName!!, nextWpt, route!!.elements.get(nextWpt).name, position.time, position
-                )
-                GatePassings.addGatePass(context, gp)
+            } else {
                 send(gp)
-                nextWpt += 1
-                setNextWpt(nextWpt)
             }
+            nextWpt += 1
+            setNextWpt(nextWpt)
         }
     }
 

@@ -61,6 +61,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
     public static final String KEY_LAST_SEND = "lastsend";
     public static final String KEY_EXPERT_MODE = "expert";
     public static final String KEY_GATE_PASSES = "gatepasses";
+    public static final String KEY_TRACKING = "trackingenabled";
     private SharedPreferences sharedPreferences;
 
 
@@ -73,51 +74,38 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         setPreferencesFromResource(R.xml.preferences, rootKey);
         initPreferences();
-        findPreference(KEY_URL).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
+        findPreference(KEY_URL).setOnPreferenceChangeListener((preference, newValue) -> {
                 return (newValue != null) && validateServerURL(newValue.toString());
-            }
         });
-        findPreference(KEY_INTERVAL).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                if (newValue != null) {
-                    try {
-                        int value = Integer.parseInt((String) newValue);
-                        return value > 0;
-                    } catch (NumberFormatException e) {
-                        Log.w(TAG, e);
-                    }
+        findPreference(KEY_INTERVAL).setOnPreferenceChangeListener((preference, newValue) -> {
+            if (newValue != null) {
+                try {
+                    int value = Integer.parseInt((String) newValue);
+                    return value > 0;
+                } catch (NumberFormatException e) {
+                    Log.w(TAG, e);
                 }
-                return false;
             }
+            return false;
         });
 
-        Preference.OnPreferenceChangeListener numberValidationListener = new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                if (newValue != null) {
-                    try {
-                        int value = Integer.parseInt((String) newValue);
-                        return value >= 0;
-                    } catch (NumberFormatException e) {
-                        Log.w(TAG, e);
-                    }
+        Preference.OnPreferenceChangeListener numberValidationListener = (preference, newValue) -> {
+            if (newValue != null) {
+                try {
+                    int value = Integer.parseInt((String) newValue);
+                    return value >= 0;
+                } catch (NumberFormatException e) {
+                    Log.w(TAG, e);
                 }
-                return false;
             }
+            return false;
         };
 
-        Preference.OnPreferenceChangeListener nonEmptyStringValidationListener = new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
+        Preference.OnPreferenceChangeListener nonEmptyStringValidationListener = (preference, newValue) -> {
                 return newValue != null && !newValue.equals("");
-            }
         };
         findPreference(KEY_DEVICE).setOnPreferenceChangeListener(nonEmptyStringValidationListener);
         findPreference(KEY_NAME).setOnPreferenceChangeListener(nonEmptyStringValidationListener);
-
         findPreference(KEY_DISTANCE).setOnPreferenceChangeListener(numberValidationListener);
         findPreference(KEY_ANGLE).setOnPreferenceChangeListener(numberValidationListener);
     }
@@ -194,6 +182,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
         findPreference(KEY_ACCURACY).setEnabled(enabled);
         findPreference(KEY_BUFFER).setEnabled(enabled);
         findPreference(KEY_WAKELOCK).setEnabled(enabled);
+        findPreference(KEY_TRACKING).setEnabled(enabled);
     }
 
     @Override
@@ -248,6 +237,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
         findPreference(KEY_ACCURACY).setVisible(b);
         findPreference(KEY_BUFFER).setVisible(b);
         findPreference(KEY_WAKELOCK).setVisible(b);
+        findPreference(KEY_TRACKING).setVisible(b);
     }
 
 }

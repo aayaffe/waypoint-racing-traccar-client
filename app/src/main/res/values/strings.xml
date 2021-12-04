@@ -19,6 +19,9 @@
     <string name="settings_status_on">Stop Tracking</string>
     <string name="settings_status_off_summary">Service stopped</string>
     <string name="settings_status_on_summary">Tracking in progress</string>
+    <string name="settings_tracking_title">Continuous Traccar Tracking</string>
+    <string name="settings_tracking_on_summary">Continuous Traccar tracking is enabled</string>
+    <string name="settings_tracking_off_summary">Continuous Traccar tracking is disabled</string>
     <string name="settings_buffer">Offline buffering</string>
     <string name="settings_buffer_off_summary">Buffering off</string>
     <string name="settings_buffer_on_summary">Buffering on</string>
