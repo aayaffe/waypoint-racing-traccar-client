@@ -1,0 +1,125 @@
+{
+  "type": "FeatureCollection",
+  "routedata": {
+    "name": "Test Route 1",
+    "organizing": "CYC",
+	"id": "12345678",
+	"lastUpdate" : "1632758105554",
+    "eventType"  : "WPTRACING"
+
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Atlit Gate",
+        "routeElementType": "GATE",
+        "ordinal": 1,
+        "mandatory": true,
+        "proofAreaType": "POLYGON",
+        "proofAreaBearings": [135, 225],
+        "proofAreaSize": [0.25]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [34.833333, 32.683333],
+          [34.891667, 32.683333]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hadera Gate",
+        "routeElementType": "GATE",
+        "ordinal": 1,
+        "mandatory": true,
+        "proofAreaType": "POLYGON",
+        "proofAreaBearings": [135, 225],
+        "proofAreaSize": [0.25]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [34.833333, 32.47],
+          [34.863333, 32.47]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Netanya Gate",
+        "routeElementType": "GATE",
+        "ordinal": 1,
+        "mandatory": true,
+        "proofAreaType": "POLYGON",
+        "proofAreaBearings": [135, 225],
+        "proofAreaSize": [0.25]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [34.783333, 32.316667],
+          [34.833333, 32.316667]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Herzliya Finish Line",
+        "routeElementType": "FINISH",
+        "ordinal": 4,
+        "mandatory": true,
+        "proofAreaType": "POLYGON",
+        "proofAreaSize": [0.15]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [34.786667, 32.1655],
+          [34.7925, 32.1655]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Ashdod Gate",
+        "routeElementType": "GATE",
+        "ordinal": 1,
+        "mandatory": true,
+        "proofAreaType": "POLYGON",
+        "proofAreaBearings": [135, 225],
+        "proofAreaSize": [0.25]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [34.5166666667, 31.85],
+          [34.625, 31.85]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Ashkelon Finish Line",
+        "routeElementType": "FINISH",
+        "ordinal": 4,
+        "mandatory": true,
+        "proofAreaType": "POLYGON",
+        "proofAreaSize": [0.15]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [34.550, 31.686666667],
+          [34.555, 31.686666667]
+        ]
+      }
+    }
+  ]
+}

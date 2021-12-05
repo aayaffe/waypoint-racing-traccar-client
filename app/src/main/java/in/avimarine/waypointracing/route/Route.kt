@@ -22,7 +22,8 @@ class Route(
     val startTime: Date,
     val elements: ArrayList<RouteElement>,
     @Serializable(with = Serializers.Companion.DateSerializer::class)
-    val lastUpdate: Date
+    val lastUpdate: Date,
+    val eventType: EventType
 ): Parcelable {
     fun isEmpty(): Boolean{
         return elements.size == 0
@@ -48,7 +49,13 @@ class Route(
             for (f in features.features()!!) {
                 el.add(parseRouteElement(f))
             }
-            return Route(id, name, Date(0), el, date)
+            var et: EventType =
+            try{
+                EventType.valueOf(json.getJSONObject("routedata").getString("eventType"))
+            } catch (e: Exception){
+                EventType.WPTRACING
+            }
+            return Route(id, name, Date(0), el, date, et)
         }
 
 
@@ -78,7 +85,7 @@ class Route(
         }
 
         fun emptyRoute(): Route {
-            return Route("", "", Date(), arrayListOf(), Date())
+            return Route("", "", Date(), arrayListOf(), Date(), EventType.WPTRACING)
         }
 
 
