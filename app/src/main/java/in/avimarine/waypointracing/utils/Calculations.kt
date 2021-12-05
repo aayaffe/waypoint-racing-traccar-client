@@ -76,6 +76,13 @@ fun toMPerSec(speed: Double): Double {
 }
 
 /**
+ * Convert [dist] in Nautical Miles to meters.
+ */
+fun toMeters(dist: Double): Double{
+    return dist * 1852
+}
+
+/**
  * Returns the speed in metres per minute
  * @param dist Distance in metres
  * @param firstTime start time in milliseconds
@@ -265,3 +272,9 @@ fun isBetweenAngles(from: Double, to:Double, angle:Double): Boolean{
     return a in from..b2
 }
 
+fun createLocation(lat: Double, lon: Double) : Location{
+    val ret = Location("")
+    ret.latitude = lat
+    ret.longitude = lon
+    return ret
+}

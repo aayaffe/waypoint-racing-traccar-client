@@ -1,5 +1,5 @@
 package `in`.avimarine.waypointracing.route
 
 enum class ProofAreaType {
-    QUADRANT, POLYGON
+    QUADRANT, POLYGON, CIRCLE
 }

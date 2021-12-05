@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "routedata": {
+    "name": "Test Route 1",
+    "organizing": "CYC",
+	"id": "12345678",
+	"lastUpdate" : "1632758105554",
+    "eventType"  : "TREASUREHUNT"
+
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Treasure 1",
+        "routeElementType": "WAYPOINT",
+        "mandatory": false,
+        "proofAreaType" : "CIRCLE",
+        "proofAreaSize" : 0.06
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.019288,
+          32.834881
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Treasure 2",
+        "routeElementType": "WAYPOINT",
+        "mandatory": false,
+        "proofAreaType" : "CIRCLE",
+        "proofAreaSize" : 1.1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.02,
+          32.84
+        ]
+      }
+    }
+  ]
+}

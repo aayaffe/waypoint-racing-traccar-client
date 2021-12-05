@@ -67,5 +67,14 @@ class ProofAreaFactory {
             wpts.add(stbdWpt)
             return ProofArea(ProofAreaType.POLYGON, wpts)
         }
+
+        /**
+         * Creates a circle proof area, with a [dist]
+         * @param dist - in Nautical miles
+         * @return ProofArea
+         */
+        fun createProofArea(dist: Double): ProofArea {
+            return ProofArea(dist)
+        }
     }
 }

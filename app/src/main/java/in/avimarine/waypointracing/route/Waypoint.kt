@@ -4,6 +4,8 @@ import `in`.avimarine.waypointracing.utils.Serializers
 import android.location.Location
 import android.os.Parcelable
 import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonParseException
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
 import kotlinx.android.parcel.Parcelize
@@ -37,6 +39,11 @@ class Waypoint(
         ProofAreaFactory.createProofArea(location, bearing1, bearing2)
     )
 
+    constructor(name: String,
+                location: Location,
+                mandatory: Boolean,
+                dist: Double) : this(name, RouteElementType.WAYPOINT, location, location, mandatory, ProofAreaFactory.createProofArea(dist))
+
     override fun isInProofArea(loc: Location): Boolean {
         return proofArea.isInProofArea(portWpt, loc)
     }
@@ -55,9 +62,26 @@ class Waypoint(
             loc.latitude = point.latitude()
             loc.longitude = point.longitude()
             val man = f.properties()!!.get("mandatory").asBoolean
-            val b1 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(0).asDouble
-            val b2 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(1).asDouble
-            return Waypoint(name, loc, man, b1, b2)
+            val proofAreaType = try {
+                ProofAreaType.valueOf((f.properties()?.get("proofAreaType") as JsonElement).asString)
+            } catch (e: Exception){
+                ProofAreaType.QUADRANT
+            }
+            when (proofAreaType) {
+                ProofAreaType.QUADRANT -> {
+                    val b1 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(0).asDouble
+                    val b2 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(1).asDouble
+                    return Waypoint(name, loc, man, b1, b2)
+                }
+                ProofAreaType.CIRCLE -> {
+                    val d = (f.properties()?.get("proofAreaSize") as JsonElement).asDouble
+                    return Waypoint(name, loc, man, d)
+                }
+                else -> {
+                    throw JsonParseException("Improper proof area for waypoint")
+                }
+            }
+
         }
 
     }
