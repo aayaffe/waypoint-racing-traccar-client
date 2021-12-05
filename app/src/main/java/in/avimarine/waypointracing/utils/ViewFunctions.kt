@@ -1,10 +1,9 @@
 package `in`.avimarine.waypointracing.utils
 
 import android.location.Location
-import android.os.Build
 import android.widget.TextView
-import androidx.annotation.RequiresApi
-import java.lang.Math.*
+import java.lang.Math.abs
+import java.lang.Math.floor
 import kotlin.math.roundToInt
 
 /**

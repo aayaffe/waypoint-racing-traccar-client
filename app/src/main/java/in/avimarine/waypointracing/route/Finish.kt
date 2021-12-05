@@ -1,9 +1,7 @@
 package `in`.avimarine.waypointracing.route
 
-import android.location.Location
-import `in`.avimarine.waypointracing.route.RouteElement
-import `in`.avimarine.waypointracing.route.RouteElementType
 import `in`.avimarine.waypointracing.utils.Serializers
+import android.location.Location
 import android.os.Parcelable
 import com.google.gson.JsonArray
 import com.mapbox.geojson.Feature

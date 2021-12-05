@@ -4,10 +4,8 @@ import `in`.avimarine.waypointracing.Position
 import android.hardware.GeomagneticField
 import android.location.Location
 import android.os.Build
-import android.text.format.DateFormat
 import android.text.format.DateFormat.format
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.turf.TurfConstants
@@ -22,7 +20,6 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 /**
@@ -64,7 +61,7 @@ fun getDirString(dir: Double, magnetic: Boolean, fromNotation: Boolean, latitude
 
 
 /**
- * Al conversion functions are from Knots
+ * All conversion functions are from Knots
  */
 fun toMPerMin(speed: Double): Double {
     return speed * 30.8667

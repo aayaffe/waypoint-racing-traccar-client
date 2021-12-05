@@ -2,11 +2,8 @@
 package `in`.avimarine.waypointracing.route
 
 import `in`.avimarine.waypointracing.TAG
-import `in`.avimarine.waypointracing.utils.isBetweenAngles
-import `in`.avimarine.waypointracing.utils.isPointInPolygon
 import android.location.Location
 import android.util.Log
-import `in`.avimarine.waypointracing.utils.Serializers
 import android.os.Parcelable
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement.bearing

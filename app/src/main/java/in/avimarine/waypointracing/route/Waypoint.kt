@@ -1,7 +1,5 @@
 package `in`.avimarine.waypointracing.route
 
-import `in`.avimarine.waypointracing.route.ProofArea
-import `in`.avimarine.waypointracing.route.ProofAreaFactory
 import `in`.avimarine.waypointracing.utils.Serializers
 import android.location.Location
 import android.os.Parcelable

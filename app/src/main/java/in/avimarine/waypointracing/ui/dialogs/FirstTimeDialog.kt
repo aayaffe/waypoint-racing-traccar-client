@@ -8,7 +8,6 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
-import kotlinx.android.synthetic.main.dialog_firsttime.*
 
 class FirstTimeDialog : DialogFragment() {
 

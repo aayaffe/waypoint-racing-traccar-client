@@ -2,16 +2,15 @@ package `in`.avimarine.waypointracing.utils
 
 import `in`.avimarine.waypointracing.route.Finish
 import `in`.avimarine.waypointracing.route.Gate
-import `in`.avimarine.waypointracing.route.RouteElement
 import `in`.avimarine.waypointracing.route.Waypoint
 import android.location.Location
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializer
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.descriptors.*
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
 import java.util.*
 
 class Serializers {

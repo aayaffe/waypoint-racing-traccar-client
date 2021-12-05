@@ -1,9 +1,7 @@
 package `in`.avimarine.waypointracing.route
 
-import `in`.avimarine.waypointracing.Position
 import android.location.Location
 import android.os.Parcelable
-import kotlinx.serialization.Serializable
 
 sealed interface RouteElement :Parcelable {
     val name : String

@@ -1,6 +1,5 @@
 package `in`.avimarine.waypointracing.ui
 
-import android.R
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
@@ -26,7 +25,7 @@ class RouteElementAdapter(context: Context,
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val view = createViewFromResource(convertView, parent, R.layout.simple_spinner_dropdown_item)
+        val view = createViewFromResource(convertView, parent, android.R.layout.simple_spinner_dropdown_item)
 
         return bindData(getItem(position), view)
     }
