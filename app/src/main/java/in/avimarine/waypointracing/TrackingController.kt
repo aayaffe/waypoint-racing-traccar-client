@@ -30,6 +30,7 @@ import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.activities.StatusActivity
 import `in`.avimarine.waypointracing.database.DatabaseHelper
 import `in`.avimarine.waypointracing.database.GatePassesDatabaseHelper
+import `in`.avimarine.waypointracing.route.EventType
 import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
@@ -102,7 +103,7 @@ class TrackingController(private val context: Context) :
         handlerGP.removeCallbacksAndMessages(null)
     }
 
-    private fun sendPosition(position: Position){
+    private fun sendPosition(position: Position) {
         if (buffer) {
             write(position)
         } else {
@@ -111,12 +112,14 @@ class TrackingController(private val context: Context) :
     }
 
     override fun onPositionUpdate(position: Position) {
-//        StatusActivity.addMessage(context.getString(R.string.status_location_update))
         val inArea = updateIsInArea(position, nextWpt)
-        if (sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)){
+        if (sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)) {
             sendPosition(position)
         }
         if (inArea && route != null) {
+            if (GatePassings.getLastGatePass(context)?.gateName ?: "" == route!!.elements.get(nextWpt).name) {
+                return //TODO Check using other options than gateName!! Add gateId.
+            }
             val gp = GatePassing(
                 route!!.eventName, route!!.id,
                 deviceId!!,
@@ -128,12 +131,14 @@ class TrackingController(private val context: Context) :
             } else {
                 send(gp)
             }
-            nextWpt += 1
-            setNextWpt(nextWpt)
+            if (route!!.eventType == EventType.WPTRACING) { //Enable auto waypoint advance for waypoint racing event only
+                nextWpt += 1
+                setNextWpt(nextWpt)
+            }
         }
     }
 
-    fun setNextWpt(n: Int) {
+    private fun setNextWpt(n: Int) {
         val sharedPref: SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         with(sharedPref.edit()) {
@@ -175,13 +180,11 @@ class TrackingController(private val context: Context) :
 
     private fun log(action: String, gatePass: GatePassing) {
         var formattedAction: String = action
-        if (gatePass != null) {
-            formattedAction +=
-                " (id:" + gatePass.id +
-                        " time:" + gatePass.time.time / 1000 +
-                        " lat:" + gatePass.latitude +
-                        " lon:" + gatePass.longitude + ")"
-        } //TODO: Add more logging
+        formattedAction +=
+            " (id:" + gatePass.id +
+                    " time:" + gatePass.time.time / 1000 +
+                    " lat:" + gatePass.latitude +
+                    " lon:" + gatePass.longitude + ")" //TODO: Add more logging
         Log.d(TAG, formattedAction)
     }
 
