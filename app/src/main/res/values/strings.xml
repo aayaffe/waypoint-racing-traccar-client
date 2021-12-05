@@ -66,4 +66,6 @@
     <string name="menu_info">Info</string>
     <string name="request_background">To continuously collect location data please enable \"%s\" permission.</string>
     <string name="request_background_option">Allow all the time</string>
+    <string name="title_waypoint_racing">Waypoint Racing</string>
+    <string name="title_treasure_hunting">Treasure Hunting</string>
 </resources>

@@ -63,7 +63,7 @@ class GatePassings {
                 }
             }
             if (gps?.passes?.size!! > 0)
-                return gps?.passes?.last()
+                return gps.passes.last()
             return null
         }
 

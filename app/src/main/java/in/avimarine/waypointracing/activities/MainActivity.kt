@@ -180,7 +180,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         route = r
         populateRouteElementSpinner(r)
         setEmptyRouteUI(route.isEmpty())
-        setTitle("Waypoint Racing", r.eventName)
+        if (route.eventType == EventType.WPTRACING) {
+            setTitle(getString(R.string.title_waypoint_racing), r.eventName)
+        } else {
+            setTitle(getString(R.string.title_treasure_hunting), r.eventName)
+        }
         sendRouteIntent(r)
         val s = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES, "")
         var gp = GatePassings("")
@@ -261,12 +265,27 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private fun setNextWaypointUI(wpt: RouteElement) {
         if (wpt.type == RouteElementType.WAYPOINT) {
-            stbdGate.setLabel(getString(R.string.pass_wpt_from))
-            stbdGate.setUnits("")
-            stbdGate.setData(getPointOfCompass(wpt.proofArea.bearings[0],wpt.proofArea.bearings[1]))
-            portGate.setLabel(getString(R.string.waypoint))
-            shortestDistanceToGate.setLabel(getString(R.string.dist_to_wpt))
-        } else {
+            if (wpt.proofArea.type == ProofAreaType.QUADRANT) {
+                shortestDistanceToGate.visibility = View.VISIBLE
+                stbdGate.visibility = View.VISIBLE
+                stbdGate.setLabel(getString(R.string.pass_wpt_from))
+                stbdGate.setUnits("")
+                stbdGate.setData(
+                    getPointOfCompass(
+                        wpt.proofArea.bearings[0],
+                        wpt.proofArea.bearings[1]
+                    )
+                )
+                portGate.setLabel(getString(R.string.waypoint))
+                shortestDistanceToGate.setLabel(getString(R.string.dist_to_wpt))
+            } else { //CIRCLE proof area
+                shortestDistanceToGate.visibility = View.INVISIBLE
+                stbdGate.visibility = View.GONE
+                portGate.setLabel(getString(R.string.waypoint))
+            }
+        } else { //Gate
+            shortestDistanceToGate.visibility = View.VISIBLE
+            stbdGate.visibility = View.VISIBLE
             stbdGate.setData("-----")
             stbdGate.setUnits(getString(R.string.nm))
             stbdGate.setLabel(getString(R.string.stbd_gate))
