@@ -17,21 +17,21 @@ class ProtocolFormatterTest {
     fun testFormatRequest() {
         val position = Position("123456789012345", "boat", Location("gps"), 0.0)
         val url = formatRequest("http://localhost:5055", position)
-        Assert.assertEquals("http://localhost:5055?id=123456789012345&timestamp=0&lat=0.0&lon=0.0&speed=0.0&bearing=0.0&altitude=0.0&accuracy=0.0&batt=0.0", url)
+        Assert.assertEquals("http://localhost:5055?id=123456789012345&timestamp=0&lat=0.0&lon=0.0&speed=0.0&bearing=0.0&altitude=0.0&accuracy=0.0&batt=0.0&boatname=boat", url)
     }
 
     @Test
     fun testFormatPathPortRequest() {
         val position = Position("123456789012345", "boat",Location("gps"), 0.0)
         val url = formatRequest("http://localhost:8888/path", position)
-        Assert.assertEquals("http://localhost:8888/path?id=123456789012345&timestamp=0&lat=0.0&lon=0.0&speed=0.0&bearing=0.0&altitude=0.0&accuracy=0.0&batt=0.0", url)
+        Assert.assertEquals("http://localhost:8888/path?id=123456789012345&timestamp=0&lat=0.0&lon=0.0&speed=0.0&bearing=0.0&altitude=0.0&accuracy=0.0&batt=0.0&boatname=boat", url)
     }
 
     @Test
     fun testFormatAlarmRequest() {
         val position = Position("123456789012345","boat", Location("gps"), 0.0)
         val url = formatRequest("http://localhost:5055/path", position, "alert message")
-        Assert.assertEquals("http://localhost:5055/path?id=123456789012345&timestamp=0&lat=0.0&lon=0.0&speed=0.0&bearing=0.0&altitude=0.0&accuracy=0.0&batt=0.0&alarm=alert%20message", url)
+        Assert.assertEquals("http://localhost:5055/path?id=123456789012345&timestamp=0&lat=0.0&lon=0.0&speed=0.0&bearing=0.0&altitude=0.0&accuracy=0.0&batt=0.0&boatname=boat&alarm=alert%20message", url)
     }
 
 }
