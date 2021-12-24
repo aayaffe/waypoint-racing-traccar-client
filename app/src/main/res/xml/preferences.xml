@@ -25,8 +25,7 @@
         android:key="trackingenabled"
         android:summaryOff="@string/settings_tracking_off_summary"
         android:summaryOn="@string/settings_tracking_on_summary"
-        android:title="@string/settings_tracking_title"
-        app:isPreferenceVisible="false"/>
+        android:title="@string/settings_tracking_title" />
 
     <EditTextPreference
         android:defaultValue="@string/settings_url_default_value"
