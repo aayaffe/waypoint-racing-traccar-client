@@ -101,13 +101,15 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
             return false;
         };
 
-        Preference.OnPreferenceChangeListener nonEmptyStringValidationListener = (preference, newValue) -> {
-                return newValue != null && !newValue.equals("");
-        };
+        Preference.OnPreferenceChangeListener nonEmptyStringValidationListener = (preference, newValue) -> newValue != null && !newValue.equals("");
         findPreference(KEY_DEVICE).setOnPreferenceChangeListener(nonEmptyStringValidationListener);
         findPreference(KEY_NAME).setOnPreferenceChangeListener(nonEmptyStringValidationListener);
         findPreference(KEY_DISTANCE).setOnPreferenceChangeListener(numberValidationListener);
         findPreference(KEY_ANGLE).setOnPreferenceChangeListener(numberValidationListener);
+        findPreference(KEY_EXPERT_MODE).setOnPreferenceChangeListener((preference, newValue) -> {
+            expertMode((Boolean) newValue);
+            return true;
+        });
     }
 
     public static class NumericEditTextPreferenceDialogFragment extends EditTextPreferenceDialogFragmentCompat {

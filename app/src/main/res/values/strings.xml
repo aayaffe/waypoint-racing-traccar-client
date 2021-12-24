@@ -68,4 +68,6 @@
     <string name="request_background_option">Allow all the time</string>
     <string name="title_waypoint_racing">Waypoint Racing</string>
     <string name="title_treasure_hunting">Treasure Hunting</string>
+    <string name="settings_expert_summary">Switch advance preferences.\nUse with care</string>
+    <string name="settings_expert_title">Expert mode</string>
 </resources>

@@ -131,18 +131,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             putBoolean(SettingsFragment.KEY_EXPERT_MODE, false)
             commit()
         }
-        lastSend.setOnLongClickListener {
-            toggleExperMode()
-            true
-        }
-    }
-
-    private fun toggleExperMode() {
-        val mode = sharedPreferences.getBoolean(SettingsFragment.KEY_EXPERT_MODE,true)
-        with(sharedPreferences.edit()) {
-            putBoolean(SettingsFragment.KEY_EXPERT_MODE, !mode)
-            commit()
-        }
     }
 
     override fun onNewIntent(i: Intent){
