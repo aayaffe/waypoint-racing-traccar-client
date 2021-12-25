@@ -70,4 +70,7 @@
     <string name="title_treasure_hunting">Treasure Hunting</string>
     <string name="settings_expert_summary">Switch advance preferences.\nUse with care</string>
     <string name="settings_expert_title">Expert mode</string>
+    <string name="settings_magnetic_on_summary">Using True bearings</string>
+    <string name="settings_magnetic_off_summary">Using Magnetic bearings</string>
+    <string name="settings_magnetic_title">Magnetic bearings</string>
 </resources>

@@ -56,7 +56,7 @@ fun getDirString(dir: Double, magnetic: Boolean, fromNotation: Boolean, latitude
     if (calcDir < 0) {
         calcDir += 360
     }
-    return String.format("%03d", Math.round(calcDir)) + if (magnetic) " M" else ""
+    return String.format("%03d", Math.round(calcDir)) + if (magnetic) "M" else ""
 }
 
 

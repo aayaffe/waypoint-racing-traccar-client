@@ -3,6 +3,11 @@ package `in`.avimarine.waypointracing.activities
 import `in`.avimarine.waypointracing.*
 import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
+import `in`.avimarine.waypointracing.ui.UiData.Companion.getCOGData
+import `in`.avimarine.waypointracing.ui.UiData.Companion.getLocationData
+import `in`.avimarine.waypointracing.ui.UiData.Companion.getPortData
+import `in`.avimarine.waypointracing.ui.UiData.Companion.getShortestDistanceToGateData
+import `in`.avimarine.waypointracing.ui.UiData.Companion.getStbdData
 import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
 import `in`.avimarine.waypointracing.utils.*
 import android.Manifest
@@ -38,13 +43,11 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.schedule
 
 
 class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     SharedPreferences.OnSharedPreferenceChangeListener, FirstTimeDialog.FirstTimeDialogListener {
 
-    private val magnetic = false
     private lateinit var positionProvider: PositionProvider
     private lateinit var sharedPreferences: SharedPreferences
     private var nextWpt: Int = 0
@@ -381,79 +384,41 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     override fun onPositionUpdate(position: Position) {
-//        StatusActivity.addMessage(context.getString(R.string.status_location_update))
         updateUI(position)
-//        if (!route.isEmpty()) {
-//            updateUI(position)
-//        } else {
-//            Log.w(TAG, "Error: route not initialized")
-//        }
     }
 
     private fun updateUI(position: Position) {
         val wpt = route.elements.elementAtOrNull(nextWpt)
-        if (wpt != null) {
-            val distWptPort = getDistance(position, wpt.portWpt)
-            val distWptStbd = getDistance(position, wpt.stbdWpt)
-            val dirWptPort = getDirection(position, wpt.portWpt)
-            val dirWptStbd = getDirection(position, wpt.stbdWpt)
-            val portData = getDirString(
-                dirWptPort,
-                magnetic,
-                false,
-                position,
-                position.time.time
-            ) + "/" + getDistString(distWptPort)
-            val stbcData = getDirString(
-                dirWptStbd,
-                magnetic,
-                false,
-                position,
-                position.time.time
-            ) + "/" + getDistString(distWptStbd)
-            portGate.setData(portData)
-            if (wpt.type != RouteElementType.WAYPOINT) {
-                stbdGate.setData(stbcData)
-            }
-            shortestDistanceToGate.setData(getDistString(pointToLineDist(position.toLocation(),wpt.portWpt,wpt.stbdWpt)))
-        } else {
-            portGate.setData("-----")
-            stbdGate.setData("-----")
-        }
+        portGate.setData(getPortData(position,wpt,sharedPreferences))
+        stbdGate.setData(getStbdData(position,wpt,sharedPreferences))
+        shortestDistanceToGate.setData(getShortestDistanceToGateData(position,wpt))
         setUiForGPS(true)
-        cog.setData(getDirString(position.course, magnetic, false, position, position.time.time))
+        cog.setData(getCOGData(position,sharedPreferences))
         sog.setData(getSpeedString(position.speed))
-        location.setData(getLatString(position.latitude) + "\n" + getLonString(position.longitude))
+        location.setData(getLocationData(position))
         time.setData(timeStamptoDateString(position.time.time))
 
-
-//        noGPSTimer.cancel()
-//        noGPSTimer.purge()
-//        noGPSTimer = Timer("GPSTIMER", true)
         val interval = (sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")?.toLong()
             ?: 600) * 4000 //After four times interval
-//        noGPSTimer.schedule(interval) {
-//            setUiForGPS(false)
-//        }
-
         delayedHandler.removeCallbacksAndMessages(null)
         delayedHandler.postDelayed({
             setUiForGPS(false)
         }, interval)
-        if (position.mock){
-            mockPosition.visibility = View.VISIBLE
+        mockPosition.visibility = if (position.mock) View.VISIBLE else View.INVISIBLE
+        if (sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)) {
+            lastSend.visibility = View.VISIBLE
+            val lastLocationSentTime = sharedPreferences.getLong(SettingsFragment.KEY_LAST_SEND, -1)
+            if (lastLocationSentTime > 0 && Utils.timeDiffInSeconds(lastLocationSentTime,Date().time) < (sharedPreferences.getString(
+                    SettingsFragment.KEY_INTERVAL,
+                    8.toString()
+                )
+                    ?.toInt() ?: 8)*1.5) {
+                lastSend.setImageResource(R.drawable.btn_rnd_grn)
+            } else {
+                lastSend.setImageResource(R.drawable.btn_rnd_red)
+            }
         } else {
-            mockPosition.visibility = View.INVISIBLE
-        }
-        val lastLocationSentTime = sharedPreferences.getLong(SettingsFragment.KEY_LAST_SEND, -1)
-        if (lastLocationSentTime > 0 && Utils.timeDiffInSeconds(lastLocationSentTime,Date().time) < (sharedPreferences.getString(
-                SettingsFragment.KEY_INTERVAL,
-                8.toString()
-            )
-                ?.toInt() ?: 8)*1.5) {
-            lastSend.setImageResource(R.drawable.btn_rnd_grn)
-        } else {
-            lastSend.setImageResource(R.drawable.btn_rnd_red)
+            lastSend.visibility = View.INVISIBLE
         }
     }
 

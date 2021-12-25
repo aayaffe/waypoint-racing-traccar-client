@@ -62,6 +62,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
     public static final String KEY_EXPERT_MODE = "expert";
     public static final String KEY_GATE_PASSES = "gatepasses";
     public static final String KEY_TRACKING = "trackingenabled";
+    public static final String KEY_MAGNETIC = "magnetic";
     private SharedPreferences sharedPreferences;
 
 
@@ -232,14 +233,14 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
 
     private void expertMode(Boolean b){
         findPreference(KEY_DEVICE).setEnabled(b);
-//        findPreference(KEY_URL).setVisible(b);
+        findPreference(KEY_URL).setVisible(b);
         findPreference(KEY_INTERVAL).setVisible(b);
         findPreference(KEY_DISTANCE).setVisible(b);
         findPreference(KEY_ANGLE).setVisible(b);
         findPreference(KEY_ACCURACY).setVisible(b);
         findPreference(KEY_BUFFER).setVisible(b);
         findPreference(KEY_WAKELOCK).setVisible(b);
-//        findPreference(KEY_TRACKING).setVisible(b);
+        findPreference(KEY_TRACKING).setVisible(b);
     }
 
 }

@@ -32,14 +32,23 @@
         android:key="trackingenabled"
         android:summaryOff="@string/settings_tracking_off_summary"
         android:summaryOn="@string/settings_tracking_on_summary"
-        android:title="@string/settings_tracking_title" />
+        android:title="@string/settings_tracking_title"
+        app:isPreferenceVisible="false"/>
 
     <EditTextPreference
         android:defaultValue="@string/settings_url_default_value"
         android:key="url"
         android:summary="@string/settings_url_summary"
         android:title="@string/settings_url_title"
-        />
+        app:isPreferenceVisible="false"/>
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="magnetic"
+        android:summaryOff="@string/settings_magnetic_on_summary"
+        android:summaryOn="@string/settings_magnetic_off_summary"
+        android:title="@string/settings_magnetic_title"
+        app:isPreferenceVisible="true"/>
 
     <ListPreference
         android:defaultValue="high"
