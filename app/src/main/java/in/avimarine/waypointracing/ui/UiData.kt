@@ -6,6 +6,8 @@ import `in`.avimarine.waypointracing.route.RouteElement
 import `in`.avimarine.waypointracing.route.RouteElementType
 import `in`.avimarine.waypointracing.utils.*
 import android.content.SharedPreferences
+import kotlin.math.abs
+import kotlin.math.cos
 
 
 class UiData {
@@ -74,7 +76,10 @@ class UiData {
             if (wpt==null){
                 return "-----"
             }
-            return getDistString(pointToLineDist(position.toLocation(), wpt.portWpt, wpt.stbdWpt))
+            val s = position.speed;
+            val brg = pointToLineDir(position.toLocation(), wpt.portWpt, wpt.stbdWpt)
+            val dif = if ((brg - position.course)<0) brg - position.course + 360 else brg - position.course
+            return getSpeedString(s * cos(Math.toRadians(dif)))
         }
 
     }

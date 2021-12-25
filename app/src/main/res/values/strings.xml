@@ -73,4 +73,5 @@
     <string name="settings_magnetic_on_summary">Using True bearings</string>
     <string name="settings_magnetic_off_summary">Using Magnetic bearings</string>
     <string name="settings_magnetic_title">Magnetic bearings</string>
+    <string name="vmg_label">VMG</string>
 </resources>

@@ -115,13 +115,14 @@ fun getDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double 
     return line.Distance()
 }
 
+/***
+ * Returns Distance in meters
+ */
 private fun getDistance(p1: Point, p2: Point):Double{
     return getDistance(p1.latitude(),p1.longitude(),p2.latitude(),p2.longitude())
 }
 
-/***
- * Returns Distance in meters
- */
+
 fun getDistance(firstLocation : Location, secondLocation: Location): Double {
     return getDistance(firstLocation.latitude, firstLocation.longitude, secondLocation.latitude, secondLocation.longitude)
 }
@@ -156,6 +157,10 @@ fun getDirection(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double
         GeodesicMask.DISTANCE_IN or GeodesicMask.LATITUDE or GeodesicMask.LONGITUDE
     )
     return line.Azimuth()
+}
+
+fun getDirection(firstLocation: Point, secondLocation: Point): Double{
+    return getDirection(firstLocation.latitude(), firstLocation.longitude(), secondLocation.latitude(), secondLocation.longitude())
 }
 fun getDirection(firstLocation: Location, secondLocation: Location): Double {
     return getDirection(firstLocation.latitude,firstLocation.longitude,secondLocation.latitude,secondLocation.longitude)
@@ -238,12 +243,25 @@ fun getLocFromDirDist(loc: Location, dir: Double, dist: Double) : Location{
  * @param loc Point's location
  * @param firstLocation Line first location
  * @param secondLocation Line's second location
- * @return Distance between the point and the line in meters
+ * @return Distance between the point and  the nearest point on the line in meters
  */
 fun pointToLineDist(loc: Location, firstLocation : Location, secondLocation: Location): Double{
     val pointList = arrayListOf(firstLocation.toPoint(),secondLocation.toPoint())
     val p = TurfMisc.nearestPointOnLine(loc.toPoint(),pointList)
     return getDistance(loc.toPoint(),p.geometry() as Point)
+}
+
+/**
+ * Get the direction between a point and a line.
+ * @param loc Point's location
+ * @param firstLocation Line first location
+ * @param secondLocation Line's second location
+ * @return Direction from the point and the nearest point on the line in degrees from north
+ */
+fun pointToLineDir(loc: Location, firstLocation : Location, secondLocation: Location): Double{
+    val pointList = arrayListOf(firstLocation.toPoint(),secondLocation.toPoint())
+    val p = TurfMisc.nearestPointOnLine(loc.toPoint(),pointList)
+    return getDirection(loc.toPoint(),p.geometry() as Point)
 }
 
 fun isPointInPolygon(wpts : ArrayList<Location>, loc: Location) : Boolean{

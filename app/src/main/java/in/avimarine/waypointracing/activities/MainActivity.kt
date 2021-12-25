@@ -8,6 +8,7 @@ import `in`.avimarine.waypointracing.ui.UiData.Companion.getLocationData
 import `in`.avimarine.waypointracing.ui.UiData.Companion.getPortData
 import `in`.avimarine.waypointracing.ui.UiData.Companion.getShortestDistanceToGateData
 import `in`.avimarine.waypointracing.ui.UiData.Companion.getStbdData
+import `in`.avimarine.waypointracing.ui.UiData.Companion.getVMGGateData
 import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
 import `in`.avimarine.waypointracing.utils.*
 import android.Manifest
@@ -397,6 +398,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         sog.setData(getSpeedString(position.speed))
         location.setData(getLocationData(position))
         time.setData(timeStamptoDateString(position.time.time))
+        vmg.setData(getVMGGateData(position,wpt))
 
         val interval = (sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")?.toLong()
             ?: 600) * 4000 //After four times interval
@@ -429,6 +431,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             portGate.visibility = View.GONE
             stbdGate.visibility = View.GONE
             shortestDistanceToGate.visibility = View.GONE
+            vmg.visibility = View.GONE
 
         } else {
             routeElementSpinner.visibility = View.VISIBLE
@@ -436,6 +439,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             portGate.visibility = View.VISIBLE
             stbdGate.visibility = View.VISIBLE
             shortestDistanceToGate.visibility = View.VISIBLE
+            vmg.visibility = View.VISIBLE
         }
     }
 
@@ -448,6 +452,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             location.setTextColor(Color.BLACK)
             time.setTextColor(Color.BLACK)
             shortestDistanceToGate.setTextColor(Color.BLACK)
+            vmg.setTextColor(Color.BLACK)
         } else {
             portGate.setTextColor(Color.RED)
             stbdGate.setTextColor(Color.RED)
@@ -456,6 +461,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             location.setTextColor(Color.RED)
             time.setTextColor(Color.RED)
             shortestDistanceToGate.setTextColor(Color.RED)
+            vmg.setTextColor(Color.RED)
         }
     }
 

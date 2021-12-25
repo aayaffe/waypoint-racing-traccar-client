@@ -193,6 +193,26 @@
         app:layout_constraintTop_toBottomOf="@id/location"
         app:unitsText="NM"
         app:autoTextSize="true"/>
+    <in.avimarine.waypointracing.ui.NavTextDrawer
+        android:id="@+id/vmg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="1dp"
+        android:layout_marginLeft="1dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginRight="1dp"
+        android:layout_marginBottom="1dp"
+        app:textColor="-65536"
+        app:dataText="-----"
+        app:dataTextSize="16sp"
+        app:labelText="@string/vmg_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@id/shortestDistanceToGate"
+        app:layout_constraintTop_toBottomOf="@id/location"
+        app:unitsText="kt"
+        app:autoTextSize="true"/>
 
     <ImageView
         android:id="@+id/mockPosition"
