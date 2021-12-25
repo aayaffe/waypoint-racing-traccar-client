@@ -36,12 +36,12 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
+import java.util.Arrays;
+import java.util.Random;
+
 import in.avimarine.waypointracing.BuildConfig;
 import in.avimarine.waypointracing.MainApplication;
 import in.avimarine.waypointracing.R;
-
-import java.util.Arrays;
-import java.util.Random;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener {
 
@@ -63,6 +63,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
     public static final String KEY_GATE_PASSES = "gatepasses";
     public static final String KEY_TRACKING = "trackingenabled";
     public static final String KEY_MAGNETIC = "magnetic";
+    public static final String KEY_IS_UI_VISIBLE = "uivisibility";
     private SharedPreferences sharedPreferences;
 
 

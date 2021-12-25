@@ -27,7 +27,7 @@ data class Position(
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
     val altitude: Double = 0.0,
-    val speed: Double = 0.0,
+    val speed: Double = 0.0, //In Knots
     val course: Double = 0.0,
     val accuracy: Double = 0.0,
     val battery: Double = 0.0,
@@ -41,7 +41,7 @@ data class Position(
         latitude = location.latitude,
         longitude = location.longitude,
         altitude = location.altitude,
-        speed = location.speed * 1.943844, // speed in knots
+        speed = location.speed * 1.943844, // convert m/sec to knots
         course = location.bearing.toDouble(),
         accuracy = if (location.provider != null && location.provider != LocationManager.GPS_PROVIDER) location.accuracy.toDouble() else 0.0,
         battery = battery,

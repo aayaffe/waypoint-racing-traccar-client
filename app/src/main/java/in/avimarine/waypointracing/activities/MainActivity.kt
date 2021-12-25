@@ -243,6 +243,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         getNextWpt()
         setGPSInterval(1)
+        setMainActivityVisibilityStatus(true)
         updateLastPass()
     }
 
@@ -290,6 +291,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         super.onPause()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
         setGPSInterval(9)
+        setMainActivityVisibilityStatus(false)
+
     }
 
     override fun onStop() {
@@ -376,6 +379,14 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
         with(sharedPref.edit()) {
             putString(SettingsFragment.KEY_INTERVAL, i.toString())
+            commit()
+        }
+    }
+
+    fun setMainActivityVisibilityStatus(b: Boolean){
+        val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
+        with(sharedPref.edit()) {
+            putBoolean(SettingsFragment.KEY_IS_UI_VISIBLE, b)
             commit()
         }
     }

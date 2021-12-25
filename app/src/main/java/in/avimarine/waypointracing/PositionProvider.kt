@@ -54,7 +54,7 @@ abstract class PositionProvider(
 
     protected fun processLocation(location: Location?) {
         if (location != null &&
-                (lastLocation == null || location.time - lastLocation!!.time >= interval || distance > 0
+                (lastLocation == null || location.time - lastLocation!!.time >= 0.5 * interval || distance > 0
                 && location.distanceTo(lastLocation) >= distance || angle > 0
                 && abs(location.bearing - lastLocation!!.bearing) >= angle)
         ) {
@@ -84,7 +84,6 @@ abstract class PositionProvider(
         }
     }
     companion object {
-        private val TAG = PositionProvider::class.java.simpleName
         const val MINIMUM_INTERVAL: Long = 1000
     }
 

@@ -83,6 +83,13 @@ fun toMeters(dist: Double): Double{
 }
 
 /**
+* Convert [dist] in meters to Nautical Miles.
+*/
+fun toNM(dist: Double): Double{
+    return dist / 1852
+}
+
+/**
  * Returns the speed in metres per minute
  * @param dist Distance in metres
  * @param firstTime start time in milliseconds

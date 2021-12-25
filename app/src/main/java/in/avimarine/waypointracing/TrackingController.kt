@@ -30,11 +30,10 @@ import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.activities.StatusActivity
 import `in`.avimarine.waypointracing.database.DatabaseHelper
 import `in`.avimarine.waypointracing.database.GatePassesDatabaseHelper
-import `in`.avimarine.waypointracing.route.EventType
-import `in`.avimarine.waypointracing.route.GatePassing
-import `in`.avimarine.waypointracing.route.GatePassings
-import `in`.avimarine.waypointracing.route.Route
+import `in`.avimarine.waypointracing.route.*
+import `in`.avimarine.waypointracing.utils.pointToLineDist
 import `in`.avimarine.waypointracing.utils.toLocation
+import `in`.avimarine.waypointracing.utils.toNM
 import android.content.SharedPreferences
 import java.util.*
 
@@ -136,6 +135,40 @@ class TrackingController(private val context: Context) :
                 setNextWpt(nextWpt)
             }
         }
+        setNewGPSInterval(position, route, nextWpt)
+    }
+
+    private fun setNewGPSInterval(position: Position, route: Route?, nextWpt: Int) {
+        val uiVisible = sharedPreferences.getBoolean(SettingsFragment.KEY_IS_UI_VISIBLE,true)
+        if (route!=null && !uiVisible){
+            val wpt = route.elements.elementAtOrNull(nextWpt)
+            if (wpt != null){
+
+                val interval = distance2interval(wpt,position)
+                setGPSInterval(interval)
+            }
+        }
+    }
+
+    private fun distance2interval(wpt: RouteElement, position: Position): Int {
+        val dist = toNM(pointToLineDist(position.toLocation(), wpt.portWpt, wpt.stbdWpt))
+        val ttg = (dist/position.speed) * 3600 //Conversion to seconds
+        return when {
+            ttg > 80 -> 40
+            ttg > 40 -> 20
+            ttg > 20 -> 10
+            ttg > 10 -> 5
+            else -> 1
+        }
+    }
+
+    private fun setGPSInterval(i: Int){
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        with(sharedPref.edit()) {
+            putString(SettingsFragment.KEY_INTERVAL, i.toString())
+            commit()
+        }
+        Log.d(TAG, "New interval is $i")
     }
 
     private fun setNextWpt(n: Int) {
