@@ -112,7 +112,7 @@ class TrackingController(private val context: Context) :
 
     override fun onPositionUpdate(position: Position) {
         val inArea = updateIsInArea(position, nextWpt)
-        if (sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)) {
+        if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false) && sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)) {
             sendPosition(position)
         }
         if (inArea && route != null) {
@@ -411,7 +411,6 @@ class TrackingController(private val context: Context) :
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        Log.d(TAG, "Changed Preference: " + key)
         if (key == SettingsFragment.KEY_NEXT_WPT) {
             nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
         }

@@ -76,7 +76,6 @@ abstract class PositionProvider(
         return 0.0
     }
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        Log.d(TAG, "Changed Preference: " + key)
         if (key == SettingsFragment.KEY_INTERVAL) {
             interval = sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
             stopUpdates()

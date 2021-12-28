@@ -477,7 +477,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        Log.d(TAG, "Changed Preference: " + key)
         if (key == SettingsFragment.KEY_STATUS) {
             setButton(sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false))
             if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false)) {
