@@ -12,9 +12,11 @@ import `in`.avimarine.waypointracing.ui.UiData.Companion.getVMGGateData
 import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
 import `in`.avimarine.waypointracing.utils.*
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
@@ -135,6 +137,17 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             putBoolean(SettingsFragment.KEY_EXPERT_MODE, false)
             commit()
         }
+    }
+
+    /**
+     * Used to ignore changing text size.
+     */
+    override fun attachBaseContext(newBase: Context?) {
+        val newOverride = Configuration(newBase?.resources?.configuration)
+        newOverride.fontScale = 1.0f
+        applyOverrideConfiguration(newOverride)
+
+        super.attachBaseContext(newBase)
     }
 
     override fun onNewIntent(i: Intent){
