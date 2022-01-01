@@ -510,7 +510,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private fun setButton(isRunning: Boolean) {
         if (isRunning) {
-            start_btn.background = ContextCompat.getDrawable(this, R.drawable.btn_rnd_red)
+            start_btn.background = ContextCompat.getDrawable(this, R.drawable.btn_rect_red)
             start_btn.text = getString(R.string.settings_status_on)
         } else {
             start_btn.background = ContextCompat.getDrawable(this, R.drawable.btn_rnd_grn)
