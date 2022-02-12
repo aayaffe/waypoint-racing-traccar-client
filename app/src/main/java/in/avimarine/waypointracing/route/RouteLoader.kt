@@ -6,6 +6,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
 import `in`.avimarine.waypointracing.TAG
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -91,6 +92,11 @@ class RouteLoader {
                         loadRoute(null)
 //                        errorLoadingRoute("Unable to Load Route from given location")
                     }
+            )
+            stringRequest.retryPolicy = DefaultRetryPolicy(
+                12000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
             )
             queue.add(stringRequest)
         }
