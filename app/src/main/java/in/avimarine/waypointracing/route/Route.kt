@@ -18,6 +18,7 @@ import java.util.*
 class Route(
     val id: String,
     val eventName: String,
+    val organizing: String,
     @Serializable(with = Serializers.Companion.DateSerializer::class)
     val startTime: Date,
     val elements: ArrayList<RouteElement>,
@@ -41,6 +42,7 @@ class Route(
         fun fromGeoJson(geojson: String): Route {
             val json = JSONObject(convertStandardJSONString(geojson))
             val name = json.getJSONObject("routedata").getString("name")
+            val organizing = json.getJSONObject("routedata").getString("organizing")
             val id = json.getJSONObject("routedata").getString("id")
             val date = Date(json.getJSONObject("routedata").getLong("lastUpdate"))
             val features = FeatureCollection.fromJson(geojson)
@@ -55,7 +57,7 @@ class Route(
             } catch (e: Exception){
                 EventType.WPTRACING
             }
-            return Route(id, name, Date(0), el, date, et)
+            return Route(id, name, organizing, Date(0), el, date, et)
         }
 
 
@@ -85,7 +87,7 @@ class Route(
         }
 
         fun emptyRoute(): Route {
-            return Route("", "", Date(), arrayListOf(), Date(), EventType.WPTRACING)
+            return Route("", "", "", Date(), arrayListOf(), Date(), EventType.WPTRACING)
         }
 
 

@@ -7,6 +7,7 @@ import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.ui.RouteElementConcat
 import `in`.avimarine.waypointracing.ui.RouteElementFullAdapter
+import `in`.avimarine.waypointracing.utils.timeStamptoDateString
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
@@ -42,13 +43,24 @@ class RouteActivity : AppCompatActivity() {
 
         if (route.isEmpty()){
             recyclerView.visibility = View.GONE
+            route_details_box.visibility = View.GONE
             no_route_header.visibility = View.VISIBLE
         } else {
             recyclerView.visibility = View.VISIBLE
+            route_details_box.visibility = View.VISIBLE
             no_route_header.visibility = View.GONE
         }
 
+        setDetailsBox(route)
+
     }
+
+    private fun setDetailsBox(route: Route) {
+        id_value.text = route.id
+        lastupdate_value.text = timeStamptoDateString(route.lastUpdate.time)
+        organizer_value.text = route.organizing
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {

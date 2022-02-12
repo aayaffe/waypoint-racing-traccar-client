@@ -74,4 +74,7 @@
     <string name="settings_magnetic_off_summary">Using Magnetic bearings</string>
     <string name="settings_magnetic_title">Magnetic bearings</string>
     <string name="vmg_label">VMG</string>
+    <string name="route_id">Route ID:</string>
+    <string name="organizer">Organizer:</string>
+    <string name="updated">Updated:</string>
 </resources>
