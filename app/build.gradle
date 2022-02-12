@@ -37,13 +37,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
-    }
-
-    lintOptions {
-        checkReleaseBuilds false
-    }
 
     flavorDimensions 'default'
     productFlavors {
@@ -66,8 +59,16 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES']
+        }
+    }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+    lint {
+        checkReleaseBuilds false
     }
 }
 
