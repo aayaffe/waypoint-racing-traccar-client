@@ -110,18 +110,18 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
             if (cursor.count > 0) {
                 cursor.moveToFirst()
                 return Position(
-                    id = cursor.getLong(cursor.getColumnIndex("id")),
-                    deviceId = cursor.getString(cursor.getColumnIndex("deviceId")),
-                    time = Date(cursor.getLong(cursor.getColumnIndex("time"))),
-                    latitude = cursor.getDouble(cursor.getColumnIndex("latitude")),
-                    longitude = cursor.getDouble(cursor.getColumnIndex("longitude")),
-                    altitude = cursor.getDouble(cursor.getColumnIndex("altitude")),
-                    speed = cursor.getDouble(cursor.getColumnIndex("speed")),
-                    course = cursor.getDouble(cursor.getColumnIndex("course")),
-                    accuracy = cursor.getDouble(cursor.getColumnIndex("accuracy")),
-                    battery = cursor.getDouble(cursor.getColumnIndex("battery")),
-                    boatName = cursor.getString(cursor.getColumnIndex("boatname")),
-                    mock = cursor.getInt(cursor.getColumnIndex("mock")) > 0,
+                    id = cursor.getLong(cursor.getColumnIndexOrThrow("id")),
+                    deviceId = cursor.getString(cursor.getColumnIndexOrThrow("deviceId")),
+                    time = Date(cursor.getLong(cursor.getColumnIndexOrThrow("time"))),
+                    latitude = cursor.getDouble(cursor.getColumnIndexOrThrow("latitude")),
+                    longitude = cursor.getDouble(cursor.getColumnIndexOrThrow("longitude")),
+                    altitude = cursor.getDouble(cursor.getColumnIndexOrThrow("altitude")),
+                    speed = cursor.getDouble(cursor.getColumnIndexOrThrow("speed")),
+                    course = cursor.getDouble(cursor.getColumnIndexOrThrow("course")),
+                    accuracy = cursor.getDouble(cursor.getColumnIndexOrThrow("accuracy")),
+                    battery = cursor.getDouble(cursor.getColumnIndexOrThrow("battery")),
+                    boatName = cursor.getString(cursor.getColumnIndexOrThrow("boatname")),
+                    mock = cursor.getInt(cursor.getColumnIndexOrThrow("mock")) > 0,
                 )
             }
         }

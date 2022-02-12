@@ -1,11 +1,11 @@
 package `in`.avimarine.waypointracing.route
 
+import `in`.avimarine.waypointracing.TAG
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
-import `in`.avimarine.waypointracing.TAG
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
@@ -13,6 +13,7 @@ import com.android.volley.toolbox.Volley
 import org.json.JSONException
 import java.io.FileInputStream
 import java.io.FileNotFoundException
+
 
 class RouteLoader {
 
@@ -101,17 +102,17 @@ class RouteLoader {
             queue.add(stringRequest)
         }
 
-        fun checkIntent(context: Context, intent: Intent): Boolean {
+        private fun checkIntent(context: Context, intent: Intent): Boolean {
             val uri: Uri
             intent.clipData?.let { clipData ->
                 Log.d(TAG, clipData.toString())
                 uri = clipData.getItemAt(0).uri
                 context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                     cursor.moveToFirst()
-                    val name = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
-                    val size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-                    Log.d(TAG, "Json filesize: " + size)
-                    Log.d(TAG, "Json filename: " + name)
+                    val name = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
+                    val size = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
+                    Log.d(TAG, "Json filesize: $size")
+                    Log.d(TAG, "Json filename: $name")
                     return if ((size < MAX_FILE_SIZE) && ("json" in name)) {
                         true
                     } else {

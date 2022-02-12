@@ -116,21 +116,21 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
             if (cursor.count > 0) {
                 cursor.moveToFirst()
                 return GatePassing(
-                    id = cursor.getLong(cursor.getColumnIndex("id")),
-                    eventName = cursor.getString(cursor.getColumnIndex("eventName")),
-                    routeId = cursor.getString(cursor.getColumnIndex("routeId")),
-                    deviceId = cursor.getString(cursor.getColumnIndex("deviceId")),
-                    boatName = cursor.getString(cursor.getColumnIndex("boatname")),
-                    gateId = cursor.getInt(cursor.getColumnIndex("gateId")),
-                    gateName = cursor.getString(cursor.getColumnIndex("gateName")),
-                    time = Date(cursor.getLong(cursor.getColumnIndex("time"))),
-                    latitude = cursor.getDouble(cursor.getColumnIndex("latitude")),
-                    longitude = cursor.getDouble(cursor.getColumnIndex("longitude")),
-                    speed = cursor.getDouble(cursor.getColumnIndex("speed")),
-                    course = cursor.getDouble(cursor.getColumnIndex("course")),
-                    accuracy = cursor.getDouble(cursor.getColumnIndex("accuracy")),
-                    battery = cursor.getDouble(cursor.getColumnIndex("battery")),
-                    mock = cursor.getInt(cursor.getColumnIndex("mock")) > 0,
+                    id = cursor.getLong(cursor.getColumnIndexOrThrow("id")),
+                    eventName = cursor.getString(cursor.getColumnIndexOrThrow("eventName")),
+                    routeId = cursor.getString(cursor.getColumnIndexOrThrow("routeId")),
+                    deviceId = cursor.getString(cursor.getColumnIndexOrThrow("deviceId")),
+                    boatName = cursor.getString(cursor.getColumnIndexOrThrow("boatname")),
+                    gateId = cursor.getInt(cursor.getColumnIndexOrThrow("gateId")),
+                    gateName = cursor.getString(cursor.getColumnIndexOrThrow("gateName")),
+                    time = Date(cursor.getLong(cursor.getColumnIndexOrThrow("time"))),
+                    latitude = cursor.getDouble(cursor.getColumnIndexOrThrow("latitude")),
+                    longitude = cursor.getDouble(cursor.getColumnIndexOrThrow("longitude")),
+                    speed = cursor.getDouble(cursor.getColumnIndexOrThrow("speed")),
+                    course = cursor.getDouble(cursor.getColumnIndexOrThrow("course")),
+                    accuracy = cursor.getDouble(cursor.getColumnIndexOrThrow("accuracy")),
+                    battery = cursor.getDouble(cursor.getColumnIndexOrThrow("battery")),
+                    mock = cursor.getInt(cursor.getColumnIndexOrThrow("mock")) > 0,
                 )
             }
         }
