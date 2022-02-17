@@ -76,9 +76,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         setPreferencesFromResource(R.xml.preferences, rootKey);
         initPreferences();
-        findPreference(KEY_URL).setOnPreferenceChangeListener((preference, newValue) -> {
-                return (newValue != null) && validateServerURL(newValue.toString());
-        });
+        findPreference(KEY_URL).setOnPreferenceChangeListener((preference, newValue) -> (newValue != null) && validateServerURL(newValue.toString()));
         findPreference(KEY_INTERVAL).setOnPreferenceChangeListener((preference, newValue) -> {
             if (newValue != null) {
                 try {
@@ -191,13 +189,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(KEY_DEVICE)) {
-            findPreference(KEY_DEVICE).setSummary(sharedPreferences.getString(KEY_DEVICE, null));
-        } else if (key.equals(KEY_NAME)) {
-            findPreference(KEY_NAME).setSummary(sharedPreferences.getString(KEY_NAME, null));
-        } else if  (key.equals(KEY_STATUS)) {
-            setPreferencesEnabled(!sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false));
-            ((MainApplication) getActivity().getApplication()).handleRatingFlow(getActivity());
+        switch (key) {
+            case KEY_DEVICE:
+                findPreference(KEY_DEVICE).setSummary(sharedPreferences.getString(KEY_DEVICE, null));
+                break;
+            case KEY_NAME:
+                findPreference(KEY_NAME).setSummary(sharedPreferences.getString(KEY_NAME, null));
+                break;
+            case KEY_STATUS:
+                setPreferencesEnabled(!sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false));
+                ((MainApplication) getActivity().getApplication()).handleRatingFlow(getActivity());
+                break;
         }
 
     }

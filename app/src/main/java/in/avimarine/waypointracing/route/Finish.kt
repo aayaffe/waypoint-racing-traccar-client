@@ -63,11 +63,11 @@ class Finish(
                 f.properties()?.get("name")?.asString ?: throw JSONException("Failed to get name")
             val line: LineString = f.geometry() as LineString
             val stbdloc = Location("")
-            stbdloc.latitude = line.coordinates().get(0).latitude()
-            stbdloc.longitude = line.coordinates().get(0).longitude()
+            stbdloc.latitude = line.coordinates()[0].latitude()
+            stbdloc.longitude = line.coordinates()[0].longitude()
             val portloc = Location("")
-            portloc.latitude = line.coordinates().get(1).latitude()
-            portloc.longitude = line.coordinates().get(1).longitude()
+            portloc.latitude = line.coordinates()[1].latitude()
+            portloc.longitude = line.coordinates()[1].longitude()
             if (f.properties()!!.has("proofAreaBearings")!!) {
                 val b1 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(0).asDouble
                 val b2 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(1).asDouble
