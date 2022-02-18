@@ -8,7 +8,8 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
-import kotlinx.android.parcel.Parcelize
+//import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.json.JSONException
 

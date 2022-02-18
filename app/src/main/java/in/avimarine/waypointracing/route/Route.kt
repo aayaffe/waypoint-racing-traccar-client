@@ -5,7 +5,8 @@ import android.os.Parcelable
 import com.google.gson.JsonParseException
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
-import kotlinx.android.parcel.Parcelize
+//import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

@@ -8,7 +8,8 @@ import android.util.Log
 import android.os.Parcelable
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement.bearing
-import kotlinx.android.parcel.Parcelize
+//import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
