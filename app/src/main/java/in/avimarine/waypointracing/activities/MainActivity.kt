@@ -1,6 +1,7 @@
 package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.*
+import `in`.avimarine.waypointracing.databinding.ActivityMain2Binding
 import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.ui.UiData.Companion.getCOGData
@@ -40,7 +41,7 @@ import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotBitmap
 import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
-import kotlinx.android.synthetic.main.activity_main2.*
+//import kotlinx.android.synthetic.main.activity_main2.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -61,16 +62,21 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private var isFirstSpinnerLoad = true
 //    private lateinit var alarmManager: AlarmManager
 //    private lateinit var alarmIntent: PendingIntent
+    private lateinit var binding: ActivityMain2Binding
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityMain2Binding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
         screenshotManager = ScreenshotManagerBuilder(this)
             .withCustomActionOrder(ScreenshotActionOrder.pixelCopyFirst()) //optional, ScreenshotActionOrder.pixelCopyFirst() by default
             .withPermissionRequestCode(REQUEST_SCREENSHOT_PERMISSION) //optional, 888 by default
             .build()
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
-        setContentView(R.layout.activity_main2)
+//        setContentView(R.layout.activity_main2)
 
 //        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 //        val originalIntent = Intent(this, AutostartReceiver::class.java)
@@ -103,7 +109,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         val mCalendar: Calendar = GregorianCalendar()
         val mTimeZone = mCalendar.timeZone
         val mGMTOffset = mTimeZone.getOffset(mCalendar.timeInMillis)
-        time.setLabel(
+        binding.time.setLabel(
             "UTC " + (if (mGMTOffset > 0) "+" else "") + TimeUnit.HOURS.convert(
                 mGMTOffset.toLong(),
                 TimeUnit.MILLISECONDS
@@ -112,7 +118,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (route.isValidWpt(nextWpt)){
             getNextWpt()
         }
-        routeElementSpinner.onItemSelectedListener = object :
+        binding.routeElementSpinner.onItemSelectedListener = object :
             AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
@@ -265,38 +271,38 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (nextWpt >= route.elements.size) {
             setNextWpt(0)
         }
-        routeElementSpinner.setSelection(nextWpt)
+        binding.routeElementSpinner.setSelection(nextWpt)
         route.elements.elementAtOrNull(nextWpt)?.let { setNextWaypointUI(it) }
     }
 
     private fun setNextWaypointUI(wpt: RouteElement) {
         if (wpt.type == RouteElementType.WAYPOINT) {
             if (wpt.proofArea.type == ProofAreaType.QUADRANT) {
-                shortestDistanceToGate.visibility = View.VISIBLE
-                stbdGate.visibility = View.VISIBLE
-                stbdGate.setLabel(getString(R.string.pass_wpt_from))
-                stbdGate.setUnits("")
-                stbdGate.setData(
+                binding.shortestDistanceToGate.visibility = View.VISIBLE
+                binding.stbdGate.visibility = View.VISIBLE
+                binding.stbdGate.setLabel(getString(R.string.pass_wpt_from))
+                binding.stbdGate.setUnits("")
+                binding.stbdGate.setData(
                     getPointOfCompass(
                         wpt.proofArea.bearings[0],
                         wpt.proofArea.bearings[1]
                     )
                 )
-                portGate.setLabel(getString(R.string.waypoint))
-                shortestDistanceToGate.setLabel(getString(R.string.dist_to_wpt))
+                binding.portGate.setLabel(getString(R.string.waypoint))
+                binding.shortestDistanceToGate.setLabel(getString(R.string.dist_to_wpt))
             } else { //CIRCLE proof area
-                shortestDistanceToGate.visibility = View.INVISIBLE
-                stbdGate.visibility = View.GONE
-                portGate.setLabel(getString(R.string.waypoint))
+                binding.shortestDistanceToGate.visibility = View.INVISIBLE
+                binding.stbdGate.visibility = View.GONE
+                binding.portGate.setLabel(getString(R.string.waypoint))
             }
         } else { //Gate
-            shortestDistanceToGate.visibility = View.VISIBLE
-            stbdGate.visibility = View.VISIBLE
-            stbdGate.setData("-----")
-            stbdGate.setUnits(getString(R.string.nm))
-            stbdGate.setLabel(getString(R.string.stbd_gate))
-            portGate.setLabel(getString(R.string.port_gate))
-            shortestDistanceToGate.setLabel(getString(R.string.distance_to_gate))
+            binding.shortestDistanceToGate.visibility = View.VISIBLE
+            binding.stbdGate.visibility = View.VISIBLE
+            binding.stbdGate.setData("-----")
+            binding.stbdGate.setUnits(getString(R.string.nm))
+            binding.stbdGate.setLabel(getString(R.string.stbd_gate))
+            binding.portGate.setLabel(getString(R.string.port_gate))
+            binding.shortestDistanceToGate.setLabel(getString(R.string.distance_to_gate))
         }
     }
 
@@ -324,7 +330,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             this,
             R.layout.waypoint_spinner_item, 0, route.elements
         )
-        routeElementSpinner.adapter = adapter
+        binding.routeElementSpinner.adapter = adapter
     }
 
 
@@ -371,7 +377,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         setNextWpt(0)
         GatePassings.reset(this, route)
         populateRouteElementSpinner(route)
-        lastPassTextView.text = ""
+        binding.lastPassTextView.text = ""
     }
 
     fun startButtonClick(view: View) {
@@ -414,15 +420,15 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private fun updateUI(position: Position) {
         val wpt = route.elements.elementAtOrNull(nextWpt)
-        portGate.setData(getPortData(position,wpt,sharedPreferences))
-        stbdGate.setData(getStbdData(position,wpt,sharedPreferences))
-        shortestDistanceToGate.setData(getShortestDistanceToGateData(position,wpt))
+        binding.portGate.setData(getPortData(position,wpt,sharedPreferences))
+        binding.stbdGate.setData(getStbdData(position,wpt,sharedPreferences))
+        binding.shortestDistanceToGate.setData(getShortestDistanceToGateData(position,wpt))
         setUiForGPS(true)
-        cog.setData(getCOGData(position,sharedPreferences))
-        sog.setData(getSpeedString(position.speed))
-        location.setData(getLocationData(position))
-        time.setData(timeStamptoDateString(position.time.time))
-        vmg.setData(getVMGGateData(position,wpt))
+        binding.cog.setData(getCOGData(position,sharedPreferences))
+        binding.sog.setData(getSpeedString(position.speed))
+        binding.location.setData(getLocationData(position))
+        binding.time.setData(timeStamptoDateString(position.time.time))
+        binding.vmg.setData(getVMGGateData(position,wpt))
 
         val interval = (sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")?.toLong()
             ?: 600) * 4000 //After four times interval
@@ -430,62 +436,62 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         delayedHandler.postDelayed({
             setUiForGPS(false)
         }, interval)
-        mockPosition.visibility = if (position.mock) View.VISIBLE else View.INVISIBLE
+        binding.mockPosition.visibility = if (position.mock) View.VISIBLE else View.INVISIBLE
         if (sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)) {
-            lastSend.visibility = View.VISIBLE
+            binding.lastSend.visibility = View.VISIBLE
             val lastLocationSentTime = sharedPreferences.getLong(SettingsFragment.KEY_LAST_SEND, -1)
             if (lastLocationSentTime > 0 && Utils.timeDiffInSeconds(lastLocationSentTime,Date().time) < (sharedPreferences.getString(
                     SettingsFragment.KEY_INTERVAL,
                     8.toString()
                 )
                     ?.toInt() ?: 8)*1.5) {
-                lastSend.setImageResource(R.drawable.btn_rnd_grn)
+                binding.lastSend.setImageResource(R.drawable.btn_rnd_grn)
             } else {
-                lastSend.setImageResource(R.drawable.btn_rnd_red)
+                binding.lastSend.setImageResource(R.drawable.btn_rnd_red)
             }
         } else {
-            lastSend.visibility = View.INVISIBLE
+            binding.lastSend.visibility = View.INVISIBLE
         }
     }
 
     private fun setEmptyRouteUI(isEmpty: Boolean) {
         if (isEmpty){
-            routeElementSpinner.visibility = View.INVISIBLE
-            nextWptHeader.text = getString(R.string.no_route_loaded)
-            portGate.visibility = View.GONE
-            stbdGate.visibility = View.GONE
-            shortestDistanceToGate.visibility = View.GONE
-            vmg.visibility = View.GONE
+            binding.routeElementSpinner.visibility = View.INVISIBLE
+            binding.nextWptHeader.text = getString(R.string.no_route_loaded)
+            binding.portGate.visibility = View.GONE
+            binding.stbdGate.visibility = View.GONE
+            binding.shortestDistanceToGate.visibility = View.GONE
+            binding.vmg.visibility = View.GONE
 
         } else {
-            routeElementSpinner.visibility = View.VISIBLE
-            nextWptHeader.text = getString(R.string.next_waypoint_gate)
-            portGate.visibility = View.VISIBLE
-            stbdGate.visibility = View.VISIBLE
-            shortestDistanceToGate.visibility = View.VISIBLE
-            vmg.visibility = View.VISIBLE
+            binding.routeElementSpinner.visibility = View.VISIBLE
+            binding.nextWptHeader.text = getString(R.string.next_waypoint_gate)
+            binding.portGate.visibility = View.VISIBLE
+            binding.stbdGate.visibility = View.VISIBLE
+            binding.shortestDistanceToGate.visibility = View.VISIBLE
+            binding.vmg.visibility = View.VISIBLE
         }
     }
 
     private fun setUiForGPS(isAvailable: Boolean) {
         if (isAvailable) {
-            portGate.setTextColor(Color.BLACK)
-            stbdGate.setTextColor(Color.BLACK)
-            cog.setTextColor(Color.BLACK)
-            sog.setTextColor(Color.BLACK)
-            location.setTextColor(Color.BLACK)
-            time.setTextColor(Color.BLACK)
-            shortestDistanceToGate.setTextColor(Color.BLACK)
-            vmg.setTextColor(Color.BLACK)
+            binding.portGate.setTextColor(Color.BLACK)
+            binding.stbdGate.setTextColor(Color.BLACK)
+            binding.cog.setTextColor(Color.BLACK)
+            binding.sog.setTextColor(Color.BLACK)
+            binding.location.setTextColor(Color.BLACK)
+            binding.time.setTextColor(Color.BLACK)
+            binding.shortestDistanceToGate.setTextColor(Color.BLACK)
+            binding.vmg.setTextColor(Color.BLACK)
         } else {
-            portGate.setTextColor(Color.RED)
-            stbdGate.setTextColor(Color.RED)
-            cog.setTextColor(Color.RED)
-            sog.setTextColor(Color.RED)
-            location.setTextColor(Color.RED)
-            time.setTextColor(Color.RED)
-            shortestDistanceToGate.setTextColor(Color.RED)
-            vmg.setTextColor(Color.RED)
+            binding.portGate.setTextColor(Color.RED)
+            binding.stbdGate.setTextColor(Color.RED)
+            binding.cog.setTextColor(Color.RED)
+            binding.sog.setTextColor(Color.RED)
+            binding.location.setTextColor(Color.RED)
+            binding.time.setTextColor(Color.RED)
+            binding.shortestDistanceToGate.setTextColor(Color.RED)
+            binding.vmg.setTextColor(Color.RED)
         }
     }
 
@@ -505,9 +511,9 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                     8.toString()
                 )
                     ?.toInt() ?: 8)*1.5) {
-                lastSend.setImageResource(R.drawable.btn_rnd_grn)
+                binding.lastSend.setImageResource(R.drawable.btn_rnd_grn)
             } else {
-                lastSend.setImageResource(R.drawable.btn_rnd_red)
+                binding.lastSend.setImageResource(R.drawable.btn_rnd_red)
             }
         } else if (key == SettingsFragment.KEY_GATE_PASSES) {
             updateLastPass()
@@ -517,17 +523,17 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private fun updateLastPass() {
         val gp = GatePassings.getLastGatePass(this)
         if (gp!=null) {
-            lastPassTextView.text = "Last gate pass: " + gp.gateName + " at: " + timeStamptoDateString(gp.time.time)
+            binding.lastPassTextView.text = "Last gate pass: " + gp.gateName + " at: " + timeStamptoDateString(gp.time.time)
         }
     }
 
     private fun setButton(isRunning: Boolean) {
         if (isRunning) {
-            start_btn.background = ContextCompat.getDrawable(this, R.drawable.btn_rect_red)
-            start_btn.text = getString(R.string.settings_status_on)
+            binding.startBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_rect_red)
+            binding.startBtn.text = getString(R.string.settings_status_on)
         } else {
-            start_btn.background = ContextCompat.getDrawable(this, R.drawable.btn_rnd_grn)
-            start_btn.text = getString(R.string.settings_status_off)
+            binding.startBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_rnd_grn)
+            binding.startBtn.text = getString(R.string.settings_status_off)
         }
     }
 

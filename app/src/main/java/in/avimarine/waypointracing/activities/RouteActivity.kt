@@ -2,6 +2,8 @@ package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.TAG
+import `in`.avimarine.waypointracing.databinding.ActivityMain2Binding
+import `in`.avimarine.waypointracing.databinding.ActivityRouteBinding
 import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
@@ -17,16 +19,21 @@ import android.view.MenuItem
 import android.view.View
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.activity_route.*
+//import kotlinx.android.synthetic.main.activity_route.*
 
 class RouteActivity : AppCompatActivity() {
 
     private var route = Route.emptyRoute()
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var binding: ActivityRouteBinding
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_route)
+        binding = ActivityRouteBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+//        setContentView(R.layout.activity_route)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)// showing the back button in action bar
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
@@ -43,12 +50,12 @@ class RouteActivity : AppCompatActivity() {
 
         if (route.isEmpty()){
             recyclerView.visibility = View.GONE
-            route_details_box.visibility = View.GONE
-            no_route_header.visibility = View.VISIBLE
+            binding.routeDetailsBox.visibility = View.GONE
+            binding.noRouteHeader.visibility = View.VISIBLE
         } else {
             recyclerView.visibility = View.VISIBLE
-            route_details_box.visibility = View.VISIBLE
-            no_route_header.visibility = View.GONE
+            binding.routeDetailsBox.visibility = View.VISIBLE
+            binding.noRouteHeader.visibility = View.GONE
         }
 
         setDetailsBox(route)
@@ -56,9 +63,9 @@ class RouteActivity : AppCompatActivity() {
     }
 
     private fun setDetailsBox(route: Route) {
-        id_value.text = route.id
-        lastupdate_value.text = timeStamptoDateString(route.lastUpdate.time)
-        organizer_value.text = route.organizing
+        binding.idValue.text = route.id
+        binding.lastupdateValue.text = timeStamptoDateString(route.lastUpdate.time)
+        binding.organizerValue.text = route.organizing
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
