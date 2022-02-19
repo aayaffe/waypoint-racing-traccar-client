@@ -41,13 +41,15 @@ class UiData {
             if (wpt == null){
                 return "-----"
             }
-            if (wpt.type == RouteElementType.WAYPOINT  && wpt.proofArea.type == ProofAreaType.QUADRANT) {
-                return getPointOfCompass(
-                    wpt.proofArea.bearings[0],
-                    wpt.proofArea.bearings[1]
-                )
-            } else {
-                return "-----"
+            if (wpt.type == RouteElementType.WAYPOINT) {
+                if (wpt.proofArea.type == ProofAreaType.QUADRANT) {
+                    return getPointOfCompass(
+                        wpt.proofArea.bearings[0],
+                        wpt.proofArea.bearings[1]
+                    )
+                } else {
+                    return "-----"
+                }
             }
             val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
             return getDirString(
