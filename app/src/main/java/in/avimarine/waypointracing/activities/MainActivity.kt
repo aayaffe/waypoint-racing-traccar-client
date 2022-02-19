@@ -663,7 +663,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        val imagePath: File = File(this.getCacheDir(), "images")
+        val imagePath = File(this.getCacheDir(), "images")
         val newFile = File(imagePath, "image.png")
         val contentUri: Uri =
             FileProvider.getUriForFile(this, "com.example.myapp.fileprovider", newFile)
