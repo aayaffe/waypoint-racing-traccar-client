@@ -12,21 +12,23 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.json.JSONException
 import org.json.JSONObject
+import java.time.LocalDate
 import java.util.*
 
 @Parcelize
 @Serializable
 class Route(
-    val id: String,
-    val eventName: String,
-    val organizing: String,
+    val id: String = "",
+    val eventName: String = "",
+    val organizing: String = "",
     @Serializable(with = Serializers.Companion.DateSerializer::class)
-    val startTime: Date,
-    val elements: ArrayList<RouteElement>,
+    val startTime: Date = Date(0),
+    val elements: ArrayList<RouteElement> = arrayListOf(),
     @Serializable(with = Serializers.Companion.DateSerializer::class)
-    val lastUpdate: Date,
-    val eventType: EventType
+    val lastUpdate: Date = Date(0),
+    val eventType: EventType = EventType.WPTRACING
 ): Parcelable {
+
     fun isEmpty(): Boolean{
         return elements.size == 0
     }

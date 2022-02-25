@@ -14,6 +14,7 @@
     <uses-permission android:name="com.huawei.permission.external_app_settings.USE_COMPONENT" />
     <uses-permission android:name="oppo.permission.OPPO_COMPONENT_SAFE" />
     <uses-permission android:name="com.huawei.permission.external_app_settings.USE_COMPONENT" />
+
     <uses-feature android:name="android.hardware.location.network" />
     <uses-feature android:name="android.hardware.location.gps" />
 
@@ -25,6 +26,12 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity
+            android:name=".activities.LoadRouteActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ExpertModeActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.RouteActivity"
             android:exported="true" />
@@ -75,7 +82,6 @@
             android:name=".Launcher"
             android:exported="true"
             android:targetActivity=".activities.MainActivity">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -95,16 +101,14 @@
             android:name=".activities.StatusActivity"
             android:screenOrientation="portrait" />
 
-
         <service
             android:name=".TrackingService"
             android:exported="false"
             android:foregroundServiceType="location" />
-
-
         <service
             android:name=".TrackingService$HideNotificationService"
             android:exported="false" />
+
         <receiver
             android:name=".AutostartReceiver"
             android:exported="true">
@@ -118,7 +122,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.example.myapp.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

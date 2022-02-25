@@ -2,7 +2,6 @@ package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.TAG
-import `in`.avimarine.waypointracing.databinding.ActivityMain2Binding
 import `in`.avimarine.waypointracing.databinding.ActivityRouteBinding
 import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.GatePassings
@@ -12,14 +11,13 @@ import `in`.avimarine.waypointracing.ui.RouteElementFullAdapter
 import `in`.avimarine.waypointracing.utils.timeStamptoDateString
 import android.content.Intent
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
-//import kotlinx.android.synthetic.main.activity_route.*
 
 class RouteActivity : AppCompatActivity() {
 
@@ -33,7 +31,6 @@ class RouteActivity : AppCompatActivity() {
         binding = ActivityRouteBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-//        setContentView(R.layout.activity_route)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)// showing the back button in action bar
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext)

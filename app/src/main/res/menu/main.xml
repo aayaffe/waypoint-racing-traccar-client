@@ -5,38 +5,42 @@
         android:id="@+id/settings_menu_action"
         android:icon="@drawable/ic_settings_black_24dp"
         app:showAsAction="always"
-        android:title="Settings"
+        android:title="@string/settings"
         app:iconTint="@color/light"/>
     <item
         android:id="@+id/send_screenshot_menu_action"
         android:icon="@drawable/ic_baseline_mobile_screen_share_24"
         app:showAsAction="ifRoom"
-        android:title="Send Screenshot"
+        android:title="@string/send_screenshot"
         app:iconTint="@color/light"/>
     <item
         android:id="@+id/history_menu_action"
         android:icon="@drawable/ic_history_black_24dp"
         app:showAsAction="ifRoom"
-        android:title="History"
+        android:title="@string/history"
         app:iconTint="@color/light"/>
     <item
         android:id="@+id/reset_route_menu_action"
         app:showAsAction="never"
-        android:title="Restart Route"
+        android:title="@string/restart_route"
         app:iconTint="@color/light"/>
     <item
         android:id="@+id/route_activity_menu_action"
         app:showAsAction="never"
-        android:title="View Route"
+        android:title="@string/view_route"
         app:iconTint="@color/light"/>
     <item
         android:id="@+id/download_latest_menu_action"
         app:showAsAction="never"
-        android:title="Download Latest Route"
+        android:title="@string/load_new_route"
         app:iconTint="@color/light"/>
     <item
-        android:id="@+id/info"
+        android:id="@+id/info_menu_action"
         android:title="@string/menu_info"
         app:showAsAction="ifRoom" />
+<!--    <item-->
+<!--        android:id="@+id/expert_mode_menu_action"-->
+<!--        android:title="@string/menu_expert_mode"-->
+<!--        app:showAsAction="ifRoom" />-->
 
 </menu>

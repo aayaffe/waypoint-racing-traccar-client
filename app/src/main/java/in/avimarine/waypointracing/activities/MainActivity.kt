@@ -13,6 +13,7 @@ import `in`.avimarine.waypointracing.ui.UiData.Companion.getVMGGateData
 import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
 import `in`.avimarine.waypointracing.utils.*
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -31,6 +32,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -184,8 +187,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private fun loadRoute(r: Route?) {
         if (r == null) {
             errorLoadingRoute("Error Loading Route")
-            val r = RouteLoader.loadRouteFromFile(this)
-            loadRoute(r)
+            loadRoute(RouteLoader.loadRouteFromFile(this))
             return
         }
         route = r
@@ -338,7 +340,20 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         menuInflater.inflate(R.menu.main, menu)
         return true
     }
+    private val getRouteStartForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+    { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val extras = result.data?.extras
+            if (extras != null) {
+                extras.getString("RouteJson")?.let {
+                    Log.d(TAG, it)
+                    RouteLoader.loadRouteFromString(it, this::loadRoute)
+                }
 
+            }
+        }
+
+    }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.settings_menu_action -> {
@@ -366,9 +381,14 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 return true
             }
             R.id.download_latest_menu_action -> {
-                RouteLoader.loadRouteFromUrl(this, getString(R.string.current_route), this::loadRoute)
+                getRouteStartForResult.launch(Intent(this, LoadRouteActivity::class.java))
                 return true
             }
+//            R.id.expert_mode_menu_action -> {
+//                val intent = Intent(this, ExpertModeActivity::class.java)
+//                this.startActivity(intent)
+//                return true
+//            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -666,16 +686,13 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         val imagePath = File(this.getCacheDir(), "images")
         val newFile = File(imagePath, "image.png")
         val contentUri: Uri =
-            FileProvider.getUriForFile(this, "com.example.myapp.fileprovider", newFile)
-
-        if (contentUri != null) {
-            val shareIntent = Intent()
-            shareIntent.action = Intent.ACTION_SEND
-            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // temp permission for receiving app to read this file
-            shareIntent.setDataAndType(contentUri, contentResolver.getType(contentUri))
-            shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri)
-            startActivity(Intent.createChooser(shareIntent, "Choose an app"))
-        }
+            FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", newFile)
+        val shareIntent = Intent()
+        shareIntent.action = Intent.ACTION_SEND
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // temp permission for receiving app to read this file
+        shareIntent.setDataAndType(contentUri, contentResolver.getType(contentUri))
+        shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri)
+        startActivity(Intent.createChooser(shareIntent, "Choose an app"))
     }
 
     companion object{
