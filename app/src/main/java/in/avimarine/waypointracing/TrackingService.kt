@@ -69,12 +69,10 @@ class TrackingService() : Service() {
 
     @SuppressLint("WakelockTimeout")
     override fun onCreate() {
+        startForeground(NOTIFICATION_ID, createNotification(this))
         Log.i(TAG, "service create")
-
         sendBroadcast(Intent(ACTION_STARTED))
         StatusActivity.addMessage(getString(R.string.status_service_create))
-        startForeground(NOTIFICATION_ID, createNotification(this))
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.KEY_WAKELOCK, true)) {
                 val powerManager = getSystemService(POWER_SERVICE) as PowerManager
@@ -106,16 +104,15 @@ class TrackingService() : Service() {
     }
 
     override fun onDestroy() {
+        stopForeground(true)
         Log.i(TAG, "service destroy")
         sendBroadcast(Intent(ACTION_STOPPED))
         StatusActivity.addMessage(getString(R.string.status_service_destroy))
         LocalBroadcastManager.getInstance(this).unregisterReceiver(br)
-        stopForeground(true)
         if (wakeLock?.isHeld == true) {
             wakeLock?.release()
         }
         trackingController?.stop()
-
     }
 
     private fun parseRouteIntent(i: Intent?){

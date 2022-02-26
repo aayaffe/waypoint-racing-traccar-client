@@ -606,10 +606,12 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             }
             i.putExtra("nextwpt", nextWpt)
             ContextCompat.startForegroundService(this, i)
-//            alarmManager.setInexactRepeating(
-//                AlarmManager.ELAPSED_REALTIME_WAKEUP,
-//                ALARM_MANAGER_INTERVAL.toLong(), ALARM_MANAGER_INTERVAL.toLong(), alarmIntent
-//            )
+//            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+//                alarmManager.setInexactRepeating(
+//                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+//                    ALARM_MANAGER_INTERVAL.toLong(), ALARM_MANAGER_INTERVAL.toLong(), alarmIntent
+//                )
+//            }
             BatteryOptimizationHelper().requestException(this)
         } else {
             sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS, false).apply()
@@ -617,7 +619,9 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun stopTrackingService() {
-//        alarmManager.cancel(alarmIntent)
+//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+//            alarmManager.cancel(alarmIntent)
+//        }
         this.stopService(Intent(this, TrackingService::class.java))
     }
 
