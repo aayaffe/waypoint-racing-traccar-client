@@ -144,8 +144,12 @@ class TrackingController(private val context: Context) :
         val uiVisible = sharedPreferences.getBoolean(SettingsFragment.KEY_IS_UI_VISIBLE,true)
         if (route!=null && !uiVisible){
             val wpt = route.elements.elementAtOrNull(nextWpt)
-            if (wpt != null){
+            val lastGatePass = GatePassings.getLastGatePass(context)
 
+            if (wpt != null){
+                if (lastGatePass!= null && lastGatePass.routeId == route.id && lastGatePass.id == wpt.id){
+                    setGPSInterval(40)
+                }
                 val interval = distance2interval(wpt,position)
                 setGPSInterval(interval)
             }

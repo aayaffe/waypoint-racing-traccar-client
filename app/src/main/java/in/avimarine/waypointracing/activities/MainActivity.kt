@@ -202,7 +202,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (!route.isEmpty()) {
             Toast.makeText(applicationContext,"Loaded route\n ${route.eventName}",Toast.LENGTH_LONG).show()
         }
-        resetRoute()
         sendRouteIntent(r)
         val s = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES, "")
         var gp = GatePassings("")
@@ -354,6 +353,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 extras.getString("RouteJson")?.let {
                     Log.d(TAG, it)
                     sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS,  false).apply()
+                    resetRoute()
                     RouteLoader.loadRouteFromString(this, it, this::loadRoute)
                 }
             }

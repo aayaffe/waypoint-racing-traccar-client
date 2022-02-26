@@ -116,7 +116,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
             if (cursor.count > 0) {
                 cursor.moveToFirst()
                 return GatePassing(
-                    id = cursor.getLong(cursor.getColumnIndexOrThrow("id")),
+                    id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
                     eventName = cursor.getString(cursor.getColumnIndexOrThrow("eventName")),
                     routeId = cursor.getString(cursor.getColumnIndexOrThrow("routeId")),
                     deviceId = cursor.getString(cursor.getColumnIndexOrThrow("deviceId")),
@@ -145,13 +145,13 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
         }.execute()
     }
 
-    fun deleteGatepass(id: Long) {
+    fun deleteGatepass(id: Int) {
         if (db.delete("gatepasses", "id = ?", arrayOf(id.toString())) != 1) {
             throw SQLException()
         }
     }
 
-    fun deleteGatePassAsync(id: Long, handler: DatabaseHandler<Unit?>) {
+    fun deleteGatePassAsync(id: Int, handler: DatabaseHandler<Unit?>) {
         object : DatabaseAsyncTask<Unit>(handler) {
             override fun executeMethod() {
                 deleteGatepass(id)
@@ -160,7 +160,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
     }
 
     companion object {
-        const val DATABASE_VERSION = 3
+        const val DATABASE_VERSION = 4
         const val DATABASE_NAME = "traccar.gatepasses.db"
     }
 

@@ -7,7 +7,7 @@ import java.util.*
 
 @Serializable
 data class GatePassing(
-    val id: Long = 0,
+    val id: Int = 0,
     val eventName: String,
     val routeId: String,
     val deviceId: String,
