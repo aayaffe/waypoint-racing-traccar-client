@@ -44,8 +44,7 @@ class ExpertModeActivity : AppCompatActivity() {
                 })
         }
         binding.loadRoutesBtn2.setOnClickListener {
-            val intent = Intent(this, LoadRouteActivity::class.java)
-            this.startActivity(intent)
+            throw RuntimeException("Test Crash"); // Force a crash
         }
 
 

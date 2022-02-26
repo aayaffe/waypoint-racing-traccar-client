@@ -66,6 +66,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 //    private lateinit var alarmManager: AlarmManager
 //    private lateinit var alarmIntent: PendingIntent
     private lateinit var binding: ActivityMainBinding
+    private val expertMode = BuildConfig.DEBUG
 
 
 
@@ -340,6 +341,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main, menu)
+        menu.findItem(R.id.expert_mode_menu_action).isVisible = expertMode
         return true
     }
     private val getRouteStartForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
@@ -386,11 +388,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 getRouteStartForResult.launch(Intent(this, LoadRouteActivity::class.java))
                 return true
             }
-//            R.id.expert_mode_menu_action -> {
-//                val intent = Intent(this, ExpertModeActivity::class.java)
-//                this.startActivity(intent)
-//                return true
-//            }
+            R.id.expert_mode_menu_action -> {
+                val intent = Intent(this, ExpertModeActivity::class.java)
+                this.startActivity(intent)
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }
