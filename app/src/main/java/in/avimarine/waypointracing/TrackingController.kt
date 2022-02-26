@@ -120,18 +120,19 @@ class TrackingController(private val context: Context) :
                 GatePassings.getLastGatePass(context)?.routeId ?: "" == route!!.id) {
                 return
             }
+            Log.d(TAG, "inArea ${route!!.elements[nextWpt].name}")
             StatusActivity.addMessage("Passed " + route!!.elements[nextWpt].name)
             val gp = GatePassing(
                 route!!.eventName, route!!.id,
                 deviceId!!,
                 boatName!!, route!!.elements[nextWpt].id, route!!.elements[nextWpt].name, position.time, position
             )
-            GatePassings.addGatePass(context, gp)
             if (buffer) {
                 write(gp)
             } else {
                 send(gp)
             }
+            GatePassings.addGatePass(context, gp)
             if (route!!.eventType == EventType.WPTRACING) { //Enable auto waypoint advance for waypoint racing event only
                 nextWpt += 1
                 setNextWpt(nextWpt)
@@ -147,11 +148,13 @@ class TrackingController(private val context: Context) :
             val lastGatePass = GatePassings.getLastGatePass(context)
 
             if (wpt != null){
-                if (lastGatePass!= null && lastGatePass.routeId == route.id && lastGatePass.id == wpt.id){
+                if (lastGatePass!= null && lastGatePass.routeId == route.id && lastGatePass.gateId == wpt.id){
                     setGPSInterval(40)
+
+                } else {
+                    val interval = distance2interval(wpt, position)
+                    setGPSInterval(interval)
                 }
-                val interval = distance2interval(wpt,position)
-                setGPSInterval(interval)
             }
         }
     }
