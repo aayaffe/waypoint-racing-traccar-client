@@ -11,8 +11,8 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.json.JSONException
 
-@Parcelize
 //@Serializable
+@Parcelize
 class Gate(
     override val name: String,
     override val type: RouteElementType = RouteElementType.GATE,
@@ -22,6 +22,7 @@ class Gate(
     override val portWpt: Location,
     override val mandatory: Boolean,
     override val proofArea: ProofArea,
+    override val id: Int,
 ) : RouteElement, Parcelable {
 
     constructor(
@@ -30,14 +31,16 @@ class Gate(
         portLocation: Location,
         mandatory: Boolean,
         bearing1: Double,
-        bearing2: Double
+        bearing2: Double,
+        id: Int
     ) : this(
         name,
         RouteElementType.GATE,
         stbdLocation,
         portLocation,
         mandatory,
-        ProofAreaFactory.createProofArea(stbdLocation, portLocation, bearing1, bearing2)
+        ProofAreaFactory.createProofArea(stbdLocation, portLocation, bearing1, bearing2),
+        id
     )
 
     constructor(
@@ -47,14 +50,16 @@ class Gate(
         mandatory: Boolean,
         bearing1: Double,
         bearing2: Double,
-        dist: Double
+        dist: Double,
+        id : Int
     ) : this(
         name,
         RouteElementType.GATE,
         stbdLocation,
         portLocation,
         mandatory,
-        ProofAreaFactory.createProofArea(stbdLocation, portLocation, bearing1, bearing2, dist)
+        ProofAreaFactory.createProofArea(stbdLocation, portLocation, bearing1, bearing2, dist),
+        id
     )
 
     constructor(
@@ -62,14 +67,16 @@ class Gate(
         stbdLocation: Location,
         portLocation: Location,
         mandatory: Boolean,
-        dist: Double
+        dist: Double,
+        id: Int
     ) : this(
         name,
         RouteElementType.GATE,
         stbdLocation,
         portLocation,
         mandatory,
-        ProofAreaFactory.createProofArea(stbdLocation, portLocation, dist)
+        ProofAreaFactory.createProofArea(stbdLocation, portLocation, dist),
+        id
     )
 
     override fun isInProofArea(loc: Location): Boolean {
@@ -81,7 +88,6 @@ class Gate(
     }
 
     companion object {
-        val TAG = "Gate"
         fun fromGeoJson(f: Feature): Gate {
             val name =
                 f.properties()?.get("name")?.asString ?: throw JSONException("Failed to get name")
@@ -93,14 +99,15 @@ class Gate(
             portloc.latitude = line.coordinates().get(1).latitude()
             portloc.longitude = line.coordinates().get(1).longitude()
             val man = f.properties()!!.get("mandatory").asBoolean
+            val id = f.properties()!!.get("id").asInt
             if (f.properties()!!.has("proofAreaBearings")) {
                 val b1 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(0).asDouble
                 val b2 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(1).asDouble
                 val dist = (f.properties()?.get("proofAreaSize") as JsonArray).get(0).asDouble
-                return Gate(name, stbdloc, portloc, man, b1, b2, dist)
+                return Gate(name, stbdloc, portloc, man, b1, b2, dist, id)
             } else {
                 val dist = (f.properties()?.get("proofAreaSize") as JsonArray).get(0).asDouble
-                return Gate(name, stbdloc, portloc, man, dist)
+                return Gate(name, stbdloc, portloc, man, dist, id)
             }
         }
     }

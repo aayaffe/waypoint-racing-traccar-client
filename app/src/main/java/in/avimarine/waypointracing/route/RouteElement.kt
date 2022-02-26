@@ -10,6 +10,7 @@ sealed interface RouteElement :Parcelable {
     val portWpt : Location
     val mandatory : Boolean
     val proofArea : ProofArea
+    val id : Int
 
     fun isInProofArea(loc: Location): Boolean
 }

@@ -24,26 +24,31 @@ class Waypoint(
     override val portWpt: Location,
     override val mandatory: Boolean,
     override val proofArea: ProofArea,
+    override val id: Int,
 ) : RouteElement, Parcelable {
     constructor(
         name: String,
         location: Location,
         mandatory: Boolean,
         bearing1: Double,
-        bearing2: Double
+        bearing2: Double,
+        id: Int
     ) : this(
         name,
         RouteElementType.WAYPOINT,
         location,
         location,
         mandatory,
-        ProofAreaFactory.createProofArea(location, bearing1, bearing2)
+        ProofAreaFactory.createProofArea(location, bearing1, bearing2),
+        id
     )
 
     constructor(name: String,
                 location: Location,
                 mandatory: Boolean,
-                dist: Double) : this(name, RouteElementType.WAYPOINT, location, location, mandatory, ProofAreaFactory.createProofArea(dist))
+                dist: Double,
+    id: Int
+    ) : this(name, RouteElementType.WAYPOINT, location, location, mandatory, ProofAreaFactory.createProofArea(dist), id)
 
     override fun isInProofArea(loc: Location): Boolean {
         return proofArea.isInProofArea(portWpt, loc)
@@ -54,7 +59,6 @@ class Waypoint(
     }
 
     companion object {
-        val TAG = "Waypoint"
         fun fromGeoJson(f: Feature): Waypoint {
             val name = f.properties()?.get("name")?.asString
                 ?: throw JSONException("Failed to get Waypoint name")
@@ -68,15 +72,16 @@ class Waypoint(
             } catch (e: Exception){
                 ProofAreaType.QUADRANT
             }
-            when (proofAreaType) {
+            val id = f.properties()!!.get("id").asInt
+            return when (proofAreaType) {
                 ProofAreaType.QUADRANT -> {
                     val b1 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(0).asDouble
                     val b2 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(1).asDouble
-                    return Waypoint(name, loc, man, b1, b2)
+                    Waypoint(name, loc, man, b1, b2, id)
                 }
                 ProofAreaType.CIRCLE -> {
                     val d = (f.properties()?.get("proofAreaSize") as JsonElement).asDouble
-                    return Waypoint(name, loc, man, d)
+                    Waypoint(name, loc, man, d, id)
                 }
                 else -> {
                     throw JsonParseException("Improper proof area for waypoint")

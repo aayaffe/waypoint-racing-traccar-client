@@ -22,6 +22,7 @@ class Finish(
     override val portWpt: Location,
     override val mandatory: Boolean,
     override val proofArea: ProofArea,
+    override val id: Int,
 ) : RouteElement, Parcelable {
 
     constructor(
@@ -30,24 +31,34 @@ class Finish(
         portLocation: Location,
         bearing1: Double,
         bearing2: Double,
-        dist: Double
+        dist: Double,
+        id: Int
     ) : this(
         name,
         RouteElementType.FINISH,
         stbdLocation,
         portLocation,
         true,
-        ProofAreaFactory.createProofArea(stbdLocation, portLocation, bearing1, bearing2, dist)
+        ProofAreaFactory.createProofArea(stbdLocation, portLocation, bearing1, bearing2, dist),
+        id
     )
 
-    constructor(name: String, stbdLocation: Location, portLocation: Location, dist: Double) : this(
-        name,
-        RouteElementType.FINISH,
-        stbdLocation,
-        portLocation,
-        true,
-        ProofAreaFactory.createProofArea(stbdLocation, portLocation, dist)
-    )
+    constructor(
+        name: String,
+        stbdLocation: Location,
+        portLocation: Location,
+        dist: Double,
+        id: Int
+    ) :
+            this(
+                name,
+                RouteElementType.FINISH,
+                stbdLocation,
+                portLocation,
+                true,
+                ProofAreaFactory.createProofArea(stbdLocation, portLocation, dist),
+                id
+            )
 
     override fun isInProofArea(loc: Location): Boolean {
         return proofArea.isInProofArea(portWpt, stbdWpt, loc)
@@ -58,7 +69,6 @@ class Finish(
     }
 
     companion object {
-        val TAG = "Finish"
         fun fromGeoJson(f: Feature): Finish {
             val name =
                 f.properties()?.get("name")?.asString ?: throw JSONException("Failed to get name")
@@ -69,14 +79,15 @@ class Finish(
             val portloc = Location("")
             portloc.latitude = line.coordinates()[1].latitude()
             portloc.longitude = line.coordinates()[1].longitude()
+            val id = f.properties()!!.get("id").asInt
             if (f.properties()!!.has("proofAreaBearings")) {
                 val b1 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(0).asDouble
                 val b2 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(1).asDouble
                 val dist = (f.properties()?.get("proofAreaSize") as JsonArray).get(0).asDouble
-                return Finish(name, stbdloc, portloc, b1, b2, dist)
+                return Finish(name, stbdloc, portloc, b1, b2, dist, id)
             } else {
                 val dist = (f.properties()?.get("proofAreaSize") as JsonArray).get(0).asDouble
-                return Finish(name, stbdloc, portloc, dist)
+                return Finish(name, stbdloc, portloc, dist, id)
             }
         }
     }

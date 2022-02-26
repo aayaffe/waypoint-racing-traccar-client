@@ -116,13 +116,15 @@ class TrackingController(private val context: Context) :
             sendPosition(position)
         }
         if (inArea && route != null) {
-            if (GatePassings.getLastGatePass(context)?.gateName ?: "" == route!!.elements[nextWpt].name) {
-                return //TODO Check using other options than gateName!! Add gateId.
+            if (GatePassings.getLastGatePass(context)?.gateId ?: "" == route!!.elements[nextWpt].id &&
+                GatePassings.getLastGatePass(context)?.routeId ?: "" == route!!.id) {
+                return
             }
+            StatusActivity.addMessage("Passed " + route!!.elements[nextWpt].name)
             val gp = GatePassing(
                 route!!.eventName, route!!.id,
                 deviceId!!,
-                boatName!!, nextWpt, route!!.elements[nextWpt].name, position.time, position
+                boatName!!, route!!.elements[nextWpt].id, route!!.elements[nextWpt].name, position.time, position
             )
             GatePassings.addGatePass(context, gp)
             if (buffer) {
@@ -395,12 +397,7 @@ class TrackingController(private val context: Context) :
         val l = location.toLocation()
         val wpt = route?.elements?.elementAtOrNull(nextWpt)
         if (wpt != null) {
-            return if (wpt.isInProofArea(l)) {
-                StatusActivity.addMessage("Passed " + wpt.name)
-                true
-            } else {
-                false
-            }
+            return wpt.isInProofArea(l)
         }
         return false
     }

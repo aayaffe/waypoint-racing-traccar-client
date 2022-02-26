@@ -353,9 +353,9 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             if (extras != null) {
                 extras.getString("RouteJson")?.let {
                     Log.d(TAG, it)
+                    sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS,  false).apply()
                     RouteLoader.loadRouteFromString(this, it, this::loadRoute)
                 }
-
             }
         }
 
@@ -620,9 +620,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         if (permission) {
             val i = Intent(this, TrackingService::class.java)
-            if (!route.isEmpty()) {
-                i.putExtra("route", route)
-            }
+            i.putExtra("route", route)
             i.putExtra("nextwpt", nextWpt)
             ContextCompat.startForegroundService(this, i)
 //            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {

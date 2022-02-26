@@ -49,7 +49,7 @@ class TrackingService() : Service() {
     private var trackingController: TrackingController? = null
     private val br: BroadcastReceiver = RouteBroadcastReceiver()
     private var nextWpt: Int = -1
-    private var route: Route? = null
+    private var route: Route = Route.emptyRoute()
 
     class HideNotificationService : Service() {
         override fun onBind(intent: Intent): IBinder? {
@@ -97,7 +97,7 @@ class TrackingService() : Service() {
     }
 
     @TargetApi(Build.VERSION_CODES.ECLAIR)
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         WakefulBroadcastReceiver.completeWakefulIntent(intent)
         parseRouteIntent(intent)
         return START_STICKY
@@ -115,9 +115,9 @@ class TrackingService() : Service() {
         trackingController?.stop()
     }
 
-    private fun parseRouteIntent(i: Intent?){
-        route = i?.getParcelableExtra("route")
-        nextWpt = i?.getIntExtra("nextwpt",-1) ?: -1
+    private fun parseRouteIntent(i: Intent){
+        route = i.getParcelableExtra("route")!!
+        nextWpt = i.getIntExtra("nextwpt",-1) ?: -1
         Log.d(TAG, "Recieved route: " + route.toString())
         Log.d(TAG, "Recieved nextwpt: " + route?.elements?.elementAtOrNull(nextWpt) )
         trackingController?.updateRoute(route)
@@ -127,7 +127,6 @@ class TrackingService() : Service() {
 
         const val ACTION_STARTED = "org.traccar.action.SERVICE_STARTED"
         const val ACTION_STOPPED = "org.traccar.action.SERVICE_STOPPED"
-        private val TAG = TrackingService::class.java.simpleName
         private const val NOTIFICATION_ID = 1
         const val ROUTE_ACTION = "GET_TRACCAR_ROUTE"
 
@@ -160,7 +159,7 @@ class TrackingService() : Service() {
 
 
     inner class RouteBroadcastReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
+        override fun onReceive(context: Context?, intent: Intent) {
             parseRouteIntent(intent)
         }
     }
