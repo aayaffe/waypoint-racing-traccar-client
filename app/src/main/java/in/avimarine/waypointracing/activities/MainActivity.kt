@@ -455,7 +455,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         binding.location.setData(getLocationData(position))
         binding.time.setData(timeStamptoDateString(position.time.time))
         binding.vmg.setData(getVMGGateData(position,wpt))
-
+        if (wpt != null) {
+            binding.location.setTextColor(if (wpt.isInProofArea(position.toLocation())) Color.GREEN else Color.BLACK )
+        } else {
+            binding.location.setTextColor(Color.BLACK)
+        }
         val interval = (sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")?.toLong()
             ?: 600) * 4000 //After four times interval
         delayedHandler.removeCallbacksAndMessages(null)
@@ -487,6 +491,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             binding.lastSend.visibility = View.INVISIBLE
         }
         binding.boatNameTextView.text = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "Undefined")
+        binding.location.setTextColor(Color.BLACK)
         if (isEmpty){
             binding.routeElementSpinner.visibility = View.INVISIBLE
             binding.nextWptHeader.text = getString(R.string.no_route_loaded)
