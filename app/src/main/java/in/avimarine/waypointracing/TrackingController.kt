@@ -51,7 +51,7 @@ class TrackingController(private val context: Context) :
     private val gatePassDatabaseHelper = GatePassesDatabaseHelper(context)
     private val networkManager = NetworkManager(context, this)
     private val deviceId = sharedPreferences.getString(SettingsFragment.KEY_DEVICE, "undefined")
-    private val boatName = sharedPreferences.getString(SettingsFragment.KEY_NAME, "boat_undefined")
+    private val boatName = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "boat_undefined")
 
 
     private val url: String = sharedPreferences.getString(

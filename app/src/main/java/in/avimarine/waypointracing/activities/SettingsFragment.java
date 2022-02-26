@@ -47,7 +47,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
 
     private static final String TAG = SettingsFragment.class.getSimpleName();
     public static final String KEY_DEVICE = "id";
-    public static final String KEY_NAME = "boat_name";
+    public static final String KEY_BOAT_NAME = "boat_name";
     public static final String KEY_URL = "url";
     public static final String KEY_URL_GATES = "urlgates";
     public static final String KEY_INTERVAL = "interval";
@@ -103,7 +103,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
 
         Preference.OnPreferenceChangeListener nonEmptyStringValidationListener = (preference, newValue) -> newValue != null && !newValue.equals("");
         findPreference(KEY_DEVICE).setOnPreferenceChangeListener(nonEmptyStringValidationListener);
-        findPreference(KEY_NAME).setOnPreferenceChangeListener(nonEmptyStringValidationListener);
+        findPreference(KEY_BOAT_NAME).setOnPreferenceChangeListener(nonEmptyStringValidationListener);
         findPreference(KEY_DISTANCE).setOnPreferenceChangeListener(numberValidationListener);
         findPreference(KEY_ANGLE).setOnPreferenceChangeListener(numberValidationListener);
         findPreference(KEY_EXPERT_MODE).setOnPreferenceChangeListener((preference, newValue) -> {
@@ -176,7 +176,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
         if (sharedPreferences.getBoolean(KEY_EXPERT_MODE, false)) {
             findPreference(KEY_DEVICE).setEnabled(enabled);
         }
-        findPreference(KEY_NAME).setEnabled(enabled);
+        findPreference(KEY_BOAT_NAME).setEnabled(enabled);
         findPreference(KEY_URL).setEnabled(enabled);
         findPreference(KEY_INTERVAL).setEnabled(enabled);
         findPreference(KEY_DISTANCE).setEnabled(enabled);
@@ -193,8 +193,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
             case KEY_DEVICE:
                 findPreference(KEY_DEVICE).setSummary(sharedPreferences.getString(KEY_DEVICE, null));
                 break;
-            case KEY_NAME:
-                findPreference(KEY_NAME).setSummary(sharedPreferences.getString(KEY_NAME, null));
+            case KEY_BOAT_NAME:
+                findPreference(KEY_BOAT_NAME).setSummary(sharedPreferences.getString(KEY_BOAT_NAME, null));
                 break;
             case KEY_STATUS:
                 setPreferencesEnabled(!sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false));
@@ -213,12 +213,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
             ((EditTextPreference) findPreference(KEY_DEVICE)).setText(id);
         }
         findPreference(KEY_DEVICE).setSummary(sharedPreferences.getString(KEY_DEVICE, null));
-        if (!sharedPreferences.contains(KEY_NAME)) {
+        if (!sharedPreferences.contains(KEY_BOAT_NAME)) {
             String id = "Boat_" + sharedPreferences.getString(KEY_DEVICE, null);
-            sharedPreferences.edit().putString(KEY_NAME, id).apply();
-            ((EditTextPreference) findPreference(KEY_NAME)).setText(id);
+            sharedPreferences.edit().putString(KEY_BOAT_NAME, id).apply();
+            ((EditTextPreference) findPreference(KEY_BOAT_NAME)).setText(id);
         }
-        findPreference(KEY_NAME).setSummary(sharedPreferences.getString(KEY_NAME, ""));
+        findPreference(KEY_BOAT_NAME).setSummary(sharedPreferences.getString(KEY_BOAT_NAME, ""));
     }
 
 

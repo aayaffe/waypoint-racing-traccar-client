@@ -42,7 +42,7 @@ abstract class PositionProvider(
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
     protected var deviceId = sharedPreferences.getString(SettingsFragment.KEY_DEVICE, "undefined")!!
-    protected var boatName = sharedPreferences.getString(SettingsFragment.KEY_NAME, "boat_undefined")!!
+    protected var boatName = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "boat_undefined")!!
     protected var interval = sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
     protected var distance: Double = sharedPreferences.getString(SettingsFragment.KEY_DISTANCE, "0")!!.toInt().toDouble()
     protected var angle: Double = sharedPreferences.getString(SettingsFragment.KEY_ANGLE, "0")!!.toInt().toDouble()

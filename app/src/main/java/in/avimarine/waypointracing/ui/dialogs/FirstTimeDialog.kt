@@ -21,15 +21,17 @@ class FirstTimeDialog : DialogFragment() {
             // Pass null as the parent view because its going in the dialog layout
             builder.setView(v)
                     // Add action buttons
-                    .setPositiveButton(R.string.set,
-                            DialogInterface.OnClickListener { dialog, id ->
-                                listener.onDialogPositiveClick(this, v.findViewById<EditText>(R.id.boatname).text.toString())
-                            })
-                    .setNegativeButton(R.string.later,
-                            DialogInterface.OnClickListener { dialog, id ->
-                                listener.onDialogNegativeClick(this)
-//                                getDialog().cancel()
-                            })
+                    .setPositiveButton(R.string.set
+                    ) { _, _ ->
+                        listener.onDialogPositiveClick(
+                            this,
+                            v.findViewById<EditText>(R.id.boatname).text.toString()
+                        )
+                    }
+                .setNegativeButton(R.string.later
+                ) { _, _ ->
+                    listener.onDialogNegativeClick(this)
+                }
             builder.setTitle("Enter the boat's name").create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }

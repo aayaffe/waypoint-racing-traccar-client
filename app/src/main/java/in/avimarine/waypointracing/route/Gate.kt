@@ -93,7 +93,7 @@ class Gate(
             portloc.latitude = line.coordinates().get(1).latitude()
             portloc.longitude = line.coordinates().get(1).longitude()
             val man = f.properties()!!.get("mandatory").asBoolean
-            if (f.properties()!!.has("proofAreaBearings")!!) {
+            if (f.properties()!!.has("proofAreaBearings")) {
                 val b1 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(0).asDouble
                 val b2 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(1).asDouble
                 val dist = (f.properties()?.get("proofAreaSize") as JsonArray).get(0).asDouble

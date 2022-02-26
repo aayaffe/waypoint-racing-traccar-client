@@ -87,7 +87,7 @@ class RouteActivity : AppCompatActivity() {
                 GatePassings("")
             }
         }
-        route?.elements?.forEachIndexed{ index, re ->
+        route.elements.forEachIndexed{ index, re ->
             val rec = RouteElementConcat(re,getLatestGatePass(index,gp))
             ret.add(rec)
         }
