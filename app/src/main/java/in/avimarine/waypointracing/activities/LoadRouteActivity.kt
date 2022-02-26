@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
@@ -63,9 +64,20 @@ class LoadRouteActivity : AppCompatActivity() {
     }
 
     private fun selectRoute(json: String){
-        val i = Intent()
-        i.putExtra("RouteJson", json)
-        setResult(RESULT_OK, i)
-        finish()
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Are you sure?")
+        builder.setMessage("Loading new route will delete all previous mark passings and reset route")
+        builder.setIcon(android.R.drawable.ic_dialog_alert)
+        builder.setPositiveButton("Yes"){dialogInterface, which ->
+            val i = Intent()
+            i.putExtra("RouteJson", json)
+            setResult(RESULT_OK, i)
+            finish()
+        }
+        builder.setNegativeButton("No"){dialogInterface, which ->
+        }
+        val alertDialog: AlertDialog = builder.create()
+        alertDialog.setCancelable(false)
+        alertDialog.show()
     }
 }
