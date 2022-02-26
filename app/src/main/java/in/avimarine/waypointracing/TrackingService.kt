@@ -123,7 +123,7 @@ class TrackingService() : Service() {
         nextWpt = i?.getIntExtra("nextwpt",-1) ?: -1
         Log.d(TAG, "Recieved route: " + route.toString())
         Log.d(TAG, "Recieved nextwpt: " + route?.elements?.elementAtOrNull(nextWpt) )
-        trackingController?.updateRoute(route, nextWpt)
+        trackingController?.updateRoute(route)
     }
 
     companion object {

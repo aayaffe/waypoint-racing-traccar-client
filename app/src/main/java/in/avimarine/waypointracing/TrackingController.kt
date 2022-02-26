@@ -406,7 +406,7 @@ class TrackingController(private val context: Context) :
     }
 
 
-    fun updateRoute(route: Route?, nextWpt: Int) {
+    fun updateRoute(route: Route?) {
         this.route = route
     }
 

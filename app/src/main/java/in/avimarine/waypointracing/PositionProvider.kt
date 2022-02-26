@@ -58,7 +58,7 @@ abstract class PositionProvider(
                 && location.distanceTo(lastLocation) >= distance || angle > 0
                 && abs(location.bearing - lastLocation!!.bearing) >= angle)
         ) {
-            Log.i(TAG, "location new")
+            Log.v(TAG, "location new")
             lastLocation = location
             listener.onPositionUpdate(Position(deviceId, boatName, location, getBatteryLevel(context)))
         } else {

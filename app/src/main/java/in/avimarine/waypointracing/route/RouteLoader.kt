@@ -165,8 +165,9 @@ class RouteLoader {
             return null
         }
 
-        fun loadRouteFromString(json: String, loadRoute: (r: Route?) -> Unit) {
+        fun loadRouteFromString(context: Context, json: String, loadRoute: (r: Route?) -> Unit) {
             loadRoute(Route.fromGeoJson(json))
+            saveRoute(context, json)
         }
     }
 }

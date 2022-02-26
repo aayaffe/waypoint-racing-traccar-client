@@ -347,7 +347,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             if (extras != null) {
                 extras.getString("RouteJson")?.let {
                     Log.d(TAG, it)
-                    RouteLoader.loadRouteFromString(it, this::loadRoute)
+                    RouteLoader.loadRouteFromString(this, it, this::loadRoute)
                 }
 
             }
@@ -659,7 +659,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private fun takeScreenshot(){
         val screenshotResult = screenshotManager.makeScreenshot()
-        val subscription = screenshotResult.observe(
+        screenshotResult.observe(
             onSuccess = { processScreenshot(it) },
             onError = { /*onMakeScreenshotFailed(it)*/ }
         )
