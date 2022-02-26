@@ -27,8 +27,8 @@ android {
         buildConfigField 'boolean', 'HIDDEN_APP', 'false'
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 21
-        versionName '3.11'
+        versionCode 22
+        versionName '3.5'
         signingConfig signingConfigs.debug
     }
     buildTypes{
@@ -47,7 +47,7 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
+        viewBinding true
     }
 
     flavorDimensions 'default'
@@ -80,7 +80,6 @@ android {
 }
 
 dependencies {
-    // Import the BoM for the Firebase platform
     implementation platform('com.google.firebase:firebase-bom:29.0.0')
     implementation 'com.google.android.material:material:1.6.0-alpha02'
     implementation 'androidx.multidex:multidex:2.0.1'
