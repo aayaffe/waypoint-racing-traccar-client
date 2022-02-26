@@ -116,13 +116,13 @@ class TrackingController(private val context: Context) :
             sendPosition(position)
         }
         if (inArea && route != null) {
-            if (GatePassings.getLastGatePass(context)?.gateName ?: "" == route!!.elements.get(nextWpt).name) {
+            if (GatePassings.getLastGatePass(context)?.gateName ?: "" == route!!.elements[nextWpt].name) {
                 return //TODO Check using other options than gateName!! Add gateId.
             }
             val gp = GatePassing(
                 route!!.eventName, route!!.id,
                 deviceId!!,
-                boatName!!, nextWpt, route!!.elements.get(nextWpt).name, position.time, position
+                boatName!!, nextWpt, route!!.elements[nextWpt].name, position.time, position
             )
             GatePassings.addGatePass(context, gp)
             if (buffer) {
