@@ -64,7 +64,8 @@
         android:key="interval"
         android:inputType="number"
         android:summary="@string/settings_interval_summary"
-        android:title="@string/settings_interval_title"/>
+        android:title="@string/settings_interval_title"
+        app:isPreferenceVisible="false"/>
 
     <EditTextPreference
         android:defaultValue="0"
