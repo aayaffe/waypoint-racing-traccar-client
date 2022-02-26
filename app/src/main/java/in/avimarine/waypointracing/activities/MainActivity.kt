@@ -199,7 +199,9 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else {
             setTitle(getString(R.string.title_treasure_hunting), r.eventName)
         }
-        Toast.makeText(applicationContext,"Loaded route\n ${route.eventName}",Toast.LENGTH_LONG).show()
+        if (!route.isEmpty()) {
+            Toast.makeText(applicationContext,"Loaded route\n ${route.eventName}",Toast.LENGTH_LONG).show()
+        }
         resetRoute()
         sendRouteIntent(r)
         val s = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES, "")
