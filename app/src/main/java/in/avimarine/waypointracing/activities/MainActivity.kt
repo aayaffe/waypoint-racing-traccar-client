@@ -486,6 +486,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else {
             binding.lastSend.visibility = View.INVISIBLE
         }
+        binding.boatNameTextView.text = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "Undefined")
         if (isEmpty){
             binding.routeElementSpinner.visibility = View.INVISIBLE
             binding.nextWptHeader.text = getString(R.string.no_route_loaded)
@@ -548,6 +549,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             }
         } else if (key == SettingsFragment.KEY_GATE_PASSES) {
             updateLastPass()
+        } else if (key == SettingsFragment.KEY_BOAT_NAME) {
+            binding.boatNameTextView.text = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "Undefined")
         }
     }
 
