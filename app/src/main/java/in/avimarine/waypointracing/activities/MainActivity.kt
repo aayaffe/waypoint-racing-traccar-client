@@ -40,6 +40,11 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.DialogFragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
+import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
+import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotBitmap
 import eu.bolt.screenshotty.ScreenshotManager
@@ -67,14 +72,19 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 //    private lateinit var alarmIntent: PendingIntent
     private lateinit var binding: ActivityMainBinding
     private val expertMode = BuildConfig.DEBUG
-
-
+    // See: https://developer.android.com/training/basics/intents/result
+    private val signInLauncher = registerForActivityResult(
+        FirebaseAuthUIActivityResultContract()
+    ) { res ->
+        this.onSignInResult(res)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+        launchAuthenticationProcess()
         screenshotManager = ScreenshotManagerBuilder(this)
             .withCustomActionOrder(ScreenshotActionOrder.pixelCopyFirst()) //optional, ScreenshotActionOrder.pixelCopyFirst() by default
             .withPermissionRequestCode(REQUEST_SCREENSHOT_PERMISSION) //optional, 888 by default
@@ -108,7 +118,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
         setButton(sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false))
         if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false)) {
-            startTrackingService(true, false)
+            startTrackingService(checkPermission = true, initialPermission = false)
         }
         val mCalendar: Calendar = GregorianCalendar()
         val mTimeZone = mCalendar.timeZone
@@ -149,6 +159,37 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
+    private fun launchAuthenticationProcess() {
+        // Choose authentication providers
+        val providers = arrayListOf(
+            AuthUI.IdpConfig.GoogleBuilder().build())
+
+        // Create and launch sign-in intent
+        val signInIntent = AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setAvailableProviders(providers)
+            .build()
+        signInLauncher.launch(signInIntent)
+    }
+
+    private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
+        val response = result.idpResponse
+        if (result.resultCode == RESULT_OK) {
+            // Successfully signed in
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                Log.d(TAG, "Logged in as ${user.displayName}")
+            }
+        } else {
+            if (response != null) {
+                Log.e(TAG, "Error authenticating ${response.error?.errorCode}")
+            } else {
+                Log.e(TAG, "User canceled sign in")
+            }
+        }
+        setUiForLogin(FirebaseAuth.getInstance().currentUser)
+    }
+
     /**
      * Used to ignore changing text size.
      */
@@ -156,7 +197,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         val newOverride = Configuration(newBase?.resources?.configuration)
         newOverride.fontScale = 1.0f
         applyOverrideConfiguration(newOverride)
-
         super.attachBaseContext(newBase)
     }
 
@@ -343,6 +383,17 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main, menu)
         menu.findItem(R.id.expert_mode_menu_action).isVisible = expertMode
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            menu.findItem(R.id.login_menu_action).icon =
+                getDrawable(R.drawable.ic_baseline_login_24)
+            menu.findItem(R.id.login_menu_action).title =
+                getString(R.string.login)
+        } else {
+            menu.findItem(R.id.login_menu_action).icon =
+                getDrawable(R.drawable.ic_baseline_logout_24)
+            menu.findItem(R.id.login_menu_action).title =
+                getString(R.string.logout)
+        }
         return true
     }
     private val getRouteStartForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
@@ -372,6 +423,10 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 this.startActivity(intent)
                 return true
             }
+            R.id.login_menu_action -> {
+                login()
+                return true
+            }
             R.id.send_screenshot_menu_action -> {
                 takeScreenshot()
                 return true
@@ -398,6 +453,21 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         return super.onOptionsItemSelected(item)
     }
+
+    private fun login() {
+        if (FirebaseAuth.getInstance().currentUser!=null){
+            AuthUI.getInstance()
+                .signOut(this)
+                .addOnCompleteListener {
+                    Log.d(TAG, "Signed out")
+                    setUiForLogin(FirebaseAuth.getInstance().currentUser)
+                }
+        } else {
+            launchAuthenticationProcess()
+        }
+    }
+
+
 
     private fun resetRoute() {
         setNextWpt(0)
@@ -508,6 +578,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             binding.shortestDistanceToGate.visibility = View.VISIBLE
             binding.vmg.visibility = View.VISIBLE
         }
+        setUiForLogin(FirebaseAuth.getInstance().currentUser)
     }
 
     private fun setUiForGPS(isAvailable: Boolean) {
@@ -530,6 +601,15 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             binding.shortestDistanceToGate.setTextColor(Color.RED)
             binding.vmg.setTextColor(Color.RED)
         }
+    }
+
+    private fun setUiForLogin(user: FirebaseUser?) {
+        if (user == null) {
+            binding.startBtn.visibility = View.INVISIBLE
+        } else {
+            binding.startBtn.visibility = View.VISIBLE
+        }
+        invalidateOptionsMenu()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
