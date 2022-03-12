@@ -420,7 +420,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-    fun setGPSInterval(i: Int){
+    private fun setGPSInterval(i: Int){
         val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
         with(sharedPref.edit()) {
             putString(SettingsFragment.KEY_INTERVAL, i.toString())
@@ -428,7 +428,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-    fun setMainActivityVisibilityStatus(b: Boolean){
+    private fun setMainActivityVisibilityStatus(b: Boolean){
         val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
         with(sharedPref.edit()) {
             putBoolean(SettingsFragment.KEY_IS_UI_VISIBLE, b)
@@ -681,44 +681,14 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private fun takeScreenshot(){
         val screenshotResult = screenshotManager.makeScreenshot()
         screenshotResult.observe(
-            onSuccess = { processScreenshot(it) },
+            onSuccess = { ScreenShot.processScreenshot(it, this) },
             onError = { /*onMakeScreenshotFailed(it)*/ }
         )
     }
 
-    private fun processScreenshot(it: eu.bolt.screenshotty.Screenshot) {
-        val bitmap = when (it) {
-            is ScreenshotBitmap -> it.bitmap
-        }
-        sendSnapshot( bitmap)
-    }
-
-    private fun sendSnapshot(bitmap: Bitmap) {
-        try {
-            val cachePath = File(this.getCacheDir(), "images")
-            cachePath.mkdirs() // don't forget to make the directory
-            val stream =
-                FileOutputStream(cachePath.toString() + "/image.png") // overwrites this image every time
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            stream.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        val imagePath = File(this.getCacheDir(), "images")
-        val newFile = File(imagePath, "image.png")
-        val contentUri: Uri =
-            FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", newFile)
-        val shareIntent = Intent()
-        shareIntent.action = Intent.ACTION_SEND
-        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // temp permission for receiving app to read this file
-        shareIntent.setDataAndType(contentUri, contentResolver.getType(contentUri))
-        shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri)
-        startActivity(Intent.createChooser(shareIntent, "Choose an app"))
-    }
-
     companion object{
         private const val PERMISSIONS_REQUEST_LOCATION = 2
-        private const val ALARM_MANAGER_INTERVAL = 15000
+//        private const val ALARM_MANAGER_INTERVAL = 15000
     }
 
 }
