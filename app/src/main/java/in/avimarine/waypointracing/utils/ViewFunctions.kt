@@ -79,8 +79,8 @@ fun getSpeedString(speed: Double, units:String="knots") : String{
 /***
  * Expects [distance] in meters, returns in Nautical miles
  */
-fun getDistString(distance: Double, units:String="nms") : String{
-    val nms = distance * 0.000539957
+fun getDistString(distance: Double, units:DistanceUnits=DistanceUnits.NauticalMiles) : String{
+    val nms = distance * metersConversion[units]!!
     return if (nms < 100) String.format("%.2f", nms) else String.format("%.0f", nms)
 }
 
@@ -102,7 +102,7 @@ fun getLonString(lon: Double): String {
     return String.format("%03d", abs(floor(lon)).toInt()) + "\u00B0 " + String.format("%06.3f", abs(lon - floor(lon)) * 60) + "' "+ if (lon > 0) "E" else "W"
 }
 
-val compassPoints = mapOf<Int, String>(
+val compassPoints = mapOf(
     0 to "N",
     45 to "NE",
     90 to "E",
@@ -123,3 +123,15 @@ fun getPointOfCompass(dir1:Double, dir2: Double):String {
     val closestDir  = (dir / 45.0).roundToInt() * 45
     return compassPoints.get(closestDir)?:"?"
 }
+
+enum class DistanceUnits{
+    NauticalMiles, Miles, Kilometers, Yards, Meters
+}
+
+val metersConversion = mapOf(
+    DistanceUnits.NauticalMiles to 0.000539957,
+    DistanceUnits.Miles to 0.000621371,
+    DistanceUnits.Kilometers to 0.001,
+    DistanceUnits.Yards to 1.09361,
+    DistanceUnits.Meters to 1.0
+)

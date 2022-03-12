@@ -84,4 +84,6 @@
     <string name="restart_route">Restart Route</string>
     <string name="view_route">View Route</string>
     <string name="load_new_route">Load new route</string>
+    <string name="lastpass_message">Last gate pass: %1$s at: %2$s</string>
+
 </resources>

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package `in`.avimarine.waypointracing;
+package `in`.avimarine.waypointracing
 
 import android.content.Context
 import `in`.avimarine.waypointracing.ProtocolFormatter.formatRequest
@@ -70,10 +70,10 @@ class TrackingController(private val context: Context) :
     private var isWaitingGP = true
 
 
-    interface PositionListener {
-        fun onPositionUpdate(position: Position?)
-        fun onPositionError(error: Throwable?)
-    }
+//    interface PositionListener {
+//        fun onPositionUpdate(position: Position?)
+//        fun onPositionError(error: Throwable?)
+//    }
 
     fun start() {
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)

@@ -562,7 +562,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private fun updateLastPass() {
         val gp = GatePassings.getLastGatePass(this)
         if (gp!=null) {
-            binding.lastPassTextView.text = "Last gate pass: " + gp.gateName + " at: " + timeStamptoDateString(gp.time.time)
+            binding.lastPassTextView.text = getString(R.string.lastpass_message,gp.gateName, timeStamptoDateString(gp.time.time))
         }
     }
 

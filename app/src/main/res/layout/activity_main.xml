@@ -238,7 +238,8 @@
                 android:src="@drawable/ic_baseline_not_listed_location_24"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="@+id/location"
-                app:layout_constraintEnd_toEndOf="@+id/location" />
+                app:layout_constraintEnd_toEndOf="@+id/location"
+                android:contentDescription="Is position mocked" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -258,7 +259,8 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/btn_rnd_red" />
+        app:srcCompat="@drawable/btn_rnd_red"
+        android:contentDescription="Last send position" />
     <TextView
         android:id="@+id/boatNameTextView"
         android:layout_width="wrap_content"
