@@ -3,13 +3,8 @@ package `in`.avimarine.waypointracing.activities
 import `in`.avimarine.waypointracing.*
 import `in`.avimarine.waypointracing.databinding.ActivityMainBinding
 import `in`.avimarine.waypointracing.route.*
+import `in`.avimarine.waypointracing.ui.LocationViewModel
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
-import `in`.avimarine.waypointracing.ui.UiData.Companion.getCOGData
-import `in`.avimarine.waypointracing.ui.UiData.Companion.getLocationData
-import `in`.avimarine.waypointracing.ui.UiData.Companion.getPortData
-import `in`.avimarine.waypointracing.ui.UiData.Companion.getShortestDistanceToGateData
-import `in`.avimarine.waypointracing.ui.UiData.Companion.getStbdData
-import `in`.avimarine.waypointracing.ui.UiData.Companion.getVMGGateData
 import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
 import `in`.avimarine.waypointracing.utils.*
 import android.Manifest
@@ -19,9 +14,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -36,7 +29,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.fragment.app.DialogFragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
@@ -46,13 +38,8 @@ import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import eu.bolt.screenshotty.ScreenshotActionOrder
-import eu.bolt.screenshotty.ScreenshotBitmap
 import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
-//import kotlinx.android.synthetic.main.activity_main2.*
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -516,15 +503,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private fun updateUI(position: Position) {
         val wpt = route.elements.elementAtOrNull(nextWpt)
-        binding.portGate.setData(getPortData(position,wpt,sharedPreferences))
-        binding.stbdGate.setData(getStbdData(position,wpt,sharedPreferences))
-        binding.shortestDistanceToGate.setData(getShortestDistanceToGateData(position,wpt))
+        binding.viewmodel = LocationViewModel(position,wpt,sharedPreferences)
         setUiForGPS(true)
-        binding.cog.setData(getCOGData(position,sharedPreferences))
-        binding.sog.setData(getSpeedString(position.speed))
-        binding.location.setData(getLocationData(position))
-        binding.time.setData(timeStamptoDateString(position.time.time))
-        binding.vmg.setData(getVMGGateData(position,wpt))
         if (wpt != null) {
             binding.location.setTextColor(if (wpt.isInProofArea(position.toLocation())) Color.GREEN else Color.BLACK )
         } else {
@@ -536,7 +516,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         delayedHandler.postDelayed({
             setUiForGPS(false)
         }, interval)
-        binding.mockPosition.visibility = if (position.mock) View.VISIBLE else View.INVISIBLE
         if (sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)) {
             binding.lastSend.visibility = View.VISIBLE
             val lastLocationSentTime = sharedPreferences.getLong(SettingsFragment.KEY_LAST_SEND, -1)

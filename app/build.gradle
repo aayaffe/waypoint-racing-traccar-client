@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'kotlin-parcelize'
+apply plugin: 'kotlin-kapt'
 
 
 android {
@@ -48,6 +49,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        dataBinding true
     }
 
     flavorDimensions 'default'
