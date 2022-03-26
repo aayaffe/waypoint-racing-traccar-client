@@ -40,10 +40,10 @@
         app:showAsAction="never"
         android:title="@string/load_new_route"
         app:iconTint="@color/light"/>
-    <item
-        android:id="@+id/info_menu_action"
-        android:title="@string/menu_info"
-        app:showAsAction="ifRoom" />
+<!--    <item-->
+<!--        android:id="@+id/info_menu_action"-->
+<!--        android:title="@string/menu_info"-->
+<!--        app:showAsAction="ifRoom" />-->
     <item
         android:id="@+id/expert_mode_menu_action"
         android:title="@string/menu_expert_mode"

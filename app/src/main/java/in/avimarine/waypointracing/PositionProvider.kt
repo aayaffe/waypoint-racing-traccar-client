@@ -62,7 +62,7 @@ abstract class PositionProvider(
             lastLocation = location
             listener.onPositionUpdate(Position(deviceId, boatName, location, getBatteryLevel(context)))
         } else {
-            Log.i(TAG, if (location != null) "location ignored" else "location nil")
+            Log.v(TAG, if (location != null) "location ignored" else "location nil")
         }
     }
 

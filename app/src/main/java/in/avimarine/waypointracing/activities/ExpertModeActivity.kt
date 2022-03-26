@@ -1,13 +1,19 @@
 package `in`.avimarine.waypointracing.activities
 
+import `in`.avimarine.waypointracing.Position
 import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.database.OnlineDatabase
 import `in`.avimarine.waypointracing.databinding.ActivityExpertModeBinding
+import `in`.avimarine.waypointracing.route.GatePassing
 import android.content.Intent
+import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import java.util.*
 
 class ExpertModeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityExpertModeBinding
@@ -44,7 +50,17 @@ class ExpertModeActivity : AppCompatActivity() {
                 })
         }
         binding.loadRoutesBtn2.setOnClickListener {
-            throw RuntimeException("Test Crash"); // Force a crash
+            val gp = GatePassing(1, "EventName", "RouteId", "deviceId", "BoatName", 12, "Gate12", Date(), 32.0,35.0)
+                val db = Firebase.firestore
+                db.collection("reports")
+                    .add(gp)
+                    .addOnSuccessListener { documentReference ->
+                        Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w(TAG, "Error adding document", e)
+                    }
+
         }
 
 

@@ -297,6 +297,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         setGPSInterval(1)
         setMainActivityVisibilityStatus(true)
         updateLastPass()
+        setBoatName()
+    }
+
+    private fun setBoatName() {
+        binding.boatNameTextView.text = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "Undefined")
     }
 
     private fun getNextWpt() {
@@ -529,7 +534,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 binding.lastSend.setImageResource(R.drawable.btn_rnd_red)
             }
         } else {
-            binding.lastSend.visibility = View.INVISIBLE
+            binding.lastSend.visibility = View.GONE
         }
     }
 
@@ -537,10 +542,10 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)) {
             binding.lastSend.visibility = View.VISIBLE
         } else {
-            binding.lastSend.visibility = View.INVISIBLE
+            binding.lastSend.visibility = View.GONE
         }
-        binding.boatNameTextView.text = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "Undefined")
-        binding.location.setTextColor(Color.BLACK)
+        setBoatName()
+//        binding.location.setTextColor(Color.BLACK)
         if (isEmpty){
             binding.routeElementSpinner.visibility = View.INVISIBLE
             binding.nextWptHeader.text = getString(R.string.no_route_loaded)
@@ -548,6 +553,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             binding.stbdGate.visibility = View.GONE
             binding.shortestDistanceToGate.visibility = View.GONE
             binding.vmg.visibility = View.GONE
+            binding.startBtn.visibility = View.INVISIBLE
 
         } else {
             binding.routeElementSpinner.visibility = View.VISIBLE
@@ -556,6 +562,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             binding.stbdGate.visibility = View.VISIBLE
             binding.shortestDistanceToGate.visibility = View.VISIBLE
             binding.vmg.visibility = View.VISIBLE
+            if (FirebaseAuth.getInstance().currentUser == null) {
+                binding.startBtn.visibility = View.INVISIBLE
+            } else {
+                binding.startBtn.visibility = View.VISIBLE
+            }
         }
         setUiForLogin(FirebaseAuth.getInstance().currentUser)
     }
@@ -583,11 +594,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun setUiForLogin(user: FirebaseUser?) {
-        if (user == null) {
-            binding.startBtn.visibility = View.INVISIBLE
-        } else {
-            binding.startBtn.visibility = View.VISIBLE
-        }
+//        if (user == null) {
+//            binding.startBtn.visibility = View.INVISIBLE
+//        } else {
+//            binding.startBtn.visibility = View.VISIBLE
+//        }
         invalidateOptionsMenu()
     }
 
@@ -614,7 +625,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else if (key == SettingsFragment.KEY_GATE_PASSES) {
             updateLastPass()
         } else if (key == SettingsFragment.KEY_BOAT_NAME) {
-            binding.boatNameTextView.text = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "Undefined")
+            setBoatName()
         }
     }
 

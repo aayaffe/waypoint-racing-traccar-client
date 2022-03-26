@@ -48,7 +48,7 @@ class RouteElementFullAdapter() :
         return RouteElementConcatViewHolder(view)
     }
 
-    /* Gets current flower and uses it to bind view. */
+    /* Gets current gate and uses it to bind view. */
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: RouteElementConcatViewHolder, position: Int) {
         val rec = getItem(position)
