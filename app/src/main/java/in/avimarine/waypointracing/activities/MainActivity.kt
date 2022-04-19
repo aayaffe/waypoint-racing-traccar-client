@@ -147,6 +147,9 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun launchAuthenticationProcess() {
+        if (FirebaseAuth.getInstance().currentUser!=null){
+            return
+        }
         // Choose authentication providers
         val providers = arrayListOf(
             AuthUI.IdpConfig.GoogleBuilder().build())
