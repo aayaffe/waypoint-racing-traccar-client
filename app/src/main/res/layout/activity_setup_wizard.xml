@@ -10,6 +10,7 @@
         android:id="@+id/stepper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -23,7 +24,9 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/stepper"
-        app:navGraph="@navigation/nav_setup_wizard" />
+        app:layout_constraintVertical_bias="1.0"
+        app:navGraph="@navigation/nav_setup_wizard"
+        tools:layout_editor_absoluteX="56dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/button_next"
