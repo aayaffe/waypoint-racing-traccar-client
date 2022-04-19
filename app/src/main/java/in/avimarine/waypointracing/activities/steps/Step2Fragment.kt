@@ -18,21 +18,15 @@ package `in`.avimarine.waypointracing.activities.steps
 import `in`.avimarine.waypointracing.Boat
 import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
-import `in`.avimarine.waypointracing.databinding.LoginFragmentBinding
 import `in`.avimarine.waypointracing.databinding.SetBoatFragmentBinding
-import `in`.avimarine.waypointracing.route.GatePassing
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SeekBar
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
@@ -52,6 +46,13 @@ class Step2Fragment : SetupFragment() {
         else {
             val b = Boat(viewBinding.boatname.text.toString(), viewBinding.sailNumber.text.toString(),viewBinding.skipper.text.toString())
             FirestoreDatabase.addBoat(b, FirebaseAuth.getInstance().currentUser?.uid ?: "") //TODO: Fix issues when user not logged in
+
+            val sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(requireContext().applicationContext)
+            with(sharedPreferences.edit()) {
+                putString("boat_name", b.name)
+                commit()
+            }
         }
         return true
     }

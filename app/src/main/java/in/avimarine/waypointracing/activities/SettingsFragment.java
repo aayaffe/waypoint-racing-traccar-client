@@ -36,12 +36,15 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.util.Arrays;
 import java.util.Random;
 
 import in.avimarine.waypointracing.BuildConfig;
 import in.avimarine.waypointracing.MainApplication;
 import in.avimarine.waypointracing.R;
+import in.avimarine.waypointracing.database.FirestoreDatabase;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener {
 
@@ -195,6 +198,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
                 break;
             case KEY_BOAT_NAME:
                 findPreference(KEY_BOAT_NAME).setSummary(sharedPreferences.getString(KEY_BOAT_NAME, null));
+                if (FirebaseAuth.getInstance().getCurrentUser()!=null) {
+                    FirestoreDatabase.Companion.updateBoatName(sharedPreferences.getString(KEY_BOAT_NAME, ""), FirebaseAuth.getInstance().getCurrentUser().getUid());
+                }
                 break;
             case KEY_STATUS:
                 setPreferencesEnabled(!sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false));

@@ -17,6 +17,7 @@
         tools:context="in.avimarine.waypointracing.activities.MainActivity">
 
 
+
         <Button
             android:id="@+id/start_btn"
             android:layout_width="100dp"
@@ -28,6 +29,22 @@
             android:text="@string/settings_status_off"
             android:textAllCaps="false"
             android:textSize="14sp"
+            app:layout_constraintBottom_toTopOf="@id/lastPassTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/nav_scroll_view" />
+
+        <Button
+            android:id="@+id/login_btn"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:onClick="loginButtonClick"
+            android:text="@string/login_btn"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/lastPassTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -81,7 +98,7 @@
                     android:layout_marginEnd="1dp"
                     app:autoTextSize="true"
                     app:data="@{viewmodel!=null ? viewmodel.portData : `------`}"
-                    app:dataTextSize="16sp"
+                    app:dataTextSize="15sp"
                     app:labelText="@string/port_gate"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toTopOf="@+id/cog"
@@ -101,7 +118,7 @@
                     android:layout_marginRight="1dp"
                     app:autoTextSize="true"
                     app:data="@{viewmodel!=null ? viewmodel.stbdData : `------`}"
-                    app:dataTextSize="16sp"
+                    app:dataTextSize="15sp"
                     app:labelText="@string/stbd_gate"
                     app:layout_constraintBottom_toBottomOf="@+id/portGate"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -183,7 +200,7 @@
                     android:layout_marginEnd="1dp"
                     app:autoTextSize="true"
                     app:data="@{viewmodel!=null ? viewmodel.timeData : `------`}"
-                    app:dataTextSize="14sp"
+                    app:dataTextSize="13sp"
                     app:labelText="UTC + ?"
                     app:layout_constraintTop_toBottomOf="@id/cog"
                     app:layout_constraintBottom_toTopOf="@id/shortestDistanceToGate"

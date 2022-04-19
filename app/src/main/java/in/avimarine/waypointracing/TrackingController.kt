@@ -35,6 +35,7 @@ import `in`.avimarine.waypointracing.utils.pointToLineDist
 import `in`.avimarine.waypointracing.utils.toLocation
 import `in`.avimarine.waypointracing.utils.toNM
 import android.content.SharedPreferences
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
@@ -388,7 +389,9 @@ class TrackingController(private val context: Context) :
 
     private fun sendToFireStore(gp: GatePassing) {
         val db = Firebase.firestore
-        db.collection("reports")
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        db.collection("reports").document(uid).
+        collection("reports")
             .add(gp)
             .addOnSuccessListener { documentReference ->
                 Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")

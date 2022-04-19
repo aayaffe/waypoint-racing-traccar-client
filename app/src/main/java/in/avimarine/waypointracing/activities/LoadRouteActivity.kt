@@ -6,7 +6,6 @@ import `in`.avimarine.waypointracing.ui.RouteViewHolder
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -29,7 +28,7 @@ class LoadRouteActivity : AppCompatActivity() {
         setTitle("Select route", "")
     }
 
-    fun populateRoutesList(){
+    private fun populateRoutesList(){
         val query: Query = FirebaseFirestore.getInstance()
             .collection("routes")
             .limit(50)

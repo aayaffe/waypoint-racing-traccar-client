@@ -95,6 +95,12 @@ class BatteryOptimizationHelper {
         return false
     }
 
+    public fun requestedExceptions(context: Context): Boolean{
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        return sharedPreferences.getBoolean(KEY_EXCEPTION_REQUESTED, false) || sharedPreferences.getBoolean(KEY_AUTOSTART_REQUESTED, false)
+    }
+
+
     companion object {
         private const val KEY_EXCEPTION_REQUESTED = "exceptionRequested"
         private const val KEY_AUTOSTART_REQUESTED = "autostartRequested"

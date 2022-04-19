@@ -5,7 +5,6 @@ import `in`.avimarine.waypointracing.databinding.ActivityMainBinding
 import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.LocationViewModel
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
-import `in`.avimarine.waypointracing.ui.dialogs.FirstTimeDialog
 import `in`.avimarine.waypointracing.utils.*
 import android.Manifest
 import android.app.Activity
@@ -45,7 +44,7 @@ import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
-    SharedPreferences.OnSharedPreferenceChangeListener, FirstTimeDialog.FirstTimeDialogListener {
+    SharedPreferences.OnSharedPreferenceChangeListener {
 
     private lateinit var positionProvider: PositionProvider
     private lateinit var sharedPreferences: SharedPreferences
@@ -96,11 +95,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (settings.getBoolean("my_first_time", true)) {
             //the app is being launched for first time
             Log.d(TAG, "First time run")
-            // first time task
-            val dialog = FirstTimeDialog()
-            dialog.show(supportFragmentManager, "FirstTimeDialogFragment")
-            // record the fact that the app has been started at least once
-            settings.edit().putBoolean("my_first_time", false).apply()
+            val intent = Intent(this, SetupWizardActivity::class.java)
+            this.startActivity(intent)
         }
 
         setButton(sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false))
@@ -201,19 +197,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         positionProvider = PositionProviderFactory.create(this, this)
     }
 
-    // The dialog fragment receives a reference to this Activity through the
-    // Fragment.onAttach() callback, which it uses to call the following methods
-    // defined by the NoticeDialogFragment.NoticeDialogListener interface
-    override fun onDialogPositiveClick(dialog: DialogFragment, boatName: String) {
-        with(sharedPreferences.edit()) {
-            putString("boat_name", boatName)
-            commit()
-        }
-    }
-
-    override fun onDialogNegativeClick(dialog: DialogFragment) {
-        // User touched the dialog's negative button
-    }
 
     private fun loadRoute(r: Route?) {
         if (r == null) {
@@ -275,6 +258,9 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     override fun onStart() {
         super.onStart()
+        val PREFS_NAME = "MyPrefsFile"
+        val settings = getSharedPreferences(PREFS_NAME, 0)
+        if (settings.getBoolean("my_first_time", true)) return
         try {
             if (LocationPermissions.arePermissionsGranted(this)) {
                 if (!this::positionProvider.isInitialized) {
@@ -476,6 +462,10 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS,  checked.not()).apply()
     }
 
+    fun loginButtonClick(view: View) {
+        login()
+    }
+
     fun setNextWpt(n: Int){
         nextWpt = n
         val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
@@ -597,11 +587,14 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun setUiForLogin(user: FirebaseUser?) {
-//        if (user == null) {
-//            binding.startBtn.visibility = View.INVISIBLE
-//        } else {
-//            binding.startBtn.visibility = View.VISIBLE
-//        }
+        if (user == null) {
+            sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS,  false).apply()
+            binding.startBtn.visibility = View.INVISIBLE
+            binding.loginBtn.visibility = View.VISIBLE
+        } else {
+            binding.startBtn.visibility = View.VISIBLE
+            binding.loginBtn.visibility = View.GONE
+        }
         invalidateOptionsMenu()
     }
 
@@ -702,7 +695,9 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 //                    ALARM_MANAGER_INTERVAL.toLong(), ALARM_MANAGER_INTERVAL.toLong(), alarmIntent
 //                )
 //            }
-            BatteryOptimizationHelper().requestException(this)
+            if (!BatteryOptimizationHelper().requestedExceptions(this)) {
+                BatteryOptimizationHelper().requestException(this)
+            }
         } else {
             sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS, false).apply()
         }

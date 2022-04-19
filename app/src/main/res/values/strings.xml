@@ -91,5 +91,8 @@
     <string name="action_next_step">Next</string>
     <string name="sail_number">Sail Number</string>
     <string name="skipper_name">Skipper</string>
+    <string name="location_permission_btn">Grant Permissions</string>
+    <string name="prevent_sleep_btn">Add Exception</string>
+    <string name="login_btn">Login\nTo enable tracking</string>
 
 </resources>

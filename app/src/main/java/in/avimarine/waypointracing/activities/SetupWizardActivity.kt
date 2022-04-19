@@ -61,8 +61,10 @@ class SetupWizardActivity : AppCompatActivity(), StepperNavListener {
     }
 
     override fun onCompleted() {
-
-//        Toast.makeText(this, "Stepper completed", Toast.LENGTH_SHORT).show()
+        val PREFS_NAME = "MyPrefsFile"
+        val settings = getSharedPreferences(PREFS_NAME, 0)
+        settings.edit().putBoolean("my_first_time", false).apply()
+        finish()
     }
 
     override fun onBackPressed() {

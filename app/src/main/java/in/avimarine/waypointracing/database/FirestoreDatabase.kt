@@ -4,9 +4,11 @@ import `in`.avimarine.waypointracing.Boat
 import `in`.avimarine.waypointracing.TAG
 import android.util.Log
 import com.google.android.gms.tasks.OnFailureListener
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 
 class FirestoreDatabase: OnlineDatabase {
@@ -39,6 +41,23 @@ class FirestoreDatabase: OnlineDatabase {
         fun addBoat(b: Boat, uid: String) {
             val db = Firebase.firestore
             db.collection("boats").document(uid).set(b)
+        }
+        fun updateBoatName(n:String, uid: String){
+            getBoat(FirebaseAuth.getInstance().currentUser?.uid ?: "", {
+                if (it != null) {
+                    val boat = it.toObject<Boat>()
+                    if (boat != null) {
+                        val newBoat = Boat(n, boat.sailNumber, boat.skipperName)
+                        addBoat(newBoat, uid)
+                    }
+                } else {
+                    val newBoat = Boat(n, "","")
+                    addBoat(newBoat, uid)
+                }
+            },{
+                val newBoat = Boat(n, "","")
+                addBoat(newBoat, uid)
+            })
         }
 
         fun getBoat(uid: String,onSuccess: (DocumentSnapshot?) -> Unit, onFailure: OnFailureListener) {
