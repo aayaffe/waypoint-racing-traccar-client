@@ -67,13 +67,13 @@ class LoadRouteActivity : AppCompatActivity() {
         builder.setTitle("Are you sure?")
         builder.setMessage("Loading new route will delete all previous mark passings and reset route")
         builder.setIcon(android.R.drawable.ic_dialog_alert)
-        builder.setPositiveButton("Yes"){dialogInterface, which ->
+        builder.setPositiveButton("Yes"){ _, _ ->
             val i = Intent()
             i.putExtra("RouteJson", json)
             setResult(RESULT_OK, i)
             finish()
         }
-        builder.setNegativeButton("No"){dialogInterface, which ->
+        builder.setNegativeButton("No"){ _, _ ->
         }
         val alertDialog: AlertDialog = builder.create()
         alertDialog.setCancelable(false)
