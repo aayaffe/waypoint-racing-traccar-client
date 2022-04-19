@@ -87,5 +87,9 @@
     <string name="lastpass_message">Last gate pass: %1$s at: %2$s</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
+    <string name="stepper_type_tab">tab</string>
+    <string name="action_next_step">Next</string>
+    <string name="sail_number">Sail Number</string>
+    <string name="skipper_name">Skipper</string>
 
 </resources>

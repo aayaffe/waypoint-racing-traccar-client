@@ -27,6 +27,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".activities.SetupWizardActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.LoadRouteActivity"
             android:exported="false" />
         <activity

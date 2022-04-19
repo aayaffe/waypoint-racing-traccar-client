@@ -1,10 +1,9 @@
 package `in`.avimarine.waypointracing.database
 
+import `in`.avimarine.waypointracing.Boat
 import `in`.avimarine.waypointracing.TAG
-import `in`.avimarine.waypointracing.route.Route
 import android.util.Log
 import com.google.android.gms.tasks.OnFailureListener
-import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
@@ -35,6 +34,22 @@ class FirestoreDatabase: OnlineDatabase {
             .addOnFailureListener { exception ->
                 Log.d(TAG, "get failed with ", exception)
             }
+    }
+    companion object {
+        fun addBoat(b: Boat, uid: String) {
+            val db = Firebase.firestore
+            db.collection("boats").document(uid).set(b)
+        }
+
+        fun getBoat(uid: String,onSuccess: (DocumentSnapshot?) -> Unit, onFailure: OnFailureListener) {
+            val db = Firebase.firestore
+            val docRef = db.collection("boats").document(uid)
+            docRef.get()
+                .addOnSuccessListener (onSuccess)
+                .addOnFailureListener { exception ->
+                    Log.d(TAG, "get failed with ", exception)
+                }
+        }
     }
 
 

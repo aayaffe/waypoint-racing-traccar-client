@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_stepper"
+    app:startDestination="@id/step_1_login">
+
+    <fragment
+        android:id="@+id/step_1_login"
+        android:name="in.avimarine.waypointracing.activities.steps.Step1Fragment"
+        android:label="Step 1" />
+
+    <fragment
+        android:id="@+id/step_2_boat"
+        android:name="in.avimarine.waypointracing.activities.steps.Step2Fragment"
+        android:label="Step 2" />
+
+    <fragment
+        android:id="@+id/step_3_route"
+        android:name="in.avimarine.waypointracing.activities.steps.Step3Fragment"
+        android:label="Step 3" />
+
+    <fragment
+        android:id="@+id/step_4_permissions"
+        android:name="in.avimarine.waypointracing.activities.steps.Step4Fragment"
+        android:label="Step 4" />
+
+</navigation>

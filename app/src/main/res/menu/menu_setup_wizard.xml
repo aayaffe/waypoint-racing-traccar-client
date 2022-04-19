@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/step_1_login"
+        android:title="Step 1 - Login" />
+
+    <item android:id="@+id/step_2_boat"
+        android:title="Step 2 - Set Boat" />
+
+    <item android:id="@+id/step_3_route"
+        android:title="Step 3 - Set Route" />
+
+    <item android:id="@+id/step_4_permissions"
+        android:title="Step 4 - Permissions" />
+
+</menu>
