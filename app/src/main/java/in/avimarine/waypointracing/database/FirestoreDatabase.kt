@@ -49,6 +49,9 @@ class FirestoreDatabase: OnlineDatabase {
                     if (boat != null) {
                         val newBoat = Boat(n, boat.sailNumber, boat.skipperName)
                         addBoat(newBoat, uid)
+                    } else {
+                        val newBoat = Boat(n, "","")
+                        addBoat(newBoat, uid)
                     }
                 } else {
                     val newBoat = Boat(n, "","")

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ManualInputFragment">
+
+
+    <TextView
+        android:id="@+id/boatNameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Boat"
+        app:layout_constraintTop_toTopOf="@id/date_input"
+        app:layout_constraintBottom_toBottomOf="@id/date_input"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteX="15dp" />
+
+    <com.santalu.maskara.widget.MaskEditText
+        android:id="@+id/lat_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:text=""
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/formatRadioGroup"
+        app:mask="__.______°"
+        app:maskCharacter="_"
+        app:maskStyle="persistent" />
+    <com.santalu.maskara.widget.MaskEditText
+        android:id="@+id/lon_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:text=""
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lat_input"
+        app:mask="___.______°"
+        app:maskCharacter="_"
+        app:maskStyle="persistent" />
+
+    <com.santalu.maskara.widget.MaskEditText
+        android:id="@+id/date_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:text=""
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/formatRadioGroup"
+        app:layout_constraintTop_toTopOf="parent"
+        app:mask="__/__/__"
+        app:maskCharacter="_"
+        app:maskStyle="persistent" />
+
+    <com.santalu.maskara.widget.MaskEditText
+        android:id="@+id/time_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:text=""
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lon_input"
+        app:mask="__:__:__"
+        app:maskCharacter="_"
+        app:maskStyle="persistent" />
+    <RadioGroup
+        android:id="@+id/formatRadioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/date_input"
+        tools:layout_editor_absoluteY="8dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/D_radioButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="D" />
+
+        <RadioButton
+            android:id="@+id/DM_radioButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DM" />
+
+        <RadioButton
+            android:id="@+id/DMS_radioButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DMS" />
+    </RadioGroup>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/wptsRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/calculate_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/time_input" />
+
+    <Button
+        android:id="@+id/calculate_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Calculate"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/send_btn"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/send_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        app:layout_constraintBottom_toBottomOf="@+id/calculate_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/calculate_btn"
+        app:layout_constraintTop_toTopOf="@+id/calculate_btn" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

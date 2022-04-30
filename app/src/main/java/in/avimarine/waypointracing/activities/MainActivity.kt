@@ -429,7 +429,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 return true
             }
             R.id.expert_mode_menu_action -> {
-                val intent = Intent(this, SetupWizardActivity::class.java)
+                val intent = Intent(this, ExpertModeActivity::class.java)
+                intent.putExtra("route", route)
                 this.startActivity(intent)
                 return true
             }
