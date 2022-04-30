@@ -17,6 +17,7 @@ package `in`.avimarine.waypointracing.activities.steps
 
 import `in`.avimarine.waypointracing.Boat
 import `in`.avimarine.waypointracing.TAG
+import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.SetBoatFragmentBinding
 import android.os.Bundle
@@ -50,7 +51,7 @@ class Step2Fragment : SetupFragment() {
             val sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(requireContext().applicationContext)
             with(sharedPreferences.edit()) {
-                putString("boat_name", b.name)
+                putString(SettingsFragment.KEY_BOAT_NAME, b.name)
                 commit()
             }
         }

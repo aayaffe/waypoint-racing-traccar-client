@@ -390,6 +390,7 @@ class TrackingController(private val context: Context) :
     private fun sendToFireStore(gp: GatePassing) {
         val db = Firebase.firestore
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        db.collection("reports").document(uid).set(hashMapOf("id" to uid))
         db.collection("reports").document(uid).
         collection("reports")
             .add(gp)

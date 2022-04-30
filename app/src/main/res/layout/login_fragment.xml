@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     tools:context="in.avimarine.waypointracing.activities.steps.Step1Fragment">
 
-    <Button
+
+    <com.google.android.gms.common.SignInButton
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

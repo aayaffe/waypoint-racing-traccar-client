@@ -76,8 +76,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             .withPermissionRequestCode(REQUEST_SCREENSHOT_PERMISSION) //optional, 888 by default
             .build()
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
-//        setContentView(R.layout.activity_main2)
-
 //        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 //        val originalIntent = Intent(this, AutostartReceiver::class.java)
 //        originalIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
@@ -165,6 +163,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             val user = FirebaseAuth.getInstance().currentUser
             if (user != null) {
                 Log.d(TAG, "Logged in as ${user.displayName}")
+                Auth.loadSettingsFromServer(user.uid, this)
             }
         } else {
             if (response != null) {
@@ -260,7 +259,10 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         super.onStart()
         val PREFS_NAME = "MyPrefsFile"
         val settings = getSharedPreferences(PREFS_NAME, 0)
-        if (settings.getBoolean("my_first_time", true)) return
+        if (settings.getBoolean("my_first_time", true)) {
+            settings.edit().putBoolean("my_first_time", false).apply()
+            return
+        }
         try {
             if (LocationPermissions.arePermissionsGranted(this)) {
                 if (!this::positionProvider.isInitialized) {

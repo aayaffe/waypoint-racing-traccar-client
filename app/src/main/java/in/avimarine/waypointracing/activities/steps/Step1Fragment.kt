@@ -60,6 +60,7 @@ class Step1Fragment : SetupFragment() {
         viewBinding = LoginFragmentBinding.inflate(inflater, container, false)
         setupUI()
         viewModel.setCurrentFragment(this)
+
         return viewBinding.root
     }
 

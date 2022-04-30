@@ -116,10 +116,16 @@ class TrackingService() : Service() {
     }
 
     private fun parseRouteIntent(i: Intent){
-        route = i.getParcelableExtra("route")!!
+        val r: Route? = i.getParcelableExtra("route")
+        route = if (r!=null) {
+            r
+        } else {
+            Log.e(TAG,"Error loading route from intent")
+            Route.emptyRoute()
+        }
         nextWpt = i.getIntExtra("nextwpt",-1)
-        Log.d(TAG, "Recieved route: " + route.toString())
-        Log.d(TAG, "Recieved nextwpt: " + route?.elements?.elementAtOrNull(nextWpt) )
+        Log.d(TAG, "Received route: $route")
+        Log.d(TAG, "Received nextwpt: " + route.elements.elementAtOrNull(nextWpt))
         trackingController?.updateRoute(route)
     }
 

@@ -97,7 +97,7 @@ class RouteActivity : AppCompatActivity() {
 
     private fun getLatestGatePass(ordinal: Int, gps: GatePassings): GatePassing? {
         val thisGps = gps.passes.filter{ it.gateId == ordinal}
-        return thisGps.maxByOrNull { it -> it.time.time }
+        return thisGps.maxByOrNull { it.time.time }
     }
 
     private fun parseRouteIntent(i: Intent?){
@@ -105,13 +105,13 @@ class RouteActivity : AppCompatActivity() {
         if (r!=null){
             route = r
         }
-        Log.d(TAG, "Recieved route: " + route.toString())
+        Log.d(TAG, "Received route: $route")
     }
 
     private fun setTitle(title: String, subTitle: String) {
         val ab = supportActionBar
-        ab?.setTitle(title)
-        ab?.setSubtitle(subTitle)
+        ab?.title = title
+        ab?.subtitle = subTitle
     }
 
 
