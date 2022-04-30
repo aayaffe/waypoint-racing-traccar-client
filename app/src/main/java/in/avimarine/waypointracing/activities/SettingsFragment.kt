@@ -13,240 +13,217 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package in.avimarine.waypointracing.activities;
+package `in`.avimarine.waypointracing.activities
 
-import android.content.ComponentName;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.text.InputType;
-import android.util.Log;
-import android.view.View;
-import android.webkit.URLUtil;
-import android.widget.EditText;
-import android.widget.Toast;
+import `in`.avimarine.waypointracing.MainApplication
+import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.database.FirestoreDatabase
+import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
+import android.net.Uri
+import android.os.Bundle
+import android.text.InputType
+import android.util.Log
+import android.view.View
+import android.webkit.URLUtil
+import android.widget.EditText
+import android.widget.Toast
+import androidx.preference.*
+import com.google.firebase.auth.FirebaseAuth
+import java.util.*
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.preference.EditTextPreference;
-import androidx.preference.EditTextPreferenceDialogFragmentCompat;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
-
-import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.Arrays;
-import java.util.Random;
-
-import in.avimarine.waypointracing.BuildConfig;
-import in.avimarine.waypointracing.MainApplication;
-import in.avimarine.waypointracing.R;
-import in.avimarine.waypointracing.database.FirestoreDatabase;
-
-public class SettingsFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener {
-
-    private static final String TAG = SettingsFragment.class.getSimpleName();
-    public static final String KEY_DEVICE = "id";
-    public static final String KEY_BOAT_NAME = "boat_name";
-    public static final String KEY_URL = "url";
-    public static final String KEY_URL_GATES = "urlgates";
-    public static final String KEY_INTERVAL = "interval";
-    public static final String KEY_DISTANCE = "distance";
-    public static final String KEY_ANGLE = "angle";
-    public static final String KEY_ACCURACY = "accuracy";
-    public static final String KEY_STATUS = "status";
-    public static final String KEY_BUFFER = "buffer";
-    public static final String KEY_WAKELOCK = "wakelock";
-    public static final String KEY_NEXT_WPT = "nextwpt";
-    public static final String KEY_LAST_SEND = "lastsend";
-    public static final String KEY_EXPERT_MODE = "expert";
-    public static final String KEY_GATE_PASSES = "gatepasses";
-    public static final String KEY_TRACKING = "trackingenabled";
-    public static final String KEY_MAGNETIC = "magnetic";
-    public static final String KEY_IS_UI_VISIBLE = "uivisibility";
-    private SharedPreferences sharedPreferences;
-
-
-    @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        if (BuildConfig.HIDDEN_APP && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            removeLauncherIcon();
+class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeListener {
+    private var sharedPreferences: SharedPreferences? = null
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        setHasOptionsMenu(true)
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+            requireContext()
+        )
+        setPreferencesFromResource(R.xml.preferences, rootKey)
+        initPreferences()
+        findPreference<Preference>(KEY_URL)?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+            newValue != null && validateServerURL(newValue.toString())
         }
-        setHasOptionsMenu(true);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        setPreferencesFromResource(R.xml.preferences, rootKey);
-        initPreferences();
-        findPreference(KEY_URL).setOnPreferenceChangeListener((preference, newValue) -> (newValue != null) && validateServerURL(newValue.toString()));
-        findPreference(KEY_INTERVAL).setOnPreferenceChangeListener((preference, newValue) -> {
-            if (newValue != null) {
+        findPreference<Preference>(KEY_INTERVAL)?.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { _, newValue ->
                 try {
-                    int value = Integer.parseInt((String) newValue);
-                    return value > 0;
-                } catch (NumberFormatException e) {
-                    Log.w(TAG, e);
+                    newValue != null && (newValue as String).toInt() > 0
+                } catch (e: NumberFormatException) {
+                    Log.w(TAG, e)
+                    false
                 }
             }
-            return false;
-        });
-
-        Preference.OnPreferenceChangeListener numberValidationListener = (preference, newValue) -> {
-            if (newValue != null) {
-                try {
-                    int value = Integer.parseInt((String) newValue);
-                    return value >= 0;
-                } catch (NumberFormatException e) {
-                    Log.w(TAG, e);
-                }
+        val numberValidationListener = Preference.OnPreferenceChangeListener { _, newValue ->
+            try {
+                newValue != null && (newValue as String).toInt() >= 0
+            } catch (e: NumberFormatException) {
+                Log.w(TAG, e)
+                false
             }
-            return false;
-        };
-
-        Preference.OnPreferenceChangeListener nonEmptyStringValidationListener = (preference, newValue) -> newValue != null && !newValue.equals("");
-        findPreference(KEY_DEVICE).setOnPreferenceChangeListener(nonEmptyStringValidationListener);
-        findPreference(KEY_BOAT_NAME).setOnPreferenceChangeListener(nonEmptyStringValidationListener);
-        findPreference(KEY_DISTANCE).setOnPreferenceChangeListener(numberValidationListener);
-        findPreference(KEY_ANGLE).setOnPreferenceChangeListener(numberValidationListener);
-        findPreference(KEY_EXPERT_MODE).setOnPreferenceChangeListener((preference, newValue) -> {
-            expertMode((Boolean) newValue);
-            return true;
-        });
+        }
+        val nonEmptyStringValidationListener =
+            Preference.OnPreferenceChangeListener { preference: Preference?, newValue: Any? -> newValue != null && newValue != "" }
+        findPreference<Preference>(KEY_DEVICE)!!.onPreferenceChangeListener =
+            nonEmptyStringValidationListener
+        findPreference<Preference>(KEY_BOAT_NAME)!!.onPreferenceChangeListener =
+            nonEmptyStringValidationListener
+        findPreference<Preference>(KEY_DISTANCE)!!.onPreferenceChangeListener =
+            numberValidationListener
+        findPreference<Preference>(KEY_ANGLE)!!.onPreferenceChangeListener =
+            numberValidationListener
+        findPreference<Preference>(KEY_EXPERT_MODE)!!.onPreferenceChangeListener =
+            Preference.OnPreferenceChangeListener { preference: Preference?, newValue: Any? ->
+                expertMode(newValue as Boolean?)
+                true
+            }
     }
 
-    public static class NumericEditTextPreferenceDialogFragment extends EditTextPreferenceDialogFragmentCompat {
-
-        public static NumericEditTextPreferenceDialogFragment newInstance(String key) {
-            final NumericEditTextPreferenceDialogFragment fragment = new NumericEditTextPreferenceDialogFragment();
-            final Bundle bundle = new Bundle();
-            bundle.putString(ARG_KEY, key);
-            fragment.setArguments(bundle);
-            return fragment;
+    class NumericEditTextPreferenceDialogFragment : EditTextPreferenceDialogFragmentCompat() {
+        override fun onBindDialogView(view: View) {
+            val editText = view.findViewById<EditText>(android.R.id.edit)
+            editText.inputType = InputType.TYPE_CLASS_NUMBER
+            super.onBindDialogView(view)
         }
 
-        @Override
-        protected void onBindDialogView(View view) {
-            EditText editText = view.findViewById(android.R.id.edit);
-            editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-            super.onBindDialogView(view);
+        companion object {
+            fun newInstance(key: String?): NumericEditTextPreferenceDialogFragment {
+                val fragment = NumericEditTextPreferenceDialogFragment()
+                val bundle = Bundle()
+                bundle.putString(ARG_KEY, key)
+                fragment.arguments = bundle
+                return fragment
+            }
         }
-
     }
 
-    @Override
-    public void onDisplayPreferenceDialog(Preference preference) {
-        if (Arrays.asList(KEY_INTERVAL, KEY_DISTANCE, KEY_ANGLE).contains(preference.getKey())) {
-            final EditTextPreferenceDialogFragmentCompat f = NumericEditTextPreferenceDialogFragment.newInstance(preference.getKey());
-            f.setTargetFragment(this, 0);
-            f.show(getFragmentManager(), "androidx.preference.PreferenceFragment.DIALOG");
+    override fun onDisplayPreferenceDialog(preference: Preference) {
+        if (listOf(KEY_INTERVAL, KEY_DISTANCE, KEY_ANGLE).contains(preference.key)) {
+            val f: EditTextPreferenceDialogFragmentCompat =
+                NumericEditTextPreferenceDialogFragment.newInstance(preference.key)
+            f.setTargetFragment(this, 0)
+            f.show(parentFragmentManager, "androidx.preference.PreferenceFragment.DIALOG")
         } else {
-            super.onDisplayPreferenceDialog(preference);
+            super.onDisplayPreferenceDialog(preference)
         }
     }
 
-    private void removeLauncherIcon() {
-        String className = SettingsActivity.class.getCanonicalName().replace(".MainActivity", ".Launcher");
-        ComponentName componentName = new ComponentName(getActivity().getPackageName(), className);
-        PackageManager packageManager = getActivity().getPackageManager();
-        if (packageManager.getComponentEnabledSetting(componentName) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
-            packageManager.setComponentEnabledSetting(
-                    componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+    override fun onResume() {
+        super.onResume()
+        sharedPreferences!!.registerOnSharedPreferenceChangeListener(this)
+        expertMode(sharedPreferences!!.getBoolean(KEY_EXPERT_MODE, false))
+        setPreferencesEnabled(!sharedPreferences!!.getBoolean(KEY_STATUS, false))
+    }
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setIcon(android.R.drawable.ic_dialog_alert);
-            builder.setMessage(getString(R.string.hidden_alert));
-            builder.setPositiveButton(android.R.string.ok, null);
-            builder.show();
+    override fun onPause() {
+        super.onPause()
+        sharedPreferences!!.unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    private fun setPreferencesEnabled(enabled: Boolean) {
+        if (sharedPreferences!!.getBoolean(KEY_EXPERT_MODE, false)) {
+            findPreference<Preference>(KEY_DEVICE)?.isEnabled = enabled
         }
+        findPreference<Preference>(KEY_BOAT_NAME)?.isEnabled = enabled
+        findPreference<Preference>(KEY_URL)?.isEnabled = enabled
+        findPreference<Preference>(KEY_INTERVAL)?.isEnabled = enabled
+        findPreference<Preference>(KEY_DISTANCE)?.isEnabled = enabled
+        findPreference<Preference>(KEY_ANGLE)?.isEnabled = enabled
+        findPreference<Preference>(KEY_ACCURACY)?.isEnabled = enabled
+        findPreference<Preference>(KEY_BUFFER)?.isEnabled = enabled
+        findPreference<Preference>(KEY_WAKELOCK)?.isEnabled = enabled
+        findPreference<Preference>(KEY_TRACKING)?.isEnabled = enabled
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-        expertMode(sharedPreferences.getBoolean(KEY_EXPERT_MODE, false));
-        setPreferencesEnabled(!sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false));
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
-    }
-
-    private void setPreferencesEnabled(boolean enabled) {
-        if (sharedPreferences.getBoolean(KEY_EXPERT_MODE, false)) {
-            findPreference(KEY_DEVICE).setEnabled(enabled);
-        }
-        findPreference(KEY_BOAT_NAME).setEnabled(enabled);
-        findPreference(KEY_URL).setEnabled(enabled);
-        findPreference(KEY_INTERVAL).setEnabled(enabled);
-        findPreference(KEY_DISTANCE).setEnabled(enabled);
-        findPreference(KEY_ANGLE).setEnabled(enabled);
-        findPreference(KEY_ACCURACY).setEnabled(enabled);
-        findPreference(KEY_BUFFER).setEnabled(enabled);
-        findPreference(KEY_WAKELOCK).setEnabled(enabled);
-        findPreference(KEY_TRACKING).setEnabled(enabled);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        switch (key) {
-            case KEY_DEVICE:
-                findPreference(KEY_DEVICE).setSummary(sharedPreferences.getString(KEY_DEVICE, null));
-                break;
-            case KEY_BOAT_NAME:
-                findPreference(KEY_BOAT_NAME).setSummary(sharedPreferences.getString(KEY_BOAT_NAME, null));
-                if (FirebaseAuth.getInstance().getCurrentUser()!=null) {
-                    FirestoreDatabase.Companion.updateBoatName(sharedPreferences.getString(KEY_BOAT_NAME, ""), FirebaseAuth.getInstance().getCurrentUser().getUid());
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        when (key) {
+            KEY_DEVICE -> findPreference<Preference>(KEY_DEVICE)!!.summary =
+                sharedPreferences.getString(KEY_DEVICE, null)
+            KEY_BOAT_NAME -> {
+                findPreference<Preference>(KEY_BOAT_NAME)!!.summary = sharedPreferences.getString(
+                    KEY_BOAT_NAME, null
+                )
+                if (FirebaseAuth.getInstance().currentUser != null) {
+                    sharedPreferences.getString(
+                        KEY_BOAT_NAME, ""
+                    )?.let {
+                        FirestoreDatabase.updateBoatName(
+                            it, FirebaseAuth.getInstance().currentUser!!
+                                .uid
+                        )
+                    }
                 }
-                break;
-            case KEY_STATUS:
-                setPreferencesEnabled(!sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false));
-                ((MainApplication) getActivity().getApplication()).handleRatingFlow(getActivity());
-                break;
+            }
+            KEY_STATUS -> {
+                setPreferencesEnabled(!sharedPreferences.getBoolean(KEY_STATUS, false))
+                activity?.let {
+                    (requireActivity().application as MainApplication).handleRatingFlow(
+                        it
+                    )
+                }
+            }
         }
-
     }
 
-    private void initPreferences() {
-        PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences, false);
-
-        if (!sharedPreferences.contains(KEY_DEVICE)) {
-            String id = String.valueOf(new Random().nextInt(900000) + 100000);
-            sharedPreferences.edit().putString(KEY_DEVICE, id).apply();
-            ((EditTextPreference) findPreference(KEY_DEVICE)).setText(id);
+    private fun initPreferences() {
+        PreferenceManager.setDefaultValues(requireActivity(), R.xml.preferences, false)
+        if (!sharedPreferences!!.contains(KEY_DEVICE)) {
+            val id = (Random().nextInt(900000) + 100000).toString()
+            sharedPreferences!!.edit().putString(KEY_DEVICE, id).apply()
+            (findPreference<Preference>(KEY_DEVICE) as EditTextPreference?)!!.text = id
         }
-        findPreference(KEY_DEVICE).setSummary(sharedPreferences.getString(KEY_DEVICE, null));
-        if (!sharedPreferences.contains(KEY_BOAT_NAME)) {
-            String id = "Boat_" + sharedPreferences.getString(KEY_DEVICE, null);
-            sharedPreferences.edit().putString(KEY_BOAT_NAME, id).apply();
-            ((EditTextPreference) findPreference(KEY_BOAT_NAME)).setText(id);
+        findPreference<Preference>(KEY_DEVICE)!!.summary =
+            sharedPreferences!!.getString(KEY_DEVICE, null)
+        if (!sharedPreferences!!.contains(KEY_BOAT_NAME)) {
+            val id = "Boat_" + sharedPreferences!!.getString(KEY_DEVICE, null)
+            sharedPreferences!!.edit().putString(KEY_BOAT_NAME, id).apply()
+            (findPreference<Preference>(KEY_BOAT_NAME) as EditTextPreference?)!!.text = id
         }
-        findPreference(KEY_BOAT_NAME).setSummary(sharedPreferences.getString(KEY_BOAT_NAME, ""));
+        findPreference<Preference>(KEY_BOAT_NAME)!!.summary = sharedPreferences!!.getString(
+            KEY_BOAT_NAME, ""
+        )
     }
 
-
-
-
-    private boolean validateServerURL(String userUrl) {
-        int port = Uri.parse(userUrl).getPort();
-        if (URLUtil.isValidUrl(userUrl) && (port == -1 || (port > 0 && port <= 65535))
-                && (URLUtil.isHttpUrl(userUrl) || URLUtil.isHttpsUrl(userUrl))) {
-            return true;
+    private fun validateServerURL(userUrl: String): Boolean {
+        val port = Uri.parse(userUrl).port
+        if (
+            URLUtil.isValidUrl(userUrl) &&
+            (port == -1 || port in 1..65535) &&
+            (URLUtil.isHttpUrl(userUrl) || URLUtil.isHttpsUrl(userUrl))
+        ) {
+            return true
         }
-        Toast.makeText(getActivity(), R.string.error_msg_invalid_url, Toast.LENGTH_LONG).show();
-        return false;
+        Toast.makeText(activity, R.string.error_msg_invalid_url, Toast.LENGTH_LONG).show()
+        return false
     }
 
-    private void expertMode(Boolean b){
-        findPreference(KEY_DEVICE).setEnabled(b);
-        findPreference(KEY_URL).setVisible(b);
-        findPreference(KEY_ACCURACY).setVisible(b);
-        findPreference(KEY_BUFFER).setVisible(b);
-        findPreference(KEY_WAKELOCK).setVisible(b);
-        findPreference(KEY_TRACKING).setVisible(b);
+    private fun expertMode(b: Boolean?) {
+        findPreference<Preference>(KEY_DEVICE)!!.isEnabled = b!!
+        findPreference<Preference>(KEY_URL)!!.isVisible = b
+        findPreference<Preference>(KEY_ACCURACY)!!.isVisible = b
+        findPreference<Preference>(KEY_BUFFER)!!.isVisible = b
+        findPreference<Preference>(KEY_WAKELOCK)!!.isVisible = b
+        findPreference<Preference>(KEY_TRACKING)!!.isVisible = b
     }
 
+    companion object {
+        private val TAG = SettingsFragment::class.java.simpleName
+        const val KEY_DEVICE = "id"
+        const val KEY_BOAT_NAME = "boat_name"
+        const val KEY_URL = "url"
+        const val KEY_URL_GATES = "urlgates"
+        const val KEY_INTERVAL = "interval"
+        const val KEY_DISTANCE = "distance"
+        const val KEY_ANGLE = "angle"
+        const val KEY_ACCURACY = "accuracy"
+        const val KEY_STATUS = "status"
+        const val KEY_BUFFER = "buffer"
+        const val KEY_WAKELOCK = "wakelock"
+        const val KEY_NEXT_WPT = "nextwpt"
+        const val KEY_LAST_SEND = "lastsend"
+        const val KEY_EXPERT_MODE = "expert"
+        const val KEY_GATE_PASSES = "gatepasses"
+        const val KEY_TRACKING = "trackingenabled"
+        const val KEY_MAGNETIC = "magnetic"
+        const val KEY_IS_UI_VISIBLE = "uivisibility"
+    }
 }

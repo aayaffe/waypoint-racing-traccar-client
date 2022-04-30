@@ -27,6 +27,10 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)// showing the back button in action bar
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment, SettingsFragment())
+            .commit()
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
