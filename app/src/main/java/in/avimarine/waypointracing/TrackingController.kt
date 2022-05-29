@@ -29,12 +29,14 @@ import `in`.avimarine.waypointracing.RequestManager.RequestHandler
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.activities.StatusActivity
 import `in`.avimarine.waypointracing.database.DatabaseHelper
+import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.database.GatePassesDatabaseHelper
 import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.utils.pointToLineDist
 import `in`.avimarine.waypointracing.utils.toLocation
 import `in`.avimarine.waypointracing.utils.toNM
 import android.content.SharedPreferences
+import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -126,7 +128,7 @@ class TrackingController(private val context: Context) :
             Log.d(TAG, "inArea ${route!!.elements[nextWpt].name}")
             StatusActivity.addMessage("Passed " + route!!.elements[nextWpt].name)
             val gp = GatePassing(
-                route!!.eventName, route!!.id,
+                route!!.eventName, route!!.id, route!!.lastUpdate,
                 deviceId!!,
                 boatName!!, route!!.elements[nextWpt].id, route!!.elements[nextWpt].name, position.time, position
             )
@@ -135,7 +137,14 @@ class TrackingController(private val context: Context) :
             } else {
                 send(gp)
             }
-            sendToFireStore(gp)
+            FirestoreDatabase.addGatePass(gp, { documentReference ->
+                Log.d(TAG, "Gatepass added with ID: ${documentReference.id}")
+                Toast.makeText(context, "Uploaded successfully", Toast.LENGTH_LONG).show()
+            },{ e ->
+                Log.e(TAG, "Error adding gatepass", e)
+                Toast.makeText(context, "--FAILED-- to upload", Toast.LENGTH_LONG).show()
+            }
+            )
             GatePassings.addGatePass(context, gp)
             if (route!!.eventType == EventType.WPTRACING) { //Enable auto waypoint advance for waypoint racing event only
                 nextWpt += 1
@@ -385,21 +394,6 @@ class TrackingController(private val context: Context) :
                 }
             }
         })
-    }
-
-    private fun sendToFireStore(gp: GatePassing) {
-        val db = Firebase.firestore
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        db.collection("reports").document(uid).set(hashMapOf("id" to uid))
-        db.collection("reports").document(uid).
-        collection("reports")
-            .add(gp)
-            .addOnSuccessListener { documentReference ->
-                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-            }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Error adding document", e)
-            }
     }
 
     private fun retry() {

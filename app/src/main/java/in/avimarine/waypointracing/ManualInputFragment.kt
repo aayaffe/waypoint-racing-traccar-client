@@ -1,7 +1,7 @@
 package `in`.avimarine.waypointracing
 
+import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.FragmentManualInputBinding
-import `in`.avimarine.waypointracing.route.Gate
 import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.ui.WptDistAdapter
 import `in`.avimarine.waypointracing.utils.CoordinatesFormat
@@ -20,9 +20,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.santalu.maskara.Mask
 import com.santalu.maskara.MaskChangedListener
 import com.santalu.maskara.MaskStyle
@@ -128,6 +125,7 @@ class ManualInputFragment : Fragment() {
         val gp = GatePassing(
             viewModel.route.value.eventName,
             viewModel.route.value.id,
+            viewModel.route.value.lastUpdate,
             "-444",
             viewModel.boatName.value,
             gateId,
@@ -135,24 +133,15 @@ class ManualInputFragment : Fragment() {
             Date(time),
             Position("-444", viewModel.boatName.value, l, -1.0)
         )
-        sendToFireStore(gp)
+        FirestoreDatabase.addManualGatePass(gp, { documentReference ->
+            Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+            Toast.makeText(requireContext(), "Uploaded successfully", Toast.LENGTH_LONG).show()
+        },{ e ->
+            Log.e(TAG, "Error adding gatepass", e)
+            Toast.makeText(requireContext(), "--FAILED-- to upload", Toast.LENGTH_LONG).show()
+        }
+        )
         viewBinding.sendBtn.isEnabled = false
-    }
-
-    private fun sendToFireStore(gp: GatePassing) {
-        val db = Firebase.firestore
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        db.collection("reports").document("Manual").set(hashMapOf("id" to "Manual"))
-        db.collection("reports").document("Manual").
-        collection("reports")
-            .add(gp)
-            .addOnSuccessListener { documentReference ->
-                Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                Toast.makeText(requireContext(), "Uploaded successfully", Toast.LENGTH_LONG).show()
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "--FAILED-- to upload", Toast.LENGTH_LONG).show()
-            }
     }
 
     private fun validateDateTime(time: String, date: String): Long {

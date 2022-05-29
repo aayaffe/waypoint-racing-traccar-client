@@ -3,9 +3,6 @@ package `in`.avimarine.waypointracing.activities
 import `in`.avimarine.waypointracing.ExpertViewModel
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.TAG
-import `in`.avimarine.waypointracing.activities.steps.StepperViewModel
-import `in`.avimarine.waypointracing.database.FirestoreDatabase
-import `in`.avimarine.waypointracing.database.OnlineDatabase
 import `in`.avimarine.waypointracing.databinding.ActivityExpertModeBinding
 import `in`.avimarine.waypointracing.route.Route
 import android.content.Intent
