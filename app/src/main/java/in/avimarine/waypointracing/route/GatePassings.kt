@@ -25,6 +25,17 @@ class GatePassings {
     }
 
     companion object {
+        fun getGatePassings(appContext: Context): GatePassings{
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext)
+            val s = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES, "")?:""
+            return try {
+                fromJson(s)
+            } catch (e: Exception) {
+                Log.d(TAG, "Failed to load gate passings", e)
+                GatePassings("")
+            }
+        }
+
         fun fromJson(s: String): GatePassings{
             return Json.decodeFromString(s)
         }

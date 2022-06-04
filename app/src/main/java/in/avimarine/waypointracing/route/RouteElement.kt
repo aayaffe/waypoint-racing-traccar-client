@@ -11,6 +11,7 @@ sealed interface RouteElement :Parcelable {
     val mandatory : Boolean
     val proofArea : ProofArea
     val id : Int
+    val points: Double
 
     fun isInProofArea(loc: Location): Boolean
 }

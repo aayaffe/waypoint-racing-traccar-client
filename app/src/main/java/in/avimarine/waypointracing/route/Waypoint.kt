@@ -25,6 +25,7 @@ class Waypoint(
     override val mandatory: Boolean,
     override val proofArea: ProofArea,
     override val id: Int,
+    override val points: Double,
 ) : RouteElement, Parcelable {
     constructor(
         name: String,
@@ -32,7 +33,8 @@ class Waypoint(
         mandatory: Boolean,
         bearing1: Double,
         bearing2: Double,
-        id: Int
+        id: Int,
+        points: Double
     ) : this(
         name,
         RouteElementType.WAYPOINT,
@@ -40,15 +42,27 @@ class Waypoint(
         location,
         mandatory,
         ProofAreaFactory.createProofArea(location, bearing1, bearing2),
-        id
+        id,
+        points
     )
 
-    constructor(name: String,
-                location: Location,
-                mandatory: Boolean,
-                dist: Double,
-    id: Int
-    ) : this(name, RouteElementType.WAYPOINT, location, location, mandatory, ProofAreaFactory.createProofArea(dist), id)
+    constructor(
+        name: String,
+        location: Location,
+        mandatory: Boolean,
+        dist: Double,
+        id: Int,
+        points: Double
+    ) : this(
+        name,
+        RouteElementType.WAYPOINT,
+        location,
+        location,
+        mandatory,
+        ProofAreaFactory.createProofArea(dist),
+        id,
+        points
+    )
 
     override fun isInProofArea(loc: Location): Boolean {
         return proofArea.isInProofArea(portWpt, loc)
@@ -60,28 +74,33 @@ class Waypoint(
 
     companion object {
         fun fromGeoJson(f: Feature): Waypoint {
-            val name = f.properties()?.get("name")?.asString
+            val props = f.properties()?:throw JSONException("Failed to get properties")
+            val name = props.get("name")?.asString
                 ?: throw JSONException("Failed to get Waypoint name")
             val point: Point = f.geometry() as Point
             val loc = Location("")
             loc.latitude = point.latitude()
             loc.longitude = point.longitude()
-            val man = f.properties()!!.get("mandatory").asBoolean
+            val man = props.get("mandatory").asBoolean
             val proofAreaType = try {
-                ProofAreaType.valueOf((f.properties()?.get("proofAreaType") as JsonElement).asString)
-            } catch (e: Exception){
+                ProofAreaType.valueOf(
+                    (props.get("proofAreaType") as JsonElement).asString
+                )
+            } catch (e: Exception) {
                 ProofAreaType.QUADRANT
             }
-            val id = f.properties()!!.get("id").asInt
+            val id = props.get("id").asInt
+            val points = if (props.has("points")) props.get("points").asDouble else 0.0
+
             return when (proofAreaType) {
                 ProofAreaType.QUADRANT -> {
-                    val b1 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(0).asDouble
-                    val b2 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(1).asDouble
-                    Waypoint(name, loc, man, b1, b2, id)
+                    val b1 = (props.get("proofAreaBearings") as JsonArray).get(0).asDouble
+                    val b2 = (props.get("proofAreaBearings") as JsonArray).get(1).asDouble
+                    Waypoint(name, loc, man, b1, b2, id, points)
                 }
                 ProofAreaType.CIRCLE -> {
-                    val d = (f.properties()?.get("proofAreaSize") as JsonElement).asDouble
-                    Waypoint(name, loc, man, d, id)
+                    val d = (props.get("proofAreaSize") as JsonElement).asDouble
+                    Waypoint(name, loc, man, d, id, points)
                 }
                 else -> {
                     throw JsonParseException("Improper proof area for waypoint")

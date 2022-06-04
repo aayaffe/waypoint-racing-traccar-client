@@ -48,7 +48,11 @@ class RouteElementAdapter(context: Context,
     }
 
     private fun bindData(value: RouteElement, view: TextView): TextView {
-        view.text = value.name
+        var points_str = ""
+        if (value.points>0){
+            points_str = " (" + value.points.toInt() + " points)"
+        }
+        view.text = value.name + points_str
         return view
     }
 }

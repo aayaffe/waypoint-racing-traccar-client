@@ -78,6 +78,7 @@
     <string name="route_id">Route ID:</string>
     <string name="organizer">Organizer:</string>
     <string name="updated">Updated:</string>
+    <string name="total_points">Total Points:</string>
     <string name="settings">Settings</string>
     <string name="send_screenshot">Send Screenshot</string>
     <string name="history">History</string>

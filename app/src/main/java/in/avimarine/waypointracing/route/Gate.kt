@@ -23,6 +23,7 @@ class Gate(
     override val mandatory: Boolean,
     override val proofArea: ProofArea,
     override val id: Int,
+    override val points: Double,
 ) : RouteElement, Parcelable {
 
     constructor(
@@ -32,7 +33,8 @@ class Gate(
         mandatory: Boolean,
         bearing1: Double,
         bearing2: Double,
-        id: Int
+        id: Int,
+        points: Double
     ) : this(
         name,
         RouteElementType.GATE,
@@ -40,7 +42,8 @@ class Gate(
         portLocation,
         mandatory,
         ProofAreaFactory.createProofArea(stbdLocation, portLocation, bearing1, bearing2),
-        id
+        id,
+        points
     )
 
     constructor(
@@ -51,7 +54,8 @@ class Gate(
         bearing1: Double,
         bearing2: Double,
         dist: Double,
-        id : Int
+        id : Int,
+        points: Double
     ) : this(
         name,
         RouteElementType.GATE,
@@ -59,7 +63,8 @@ class Gate(
         portLocation,
         mandatory,
         ProofAreaFactory.createProofArea(stbdLocation, portLocation, bearing1, bearing2, dist),
-        id
+        id,
+        points
     )
 
     constructor(
@@ -68,7 +73,8 @@ class Gate(
         portLocation: Location,
         mandatory: Boolean,
         dist: Double,
-        id: Int
+        id: Int,
+        points: Double
     ) : this(
         name,
         RouteElementType.GATE,
@@ -76,7 +82,8 @@ class Gate(
         portLocation,
         mandatory,
         ProofAreaFactory.createProofArea(stbdLocation, portLocation, dist),
-        id
+        id,
+        points
     )
 
     override fun isInProofArea(loc: Location): Boolean {
@@ -89,25 +96,27 @@ class Gate(
 
     companion object {
         fun fromGeoJson(f: Feature): Gate {
+            val props = f.properties()?:throw JSONException("Failed to get properties")
             val name =
-                f.properties()?.get("name")?.asString ?: throw JSONException("Failed to get name")
+                props.get("name")?.asString ?: throw JSONException("Failed to get name")
             val line: LineString = f.geometry() as LineString
             val stbdloc = Location("")
-            stbdloc.latitude = line.coordinates().get(0).latitude()
-            stbdloc.longitude = line.coordinates().get(0).longitude()
+            stbdloc.latitude = line.coordinates()[0].latitude()
+            stbdloc.longitude = line.coordinates()[0].longitude()
             val portloc = Location("")
-            portloc.latitude = line.coordinates().get(1).latitude()
-            portloc.longitude = line.coordinates().get(1).longitude()
-            val man = f.properties()!!.get("mandatory").asBoolean
-            val id = f.properties()!!.get("id").asInt
-            if (f.properties()!!.has("proofAreaBearings")) {
-                val b1 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(0).asDouble
-                val b2 = (f.properties()?.get("proofAreaBearings") as JsonArray).get(1).asDouble
-                val dist = (f.properties()?.get("proofAreaSize") as JsonArray).get(0).asDouble
-                return Gate(name, stbdloc, portloc, man, b1, b2, dist, id)
+            portloc.latitude = line.coordinates()[1].latitude()
+            portloc.longitude = line.coordinates()[1].longitude()
+            val man = props.get("mandatory").asBoolean
+            val id = props.get("id").asInt
+            val points = if (props.has("points")) props.get("points").asDouble else 0.0
+            return if (props.has("proofAreaBearings")) {
+                val b1 = (props.get("proofAreaBearings") as JsonArray).get(0).asDouble
+                val b2 = (props.get("proofAreaBearings") as JsonArray).get(1).asDouble
+                val dist = (props.get("proofAreaSize") as JsonArray).get(0).asDouble
+                Gate(name, stbdloc, portloc, man, b1, b2, dist, id, points)
             } else {
-                val dist = (f.properties()?.get("proofAreaSize") as JsonArray).get(0).asDouble
-                return Gate(name, stbdloc, portloc, man, dist, id)
+                val dist = (props.get("proofAreaSize") as JsonArray).get(0).asDouble
+                Gate(name, stbdloc, portloc, man, dist, id, points)
             }
         }
     }
