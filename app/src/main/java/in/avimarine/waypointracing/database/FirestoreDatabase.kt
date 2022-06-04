@@ -96,6 +96,17 @@ class FirestoreDatabase {
                 .addOnSuccessListener (onSuccess)
                 .addOnFailureListener (onFailure)
         }
+
+        fun getOwnReports(routeId: String, gateId: Int, onSuccess: (QuerySnapshot) -> Unit, onFailure: OnFailureListener) {
+            val db = Firebase.firestore
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+            val docRef = db.collection("reports").document(uid).collection("reports").whereEqualTo("routeId",routeId).whereEqualTo("gateId", gateId)
+            docRef.get()
+                .addOnSuccessListener (onSuccess)
+                .addOnFailureListener { exception ->
+                    Log.d(TAG, "get failed with ", exception)
+                }
+        }
     }
 
 

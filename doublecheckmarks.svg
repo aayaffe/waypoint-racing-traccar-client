@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="88.006882mm"
+   height="57.915813mm"
+   viewBox="0 0 88.006882 57.915813"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   sodipodi:docname="doublecheckmarks.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:zoom="0.74118967"
+     inkscape:cx="8.769685"
+     inkscape:cy="195.63144"
+     inkscape:window-width="1284"
+     inkscape:window-height="1040"
+     inkscape:window-x="156"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-57.109545,-111.41602)">
+    <g
+       id="g3038">
+      <path
+         style="fill:#004f9a;fill-opacity:1;fill-rule:evenodd;stroke:#004f9a;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 62.852081,133.45091 -5.56739,5.5674 21.245782,27.9916 5.553615,-5.61887 m 14.371871,-15.79082 26.562911,-28.54154 -5.71154,-5.4554 -25.991975,27.34158"
+         id="path857"
+         sodipodi:nodetypes="cccccccc" />
+      <path
+         style="fill:#004f9a;fill-opacity:1;fill-rule:evenodd;stroke:#004f9a;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 77.196419,141.13499 21.24578,27.9916 46.488421,-49.95123 -5.71154,-5.4554 -40.776881,42.84396 -15.67839,-20.99633 z"
+         id="path857-2"
+         sodipodi:nodetypes="ccccccc" />
+    </g>
+  </g>
+</svg>

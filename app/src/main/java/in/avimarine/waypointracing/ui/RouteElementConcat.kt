@@ -6,6 +6,4 @@ import `in`.avimarine.waypointracing.route.RouteElement
 class RouteElementConcat (
     val re: RouteElement,
     val gp: GatePassing?
-){
-
-}
+)

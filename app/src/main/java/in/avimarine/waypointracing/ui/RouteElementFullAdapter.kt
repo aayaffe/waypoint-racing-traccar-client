@@ -1,13 +1,18 @@
 package `in`.avimarine.waypointracing.ui
 
 import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.TAG
+import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.utils.timeStamptoDateString
+import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -32,7 +37,30 @@ class RouteElementFullAdapter() :
             currentRec = rec
             nameTextView.text = rec.re.name
             if (rec.gp != null) {
-                passedImageView.setImageResource(R.drawable.ic_baseline_check_24)
+                passedImageView.setImageResource(R.drawable.ic_checkmark)
+                passedImageView.setOnClickListener {
+                    Toast.makeText(
+                        passedImageView.context,
+                        "Passed gate\\waypoint",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                FirestoreDatabase.getOwnReports(rec.gp.routeId, rec.gp.gateId, {
+                    if (!it.isEmpty) {
+                        passedImageView.setImageResource(R.drawable.ic_doublecheckmark)
+                        passedImageView.setOnClickListener {
+                            Toast.makeText(
+                                passedImageView.context,
+                                "Report uploaded successfully",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                }, {
+                    Log.e(TAG, "Error getting reports",it)
+                })
+
+                //TODO: in treasure hunt mode, find first gate pass
                 gatePassTextView.text = "Last Gate Pass: " + timeStamptoDateString(rec.gp.time.time)
             } else {
                 passedImageView.setImageResource(R.drawable.ic_baseline_x_24)
