@@ -59,6 +59,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "eventName TEXT, " +
                     "routeId TEXT, " +
+                    "routeLastUpdate INTEGER, " +
                     "deviceId TEXT," +
                     "boatname TEXT," +
                     "gateId INTEGER," +
@@ -162,7 +163,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
     }
 
     companion object {
-        const val DATABASE_VERSION = 5
+        const val DATABASE_VERSION = 6
         const val DATABASE_NAME = "traccar.gatepasses.db"
     }
 

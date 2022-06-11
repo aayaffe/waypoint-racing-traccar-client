@@ -15,7 +15,7 @@ import org.json.JSONException
 @Parcelize
 class Finish(
     override val name: String,
-    override val type: RouteElementType = RouteElementType.FINISH,
+    override val routeElementType: RouteElementType = RouteElementType.FINISH,
     @Serializable(with = Serializers.Companion.LocationSerializer::class)
     override val stbdWpt: Location,
     @Serializable(with = Serializers.Companion.LocationSerializer::class)

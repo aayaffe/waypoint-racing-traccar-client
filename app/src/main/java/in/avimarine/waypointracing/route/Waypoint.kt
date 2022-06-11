@@ -17,7 +17,7 @@ import org.json.JSONException
 @Parcelize
 class Waypoint(
     override val name: String,
-    override val type: RouteElementType = RouteElementType.WAYPOINT,
+    override val routeElementType: RouteElementType = RouteElementType.WAYPOINT,
     @Serializable(with = Serializers.Companion.LocationSerializer::class)
     override val stbdWpt: Location,
     @Serializable(with = Serializers.Companion.LocationSerializer::class)

@@ -46,7 +46,7 @@ class LocationViewModel(
         if (wpt == null){
             return "-----"
         }
-        if (wpt.type == RouteElementType.WAYPOINT) {
+        if (wpt.routeElementType == RouteElementType.WAYPOINT) {
             if (wpt.proofArea.type == ProofAreaType.QUADRANT) {
                 return getPointOfCompass(
                     wpt.proofArea.bearings[0],

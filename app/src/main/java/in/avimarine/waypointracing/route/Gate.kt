@@ -11,11 +11,11 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.json.JSONException
 
-//@Serializable
+@Serializable
 @Parcelize
 class Gate(
     override val name: String,
-    override val type: RouteElementType = RouteElementType.GATE,
+    override val routeElementType: RouteElementType = RouteElementType.GATE,
     @Serializable(with = Serializers.Companion.LocationSerializer::class)
     override val stbdWpt: Location,
     @Serializable(with = Serializers.Companion.LocationSerializer::class)

@@ -37,8 +37,9 @@ import `in`.avimarine.waypointracing.utils.toLocation
 import `in`.avimarine.waypointracing.utils.toNM
 import android.content.SharedPreferences
 import android.widget.Toast
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import java.util.*
 
@@ -57,6 +58,8 @@ class TrackingController(private val context: Context) :
     private val networkManager = NetworkManager(context, this)
     private val deviceId = sharedPreferences.getString(SettingsFragment.KEY_DEVICE, "undefined")
     private val boatName = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "boat_undefined")
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
+
 
 
     private val url: String = sharedPreferences.getString(
@@ -82,6 +85,7 @@ class TrackingController(private val context: Context) :
 
     fun start() {
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+        firebaseAnalytics = Firebase.analytics
         nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
         if (isOnline) {
             read()
@@ -137,6 +141,10 @@ class TrackingController(private val context: Context) :
             } else {
                 send(gp)
             }
+            firebaseAnalytics.logEvent("gate_pass") {
+                param("route", route!!.eventName)
+                param("next_wpt", nextWpt.toString())
+            }
             FirestoreDatabase.addGatePass(gp, { documentReference ->
                 Log.d(TAG, "Gatepass added with ID: ${documentReference.id}")
                 Toast.makeText(context, "Uploaded successfully", Toast.LENGTH_LONG).show()
@@ -164,7 +172,7 @@ class TrackingController(private val context: Context) :
 
             if (wpt != null){
                 if (lastGatePass!= null && lastGatePass.routeId == route.id && lastGatePass.gateId == wpt.id){
-                    setGPSInterval(40)
+                    setGPSInterval(MAX_INTERVAL)
 
                 } else {
                     val interval = distance2interval(wpt, position)
@@ -178,6 +186,7 @@ class TrackingController(private val context: Context) :
         val dist = toNM(pointToLineDist(position.toLocation(), wpt.portWpt, wpt.stbdWpt))
         val ttg = (dist/position.speed) * 3600 //Conversion to seconds
         return when {
+            ttg > 120 -> MAX_INTERVAL
             ttg > 80 -> 40
             ttg > 40 -> 20
             ttg > 20 -> 10
@@ -437,6 +446,7 @@ class TrackingController(private val context: Context) :
 
     companion object {
         private const val RETRY_DELAY = 30 * 1000
+        private const val MAX_INTERVAL = 60
     }
 
 
