@@ -19,7 +19,8 @@
         android:id="@+id/route_element_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_margin="4dp"
+        android:layout_marginStart="12dp"
         android:textSize="16sp"
         app:layout_constraintStart_toEndOf="@+id/passed_image"
         app:layout_constraintTop_toTopOf="parent" />
@@ -27,11 +28,32 @@
         android:id="@+id/last_gate_pass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_margin="4dp"
+        android:layout_marginStart="12dp"
         android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/gp_location"
         app:layout_constraintStart_toEndOf="@+id/passed_image"
         app:layout_constraintTop_toBottomOf="@id/route_element_name"/>
+    <TextView
+        android:id="@+id/gp_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:layout_marginStart="12dp"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/passed_image" />
+    <ImageView
+        android:id="@+id/loc_status_image"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_margin="8dp"
+        app:layout_constraintBottom_toBottomOf="@id/gp_location"
+        app:layout_constraintStart_toEndOf="@id/gp_location"
+        app:layout_constraintTop_toTopOf="@id/gp_location"
+        android:src="@drawable/ic_baseline_not_listed_location_24"
+        android:visibility="gone"
+        android:contentDescription="Location status" />
     <ImageView
         android:id="@+id/route_element_type_image"
         android:layout_width="35dp"

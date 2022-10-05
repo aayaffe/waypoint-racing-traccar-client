@@ -9,16 +9,22 @@ import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.ui.RouteElementConcat
 import `in`.avimarine.waypointracing.ui.RouteElementFullAdapter
+import `in`.avimarine.waypointracing.utils.ScreenShot
 import `in`.avimarine.waypointracing.utils.timeStamptoDateString
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import eu.bolt.screenshotty.ScreenshotActionOrder
+import eu.bolt.screenshotty.ScreenshotManager
+import eu.bolt.screenshotty.ScreenshotManagerBuilder
 
 class RouteActivity : AppCompatActivity() {
 
@@ -58,7 +64,15 @@ class RouteActivity : AppCompatActivity() {
 
         setDetailsBox(route)
         setPointsDetails(route)
+        screenshotManager = ScreenshotManagerBuilder(this)
+            .withCustomActionOrder(ScreenshotActionOrder.pixelCopyFirst()) //optional, ScreenshotActionOrder.pixelCopyFirst() by default
+            .withPermissionRequestCode(REQUEST_SCREENSHOT_PERMISSION) //optional, 888 by default
+            .build()
+    }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_route, menu)
+        return true
     }
 
     private fun setPointsDetails(route: Route) {
@@ -89,12 +103,17 @@ class RouteActivity : AppCompatActivity() {
         binding.idValue.text = route.id
         binding.lastupdateValue.text = timeStamptoDateString(route.lastUpdate.time)
         binding.organizerValue.text = route.organizing
+        binding.boatnameValue.text = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "Undefined")
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
                 finish()
+                return true
+            }
+            R.id.send_screenshot_menu_action -> {
+                takeScreenshot()
                 return true
             }
         }
@@ -129,6 +148,24 @@ class RouteActivity : AppCompatActivity() {
         val ab = supportActionBar
         ab?.title = title
         ab?.subtitle = subTitle
+    }
+
+
+    private val REQUEST_SCREENSHOT_PERMISSION: Int = 12344321
+    private lateinit var screenshotManager : ScreenshotManager
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        screenshotManager.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun takeScreenshot(){
+        val screenshotResult = screenshotManager.makeScreenshot()
+        screenshotResult.observe(
+            onSuccess = { ScreenShot.processScreenshot(it, this) },
+            onError = { /*onMakeScreenshotFailed(it)*/ }
+        )
     }
 
 }

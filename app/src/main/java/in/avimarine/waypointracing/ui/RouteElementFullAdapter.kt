@@ -3,6 +3,8 @@ package `in`.avimarine.waypointracing.ui
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
+import `in`.avimarine.waypointracing.utils.getLatString
+import `in`.avimarine.waypointracing.utils.getLonString
 import `in`.avimarine.waypointracing.utils.timeStamptoDateString
 import android.content.Context
 import android.os.Build
@@ -27,6 +29,8 @@ class RouteElementFullAdapter() :
         private val nameTextView: TextView = itemView.findViewById(R.id.route_element_name)
         private val gatePassTextView: TextView = itemView.findViewById(R.id.last_gate_pass)
         private val passedImageView: ImageView = itemView.findViewById(R.id.passed_image)
+        private val gpLocTextView: TextView = itemView.findViewById(R.id.gp_location)
+        private val locStatusImageView: ImageView = itemView.findViewById(R.id.loc_status_image)
         private val typeImageView: ImageView = itemView.findViewById(R.id.route_element_type_image)
 
         private var currentRec: RouteElementConcat? = null
@@ -61,7 +65,11 @@ class RouteElementFullAdapter() :
                 })
 
                 //TODO: in treasure hunt mode, find first gate pass
-                gatePassTextView.text = "Last Gate Pass: " + timeStamptoDateString(rec.gp.time.time)
+                gatePassTextView.text = timeStamptoDateString(rec.gp.time.time)
+                gpLocTextView.text = getLatString(rec.gp.latitude) + " " + getLonString(rec.gp.longitude)
+                if (rec.gp.mock){
+                    locStatusImageView.visibility=View.VISIBLE
+                }
             } else {
                 passedImageView.setImageResource(R.drawable.ic_baseline_x_24)
                 gatePassTextView.text = "Last Gate Pass: Never"
