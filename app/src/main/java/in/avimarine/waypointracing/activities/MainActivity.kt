@@ -246,8 +246,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private fun setTitle(title: String, subTitle: String) {
         val ab = supportActionBar
-        ab?.setTitle(title)
-        ab?.setSubtitle(subTitle)
+        ab?.title = title
+        ab?.subtitle = subTitle
     }
 
 
@@ -306,7 +306,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun setNextWaypointUI(wpt: RouteElement) {
-        if (wpt.type == RouteElementType.WAYPOINT) {
+        if (wpt.routeElementType == RouteElementType.WAYPOINT) {
             if (wpt.proofArea.type == ProofAreaType.QUADRANT) {
                 binding.shortestDistanceToGate.visibility = View.VISIBLE
                 binding.stbdGate.visibility = View.VISIBLE
