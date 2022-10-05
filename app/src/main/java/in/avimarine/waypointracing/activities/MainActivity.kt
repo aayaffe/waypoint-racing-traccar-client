@@ -8,6 +8,8 @@ import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.utils.*
 import android.Manifest
 import android.app.Activity
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -28,8 +30,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.DialogFragment
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -48,14 +48,13 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private lateinit var positionProvider: PositionProvider
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var alarmManager: AlarmManager
+    private lateinit var alarmIntent: PendingIntent
     private var nextWpt: Int = 0
     private val PERMISSIONS_REQUEST_LOCATION_UI = 4
     private var route = Route.emptyRoute()
-//    private var noGPSTimer: Timer = Timer("GPSTIMER", true)
     val delayedHandler = Handler(Looper.getMainLooper())
     private var isFirstSpinnerLoad = true
-//    private lateinit var alarmManager: AlarmManager
-//    private lateinit var alarmIntent: PendingIntent
     private lateinit var binding: ActivityMainBinding
     private val expertMode = BuildConfig.DEBUG
     // See: https://developer.android.com/training/basics/intents/result
@@ -76,10 +75,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             .withPermissionRequestCode(REQUEST_SCREENSHOT_PERMISSION) //optional, 888 by default
             .build()
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
-//        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-//        val originalIntent = Intent(this, AutostartReceiver::class.java)
-//        originalIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-//        alarmIntent = PendingIntent.getBroadcast(this, 0, originalIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         if (intent.action == Intent.ACTION_MAIN) {
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
@@ -98,6 +93,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
 
         setButton(sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false))
+        alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false)) {
             startTrackingService(checkPermission = true, initialPermission = false)
         }
@@ -113,6 +109,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (route.isValidWpt(nextWpt)){
             getNextWpt()
         }
+
+        createAlarmIntent()
         binding.routeElementSpinner.onItemSelectedListener = object :
             AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
@@ -127,7 +125,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                     return
                 }
                 setNextWpt(position)
-                sendRouteIntent(route)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -138,6 +135,17 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             putBoolean(SettingsFragment.KEY_EXPERT_MODE, false)
             commit()
         }
+    }
+
+    private fun createAlarmIntent() {
+        val originalIntent = Intent(this, AutostartReceiver::class.java)
+        originalIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+        alarmIntent = PendingIntent.getBroadcast(applicationContext, 0, originalIntent, flags)
     }
 
     private fun launchAuthenticationProcess() {
@@ -204,6 +212,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             return
         }
         route = r
+        sharedPreferences.edit().putString(SettingsFragment.KEY_ROUTE,  route.toString()).apply()
         populateRouteElementSpinner(r)
         setEmptyRouteUI(route.isEmpty())
         if (route.eventType == EventType.WPTRACING) {
@@ -214,7 +223,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (!route.isEmpty()) {
             Toast.makeText(applicationContext,"Loaded route\n ${route.eventName}",Toast.LENGTH_LONG).show()
         }
-        sendRouteIntent(r)
+        createAlarmIntent()
         val s = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES, "")
         var gp = GatePassings("")
         if (s != null) {
@@ -234,14 +243,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     }
 
-    private fun sendRouteIntent(r: Route) {
-        Intent().also { intent ->
-            intent.action = TrackingService.ROUTE_ACTION
-            intent.putExtra("route", r)
-            intent.putExtra("nextwpt", nextWpt)
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
-        }
-    }
 
     private fun setTitle(title: String, subTitle: String) {
         val ab = supportActionBar
@@ -689,15 +690,14 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         if (permission) {
             val i = Intent(this, TrackingService::class.java)
-            i.putExtra("route", route)
-            i.putExtra("nextwpt", nextWpt)
             ContextCompat.startForegroundService(this, i)
-//            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-//                alarmManager.setInexactRepeating(
-//                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
-//                    ALARM_MANAGER_INTERVAL.toLong(), ALARM_MANAGER_INTERVAL.toLong(), alarmIntent
-//                )
-//            }
+            createAlarmIntent()
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                alarmManager.setInexactRepeating(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    ALARM_MANAGER_INTERVAL.toLong(), ALARM_MANAGER_INTERVAL.toLong(), alarmIntent
+                )
+            }
             if (!BatteryOptimizationHelper().requestedExceptions(this)) {
                 BatteryOptimizationHelper().requestException(this)
             }
@@ -707,9 +707,10 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun stopTrackingService() {
-//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-//            alarmManager.cancel(alarmIntent)
-//        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            alarmManager.cancel(alarmIntent)
+            Log.d(TAG, "Stopped alarm manager")
+        }
         this.stopService(Intent(this, TrackingService::class.java))
     }
 
@@ -759,7 +760,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     companion object{
         private const val PERMISSIONS_REQUEST_LOCATION = 2
-//        private const val ALARM_MANAGER_INTERVAL = 15000
+        private const val ALARM_MANAGER_INTERVAL = 15000
     }
 
 }

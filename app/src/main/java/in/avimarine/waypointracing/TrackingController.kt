@@ -78,11 +78,6 @@ class TrackingController(private val context: Context) :
     private var isWaitingGP = true
 
 
-//    interface PositionListener {
-//        fun onPositionUpdate(position: Position?)
-//        fun onPositionError(error: Throwable?)
-//    }
-
     fun start() {
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         firebaseAnalytics = Firebase.analytics

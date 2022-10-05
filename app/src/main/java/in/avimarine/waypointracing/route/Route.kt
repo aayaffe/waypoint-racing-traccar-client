@@ -8,6 +8,7 @@ import com.mapbox.geojson.FeatureCollection
 //import kotlinx.android.parcel.Parcelize
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.json.JSONException
@@ -33,7 +34,7 @@ class Route(
         return elements.size == 0
     }
 
-    fun toGeoJson():String{
+    override fun toString():String{
         return Json.encodeToString(this)
     }
 
@@ -42,6 +43,11 @@ class Route(
     }
     companion object {
         val TAG = "Route"
+
+        fun fromString(s: String): Route{
+            return Json.decodeFromString(s)
+        }
+
         fun fromGeoJson(geojson: String): Route {
             val json = JSONObject(convertStandardJSONString(geojson))
             val name = json.getJSONObject("routedata").getString("name")

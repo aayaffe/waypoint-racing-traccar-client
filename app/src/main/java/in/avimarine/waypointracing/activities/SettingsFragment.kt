@@ -219,6 +219,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         const val KEY_BUFFER = "buffer"
         const val KEY_WAKELOCK = "wakelock"
         const val KEY_NEXT_WPT = "nextwpt"
+        const val KEY_ROUTE = "route"
         const val KEY_LAST_SEND = "lastsend"
         const val KEY_EXPERT_MODE = "expert"
         const val KEY_GATE_PASSES = "gatepasses"

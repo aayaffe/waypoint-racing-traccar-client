@@ -19,16 +19,14 @@ import `in`.avimarine.waypointracing.activities.MainActivity
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.activities.StatusActivity
 import `in`.avimarine.waypointracing.route.Route
+import `in`.avimarine.waypointracing.utils.Utils
 import android.Manifest
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
@@ -40,15 +38,16 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
+import org.json.JSONException
+import java.util.*
 
 
-class TrackingService() : Service() {
+class TrackingService() : Service(), SharedPreferences.OnSharedPreferenceChangeListener {
 
 
     private var wakeLock: WakeLock? = null
     private var trackingController: TrackingController? = null
-    private val br: BroadcastReceiver = RouteBroadcastReceiver()
-    private var nextWpt: Int = -1
+    private lateinit var sharedPreferences: SharedPreferences
     private var route: Route = Route.emptyRoute()
 
     class HideNotificationService : Service() {
@@ -71,6 +70,7 @@ class TrackingService() : Service() {
     override fun onCreate() {
         startForeground(NOTIFICATION_ID, createNotification(this))
         Log.i(TAG, "service create")
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
         sendBroadcast(Intent(ACTION_STARTED))
         StatusActivity.addMessage(getString(R.string.status_service_create))
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -82,50 +82,55 @@ class TrackingService() : Service() {
             trackingController = TrackingController(this)
             trackingController?.start()
         }
-
+        parseRoute(sharedPreferences)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             ContextCompat.startForegroundService(this, Intent(this, HideNotificationService::class.java))
         }
-        val filter = IntentFilter(ROUTE_ACTION)
-        LocalBroadcastManager.getInstance(this).registerReceiver(br, filter);
-
-
     }
 
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
 
-    @TargetApi(Build.VERSION_CODES.ECLAIR)
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        Log.d(TAG, "OnStart, startId: $startId")
         WakefulBroadcastReceiver.completeWakefulIntent(intent)
-        parseRouteIntent(intent)
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         return START_STICKY
     }
 
     override fun onDestroy() {
         stopForeground(true)
         Log.i(TAG, "service destroy")
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
         sendBroadcast(Intent(ACTION_STOPPED))
         StatusActivity.addMessage(getString(R.string.status_service_destroy))
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(br)
         if (wakeLock?.isHeld == true) {
             wakeLock?.release()
         }
         trackingController?.stop()
     }
 
-    private fun parseRouteIntent(i: Intent){
-        val r: Route? = i.getParcelableExtra("route")
-        route = if (r!=null) {
-            r
+    override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
+        if (key == SettingsFragment.KEY_ROUTE) {
+            parseRoute(sp)
+        }
+    }
+
+    private fun parseRoute(sp: SharedPreferences) {
+        val s = sp.getString(SettingsFragment.KEY_ROUTE, null)
+        route = if (s!= null) {
+            try {
+                Route.fromString(s)
+            } catch (e: JSONException){
+                Log.e(TAG,"Error parsing route", e)
+                Route.emptyRoute()
+            }
         } else {
-            Log.e(TAG,"Error loading route from intent")
+            Log.e(TAG,"Error loading route from sharedpreferences (null)")
             Route.emptyRoute()
         }
-        nextWpt = i.getIntExtra("nextwpt",-1)
-        Log.d(TAG, "Received route: $route")
-        Log.d(TAG, "Received nextwpt: " + route.elements.elementAtOrNull(nextWpt))
+        Log.d(TAG, "Received route: ${route.eventName}")
         trackingController?.updateRoute(route)
     }
 
@@ -163,12 +168,6 @@ class TrackingService() : Service() {
     }
 
 
-
-    inner class RouteBroadcastReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent) {
-            parseRouteIntent(intent)
-        }
-    }
 }
 
 
