@@ -28,6 +28,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 31
         versionCode 26
+        versionCode 27
         versionName '3.9'
         signingConfig signingConfigs.debug
     }
