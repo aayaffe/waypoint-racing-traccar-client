@@ -35,6 +35,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
 
         private var error: RuntimeException? = null
 
+        @Deprecated("Deprecated in Java")
         override fun doInBackground(vararg params: Unit): T? {
             return try {
                 executeMethod()
@@ -46,6 +47,7 @@ class GatePassesDatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DA
 
         protected abstract fun executeMethod(): T
 
+        @Deprecated("Deprecated in Java")
         override fun onPostExecute(result: T?) {
             handler.onComplete(error == null, result)
         }

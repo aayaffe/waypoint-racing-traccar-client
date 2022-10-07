@@ -72,6 +72,7 @@ class AndroidPositionProvider(context: Context, listener: PositionListener) :
                         )
                     }
 
+                    @Deprecated("Deprecated in Java")
                     override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
                     override fun onProviderEnabled(provider: String) {}
                     override fun onProviderDisabled(provider: String) {}
@@ -86,6 +87,7 @@ class AndroidPositionProvider(context: Context, listener: PositionListener) :
         processLocation(location)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
     override fun onProviderEnabled(provider: String) {}
     override fun onProviderDisabled(provider: String) {}

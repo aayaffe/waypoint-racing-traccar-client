@@ -55,7 +55,7 @@ abstract class PositionProvider(
     protected fun processLocation(location: Location?) {
         if (location != null &&
                 (lastLocation == null || location.time - lastLocation!!.time >= 0.5 * interval || distance > 0
-                && location.distanceTo(lastLocation) >= distance || angle > 0
+                && location.distanceTo(lastLocation!!) >= distance || angle > 0
                 && abs(location.bearing - lastLocation!!.bearing) >= angle)
         ) {
             Log.v(TAG, "location new")

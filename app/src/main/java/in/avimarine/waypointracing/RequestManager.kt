@@ -60,10 +60,12 @@ object RequestManager {
 
     private class RequestAsyncTask(private val handler: RequestHandler) : AsyncTask<String, Unit, Boolean>() {
 
+        @Deprecated("Deprecated in Java")
         override fun doInBackground(vararg request: String): Boolean {
             return sendRequest(request[0])
         }
 
+        @Deprecated("Deprecated in Java")
         override fun onPostExecute(result: Boolean) {
             handler.onComplete(result)
         }

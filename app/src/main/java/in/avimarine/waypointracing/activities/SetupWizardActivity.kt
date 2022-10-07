@@ -67,6 +67,7 @@ class SetupWizardActivity : AppCompatActivity(), StepperNavListener {
         finish()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (stepper.currentStep == 0) {
             super.onBackPressed()

@@ -745,6 +745,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private lateinit var screenshotManager : ScreenshotManager
 
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         screenshotManager.onActivityResult(requestCode, resultCode, data)
