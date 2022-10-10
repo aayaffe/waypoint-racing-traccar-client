@@ -9,6 +9,8 @@
         <attr name="unitsEnabled" format="boolean" />
         <attr name="autoTextSize" format="boolean" />
         <attr name="dataTextSize" format="dimension" />
+        <attr name="maxDataLines" format="integer" />
+
     </declare-styleable>
 
 </resources>

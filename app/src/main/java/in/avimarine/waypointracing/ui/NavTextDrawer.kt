@@ -25,6 +25,8 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
     private var unitsText: String? = null
     private var labelText: String? = null
     private var textColor = Color.BLACK
+    private var maxDataLines = 1
+
 
     init {
         setupAttributes(attrs)
@@ -57,6 +59,9 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
     fun setTextColor(c: Int){
         binding.dataTV.setTextColor(c)
     }
+    fun setMaxDataLines(i: Int){
+        binding.dataTV.maxLines = i
+    }
 
     private fun setupAttributes(attrs: AttributeSet?) {
         Log.d(TAG,"SetupAttributes")
@@ -70,6 +75,7 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
         labelEnabled = typedArray.getBoolean(R.styleable.NavTextDrawer_labelEnabled,true)
         unitsEnabled = typedArray.getBoolean(R.styleable.NavTextDrawer_unitsEnabled,true)
         textColor = typedArray.getInt(R.styleable.NavTextDrawer_textColor, Color.BLACK)
+        maxDataLines = typedArray.getInt(R.styleable.NavTextDrawer_maxDataLines, 1)
         val dataTextSize = typedArray.getDimension(R.styleable.NavTextDrawer_dataTextSize, 12f)
         binding.dataTV.textSize = dataTextSize
 
@@ -77,11 +83,12 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
         setUnits(unitsText)
         setData(dataText)
         setTextColor(textColor)
+        setMaxDataLines(maxDataLines)
         if (!labelEnabled){
-            binding.labelTv.visibility = View.INVISIBLE
+            binding.labelTv.visibility = View.GONE
         }
         if (!unitsEnabled){
-            binding.unitsTv.visibility = View.INVISIBLE
+            binding.unitsTv.visibility = View.GONE
         }
         if (typedArray.getBoolean(R.styleable.NavTextDrawer_autoTextSize,false)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

@@ -17,13 +17,11 @@
         tools:context="in.avimarine.waypointracing.activities.MainActivity">
 
 
-
         <Button
             android:id="@+id/start_btn"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="4dp"
             android:background="@drawable/btn_rnd_grn"
             android:onClick="startButtonClick"
             android:text="@string/settings_status_off"
@@ -183,6 +181,8 @@
                     app:data="@{viewmodel!=null ? viewmodel.locationData : `------\n------`}"
                     app:dataTextSize="10sp"
                     app:labelText="Location"
+                    app:labelEnabled="false"
+                    app:maxDataLines="2"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintBottom_toBottomOf="@+id/time"
                     app:layout_constraintTop_toTopOf="@+id/time"
@@ -259,7 +259,8 @@
                     android:src="@drawable/ic_baseline_not_listed_location_24"
                     android:visibility="@{viewmodel.position.mock? View.VISIBLE : View.INVISIBLE}"
                     app:layout_constraintBottom_toBottomOf="@+id/location"
-                    app:layout_constraintEnd_toEndOf="@+id/location" />
+                    app:layout_constraintEnd_toEndOf="@+id/location"
+                    tools:ignore="ImageContrastCheck" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>
 
