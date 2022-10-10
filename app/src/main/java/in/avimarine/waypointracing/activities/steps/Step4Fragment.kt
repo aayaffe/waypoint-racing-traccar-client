@@ -17,6 +17,7 @@ package `in`.avimarine.waypointracing.activities.steps
 
 import `in`.avimarine.waypointracing.BatteryOptimizationHelper
 import `in`.avimarine.waypointracing.databinding.GrantPermissionFragmentBinding
+import `in`.avimarine.waypointracing.utils.LocationPermissions
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -38,7 +39,7 @@ class Step4Fragment : SetupFragment() {
     private lateinit var viewBinding: GrantPermissionFragmentBinding
 
     override fun validateFragment(): Boolean {
-        return BatteryOptimizationHelper().requestedExceptions(requireContext()) && hasPermissions(activity as Context, PERMISSIONS)
+        return BatteryOptimizationHelper().requestedExceptions(requireContext()) && LocationPermissions.arePermissionsGranted(activity as Context)
     }
 
     /**
@@ -57,7 +58,20 @@ class Step4Fragment : SetupFragment() {
 
     private fun setupUI() {
         viewBinding.locationPermissionsBtn.setOnClickListener {
-            getLocationPermissions()
+//            getLocationPermissions()
+            if (LocationPermissions.arePermissionsGranted(activity as Context)) {
+                viewBinding.locationPermissionsBtn.setBackgroundColor(Color.GREEN)
+                viewBinding.locationPermissionsBtn.isEnabled = false
+            } else {
+                activity?.let { it1 ->
+                    LocationPermissions.askForLocationPermission(
+                        it1,
+                        LocationPermissions.PERMISSIONS_REQUEST_LOCATION_UI
+                    )
+                }
+                viewBinding.locationPermissionsBtn.setBackgroundColor(Color.GREEN)
+
+            }
         }
         viewBinding.preventSleepBtn.setOnClickListener {
             getNoSleepException()
@@ -70,22 +84,22 @@ class Step4Fragment : SetupFragment() {
         viewBinding.preventSleepBtn.isEnabled = false
     }
 
-    private fun getLocationPermissions() {
-        activity?.let {
-            if (hasPermissions(activity as Context, PERMISSIONS)) {
-                viewBinding.locationPermissionsBtn.setBackgroundColor(Color.GREEN)
-                viewBinding.locationPermissionsBtn.isEnabled = false
-            } else {
-                permReqLauncher.launch(
-                    PERMISSIONS
-                )
-            }
-        }
-    }
+//    private fun getLocationPermissions() {
+//        activity?.let {
+//            if (arePermissionsGranted(activity as Context)) {
+//                viewBinding.locationPermissionsBtn.setBackgroundColor(Color.GREEN)
+//                viewBinding.locationPermissionsBtn.isEnabled = false
+//            } else {
+//                permReqLauncher.launch(
+//                    PERMISSIONS
+//                )
+//            }
+//        }
+//    }
     // util method
-    private fun hasPermissions(context: Context, permissions: Array<String>): Boolean = permissions.all {
-        ActivityCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-    }
+//    private fun hasPermissions(context: Context, permissions: Array<String>): Boolean = permissions.all {
+//        ActivityCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+//    }
 
     companion object {
         var PERMISSIONS = arrayOf(

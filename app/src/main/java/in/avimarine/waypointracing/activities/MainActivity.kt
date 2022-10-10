@@ -6,6 +6,7 @@ import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.LocationViewModel
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.utils.*
+import `in`.avimarine.waypointracing.utils.LocationPermissions.Companion.PERMISSIONS_REQUEST_LOCATION_UI
 import android.Manifest
 import android.app.Activity
 import android.app.AlarmManager
@@ -28,7 +29,9 @@ import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.firebase.ui.auth.AuthUI
@@ -51,7 +54,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private lateinit var alarmManager: AlarmManager
     private lateinit var alarmIntent: PendingIntent
     private var nextWpt: Int = 0
-    private val PERMISSIONS_REQUEST_LOCATION_UI = 4
     private var route = Route.emptyRoute()
     val delayedHandler = Handler(Looper.getMainLooper())
     private var isFirstSpinnerLoad = true
@@ -271,7 +273,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 }
                 positionProvider.startUpdates()
             } else {
-                askForLocationPermission(PERMISSIONS_REQUEST_LOCATION_UI)
+                LocationPermissions.askForLocationPermission(this,
+                    PERMISSIONS_REQUEST_LOCATION_UI)
             }
         } catch (e: SecurityException) {
             Log.w(TAG, e)
@@ -646,29 +649,57 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-    private fun askForLocationPermission(permissionRequestCode: Int) {
-        val requiredPermissions: MutableSet<String> = HashSet()
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-            && ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        }
-        if (requiredPermissions.isNotEmpty()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(requiredPermissions.toTypedArray(), permissionRequestCode)
-            }
-        }
-    }
+
+//    private fun askForLocationPermission(permissionRequestCode: Int) {
+//        val requiredPermissions: MutableSet<String> = HashSet()
+//        if (ContextCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.ACCESS_FINE_LOCATION
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+//        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+//            && ContextCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+//        }
+//        if (requiredPermissions.isNotEmpty()) {
+//
+//                if (ActivityCompat.shouldShowRequestPermissionRationale(
+//                        this,
+//                        Manifest.permission.ACCESS_FINE_LOCATION
+//                    )
+//                ) {
+//                    val alertBuilder: AlertDialog.Builder = AlertDialog.Builder(this)
+//                    alertBuilder.setCancelable(true)
+//                    alertBuilder.setTitle("Fine location permission necessary")
+//                    alertBuilder.setMessage("Waypoint Racing collects location data to enable boat tracking, and race course navigation even when the app is closed or not in use.")
+//                    alertBuilder.setPositiveButton(android.R.string.yes
+//                    ) { _, _ ->
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                            requestPermissions(
+//                                requiredPermissions.toTypedArray(),
+//                                permissionRequestCode
+//                            )
+//                        }
+//                    }
+//                    val alert: AlertDialog = alertBuilder.create()
+//                    alert.show()
+//                } else {
+//                    // No explanation needed, we can request the permission.
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                        requestPermissions(
+//                            requiredPermissions.toTypedArray(),
+//                            permissionRequestCode
+//                        )
+//                    }
+//                }
+//        }
+//    }
 
     private fun startTrackingService(checkPermission: Boolean, initialPermission: Boolean) {
         var permission = initialPermission
@@ -720,7 +751,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSIONS_REQUEST_LOCATION || requestCode == PERMISSIONS_REQUEST_LOCATION_UI) {
+        if (requestCode == PERMISSIONS_REQUEST_LOCATION || requestCode == LocationPermissions.PERMISSIONS_REQUEST_LOCATION_UI) {
             var granted = true
             for (result in grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {
