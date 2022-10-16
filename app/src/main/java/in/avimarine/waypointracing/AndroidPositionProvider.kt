@@ -23,6 +23,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
+import java.util.*
 
 class AndroidPositionProvider(context: Context, listener: PositionListener) :
     PositionProvider(context, listener), LocationListener {
@@ -84,6 +85,12 @@ class AndroidPositionProvider(context: Context, listener: PositionListener) :
     }
 
     override fun onLocationChanged(location: Location) {
+        //GPS Week rollover fix. Add 1024 weeks if OS time is off by more than ~992 weeks
+        //https://stackoverflow.com/questions/56147606/
+        val c = Calendar.getInstance()
+        if (c.time.time - location.time > 600000000000L) {
+            location.time = location.time + 619315200000L
+        }
         processLocation(location)
     }
 
