@@ -120,8 +120,10 @@ class TrackingController(private val context: Context) :
             sendPosition(position)
         }
         if (inArea && route != null) {
-            if (GatePassings.getLastGatePass(context)?.gateId ?: "" == route!!.elements[nextWpt].id &&
-                GatePassings.getLastGatePass(context)?.routeId ?: "" == route!!.id) {
+            if ((GatePassings.getLastGatePass(context)?.gateId
+                    ?: "") == route!!.elements[nextWpt].id &&
+                (GatePassings.getLastGatePass(context)?.routeId ?: "") == route!!.id
+            ) {
                 return
             }
             Log.d(TAG, "inArea ${route!!.elements[nextWpt].name}")

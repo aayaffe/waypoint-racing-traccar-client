@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false)) {
             startTrackingService(checkPermission = true, initialPermission = false)
         }
-        val mCalendar: Calendar = GregorianCalendar()
+        val mCalendar: Calendar = GregorianCalendar() //TODO: move to onstart
         val mTimeZone = mCalendar.timeZone
         val mGMTOffset = mTimeZone.getOffset(mCalendar.timeInMillis)
         binding.time.setLabel(
