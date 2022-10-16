@@ -199,7 +199,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
     private fun expertMode(b: Boolean?) {
         findPreference<Preference>(KEY_DEVICE)!!.isEnabled = b!!
         findPreference<Preference>(KEY_URL)!!.isVisible = b
-        findPreference<Preference>(KEY_ACCURACY)!!.isVisible = b
+//        findPreference<Preference>(KEY_ACCURACY)!!.isVisible = b
         findPreference<Preference>(KEY_BUFFER)!!.isVisible = b
         findPreference<Preference>(KEY_WAKELOCK)!!.isVisible = b
         findPreference<Preference>(KEY_TRACKING)!!.isVisible = b
