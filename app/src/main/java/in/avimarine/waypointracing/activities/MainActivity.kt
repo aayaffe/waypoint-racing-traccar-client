@@ -266,6 +266,10 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             settings.edit().putBoolean("my_first_time", false).apply()
             return
         }
+        startPositionProvider()
+    }
+
+    private fun startPositionProvider() {
         try {
             if (LocationPermissions.arePermissionsGranted(this)) {
                 if (!this::positionProvider.isInitialized) {
@@ -273,8 +277,10 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 }
                 positionProvider.startUpdates()
             } else {
-                LocationPermissions.askForLocationPermission(this,
-                    PERMISSIONS_REQUEST_LOCATION_UI)
+                LocationPermissions.askForLocationPermission(
+                    this,
+                    PERMISSIONS_REQUEST_LOCATION_UI
+                )
             }
         } catch (e: SecurityException) {
             Log.w(TAG, e)
@@ -288,6 +294,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
         }
+        startPositionProvider()
         getNextWpt()
         setGPSInterval(1)
         setMainActivityVisibilityStatus(true)
@@ -342,19 +349,23 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     override fun onPause() {
         super.onPause()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-        setGPSInterval(9)
+        setGPSInterval(sharedPreferences.getString(SettingsFragment.KEY_INITIAL_INTERVAL, "30")!!.toInt())
         setMainActivityVisibilityStatus(false)
-
+        stopPositionProvider()
     }
 
-    override fun onStop() {
+    private fun stopPositionProvider() {
         try {
-            if (this::positionProvider.isInitialized){
+            if (this::positionProvider.isInitialized) {
                 positionProvider.stopUpdates()
             }
         } catch (e: Exception) {
             Log.w(TAG, e)
         }
+    }
+
+    override fun onStop() {
+        stopPositionProvider()
         super.onStop()
     }
 
@@ -454,8 +465,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             launchAuthenticationProcess()
         }
     }
-
-
 
     private fun resetRoute() {
         setNextWpt(0)
@@ -648,58 +657,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             binding.startBtn.text = getString(R.string.settings_status_off)
         }
     }
-
-
-//    private fun askForLocationPermission(permissionRequestCode: Int) {
-//        val requiredPermissions: MutableSet<String> = HashSet()
-//        if (ContextCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.ACCESS_FINE_LOCATION
-//            ) != PackageManager.PERMISSION_GRANTED
-//        ) {
-//            requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-//        }
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-//            && ContextCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-//            ) != PackageManager.PERMISSION_GRANTED
-//        ) {
-//            requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-//        }
-//        if (requiredPermissions.isNotEmpty()) {
-//
-//                if (ActivityCompat.shouldShowRequestPermissionRationale(
-//                        this,
-//                        Manifest.permission.ACCESS_FINE_LOCATION
-//                    )
-//                ) {
-//                    val alertBuilder: AlertDialog.Builder = AlertDialog.Builder(this)
-//                    alertBuilder.setCancelable(true)
-//                    alertBuilder.setTitle("Fine location permission necessary")
-//                    alertBuilder.setMessage("Waypoint Racing collects location data to enable boat tracking, and race course navigation even when the app is closed or not in use.")
-//                    alertBuilder.setPositiveButton(android.R.string.yes
-//                    ) { _, _ ->
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                            requestPermissions(
-//                                requiredPermissions.toTypedArray(),
-//                                permissionRequestCode
-//                            )
-//                        }
-//                    }
-//                    val alert: AlertDialog = alertBuilder.create()
-//                    alert.show()
-//                } else {
-//                    // No explanation needed, we can request the permission.
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                        requestPermissions(
-//                            requiredPermissions.toTypedArray(),
-//                            permissionRequestCode
-//                        )
-//                    }
-//                }
-//        }
-//    }
 
     private fun startTrackingService(checkPermission: Boolean, initialPermission: Boolean) {
         var permission = initialPermission
