@@ -17,6 +17,7 @@ package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.MainApplication
 import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -226,5 +227,6 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         const val KEY_TRACKING = "trackingenabled"
         const val KEY_MAGNETIC = "magnetic"
         const val KEY_IS_UI_VISIBLE = "uivisibility"
+        const val KEY_ADAPTIVE_INTERVAL = "adaptiveinterval"
     }
 }

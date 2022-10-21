@@ -96,5 +96,6 @@
     <string name="prevent_sleep_btn">Add Exception</string>
     <string name="login_btn">Login\nTo enable tracking</string>
     <string name="boat">Boat:</string>
+    <string name="settings_adaptiveinterval">Adaptive interval</string>
 
 </resources>

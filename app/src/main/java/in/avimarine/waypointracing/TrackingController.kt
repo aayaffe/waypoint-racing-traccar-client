@@ -168,12 +168,15 @@ class TrackingController(private val context: Context) :
             val lastGatePass = GatePassings.getLastGatePass(context)
 
             if (wpt != null){
-                if (lastGatePass!= null && lastGatePass.routeId == route.id && lastGatePass.gateId == wpt.id){
+                if ((lastGatePass != null) && (lastGatePass.routeId == route.id) && (lastGatePass.gateId == wpt.id)){
                     setGPSInterval(MAX_INTERVAL)
-
                 } else {
-                    val interval = distance2interval(wpt, position)
-                    setGPSInterval(interval)
+                    if (sharedPreferences.getBoolean(SettingsFragment.KEY_ADAPTIVE_INTERVAL, true)) {
+                        val interval = distance2interval(wpt, position)
+                        setGPSInterval(interval)
+                    } else {
+                        setGPSInterval(sharedPreferences.getString(SettingsFragment.KEY_INITIAL_INTERVAL,"30")!!.toInt())
+                    }
                 }
             }
         }

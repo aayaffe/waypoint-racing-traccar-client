@@ -97,5 +97,9 @@
         android:summaryOff="@string/settings_wakelock_off_summary"
         android:summaryOn="@string/settings_wakelock_on_summary"
         android:title="@string/settings_wakelock" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="adaptiveinterval"
+        android:title="@string/settings_adaptiveinterval" />
 
 </PreferenceScreen>
