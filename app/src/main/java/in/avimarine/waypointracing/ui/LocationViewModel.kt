@@ -25,6 +25,11 @@ class LocationViewModel(
     fun getLocationData(): String {
         return getLatString(position.latitude) + "\n" + getLonString(position.longitude)
     }
+
+    fun getAccuracyData():String {
+        return if (position.accuracy>0) {position.accuracy.toString()} else ""
+    }
+
     fun getTimeData():String {
         return timeStamptoDateString(position.time.time)
     }

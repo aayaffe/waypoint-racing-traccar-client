@@ -14,30 +14,32 @@
         android:id="@+id/dataTV"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:drawablePadding="4dp"
         android:fontFamily="sans-serif-black"
-        android:gravity="center_vertical"
         android:textColor="@android:color/black"
-        android:textSize="24sp"
+        android:textSize="30sp"
         app:autoSizeTextType="uniform"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/unitsTv"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/labelTv"
-        tools:text="270/12" />
+        tools:text="270/12\nsecond line" />
 
     <TextView
         android:id="@+id/labelTv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.28"
         android:layout_centerVertical="true"
-        android:drawablePadding="4dp"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp"
         android:fontFamily="sans-serif-medium"
-        android:gravity="center_vertical"
+        app:autoSizeTextType="uniform"
         android:textColor="@android:color/secondary_text_light"
         android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/dataTV"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         tools:text="Direction/Distance" />
 
     <TextView
