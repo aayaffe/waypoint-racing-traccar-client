@@ -63,6 +63,12 @@
         android:defaultValue="8"
         android:key="interval"
         android:inputType="number"
+        app:isPreferenceVisible="false"/>
+
+    <EditTextPreference
+        android:defaultValue="10"
+        android:key="initialinterval"
+        android:inputType="number"
         android:summary="@string/settings_interval_summary"
         android:title="@string/settings_interval_title"
         app:isPreferenceVisible="false"/>
@@ -97,5 +103,9 @@
         android:summaryOff="@string/settings_wakelock_off_summary"
         android:summaryOn="@string/settings_wakelock_on_summary"
         android:title="@string/settings_wakelock" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="adaptiveinterval"
+        android:title="@string/settings_adaptiveinterval" />
 
 </PreferenceScreen>

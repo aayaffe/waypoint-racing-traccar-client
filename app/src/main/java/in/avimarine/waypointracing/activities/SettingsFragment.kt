@@ -17,6 +17,7 @@ package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.MainApplication
 import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -33,9 +34,9 @@ import com.google.firebase.auth.FirebaseAuth
 import java.util.*
 
 class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeListener {
+    private var expertPressed = 0
     private var sharedPreferences: SharedPreferences? = null
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setHasOptionsMenu(true)
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
             requireContext()
         )
@@ -44,7 +45,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         findPreference<Preference>(KEY_URL)?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
             newValue != null && validateServerURL(newValue.toString())
         }
-        findPreference<Preference>(KEY_INTERVAL)?.onPreferenceChangeListener =
+        findPreference<Preference>(KEY_INITIAL_INTERVAL)?.onPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { _, newValue ->
                 try {
                     newValue != null && (newValue as String).toInt() > 0
@@ -76,6 +77,25 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
                 expertMode(newValue as Boolean?)
                 true
             }
+
+        findPreference<Preference>(KEY_EXPERT_MODE)?.setOnPreferenceClickListener {
+            Log.d(TAG, "Pressed Expert")
+            if (expertPressed == 7) {
+                setTestMode(true)
+            } else {
+                expertPressed+=1
+            }
+            true
+        }
+        setTestMode(false)
+    }
+
+    private fun setTestMode(b: Boolean) {
+        findPreference<Preference>(KEY_ACCURACY)!!.isVisible = b
+        findPreference<Preference>(KEY_ANGLE)!!.isVisible = b
+        findPreference<Preference>(KEY_DISTANCE)!!.isVisible = b
+        findPreference<Preference>(KEY_INITIAL_INTERVAL)!!.isVisible = b
+        findPreference<Preference>(KEY_ADAPTIVE_INTERVAL)!!.isVisible = b
     }
 
     class NumericEditTextPreferenceDialogFragment : EditTextPreferenceDialogFragmentCompat() {
@@ -97,7 +117,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference) {
-        if (listOf(KEY_INTERVAL, KEY_DISTANCE, KEY_ANGLE).contains(preference.key)) {
+        if (listOf(KEY_INITIAL_INTERVAL, KEY_DISTANCE, KEY_ANGLE).contains(preference.key)) {
             val f: EditTextPreferenceDialogFragmentCompat =
                 NumericEditTextPreferenceDialogFragment.newInstance(preference.key)
             f.setTargetFragment(this, 0)
@@ -112,6 +132,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         sharedPreferences!!.registerOnSharedPreferenceChangeListener(this)
         expertMode(sharedPreferences!!.getBoolean(KEY_EXPERT_MODE, false))
         setPreferencesEnabled(!sharedPreferences!!.getBoolean(KEY_STATUS, false))
+        expertPressed = 0
     }
 
     override fun onPause() {
@@ -125,7 +146,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         }
         findPreference<Preference>(KEY_BOAT_NAME)?.isEnabled = enabled
         findPreference<Preference>(KEY_URL)?.isEnabled = enabled
-        findPreference<Preference>(KEY_INTERVAL)?.isEnabled = enabled
+        findPreference<Preference>(KEY_INITIAL_INTERVAL)?.isEnabled = enabled
         findPreference<Preference>(KEY_DISTANCE)?.isEnabled = enabled
         findPreference<Preference>(KEY_ANGLE)?.isEnabled = enabled
         findPreference<Preference>(KEY_ACCURACY)?.isEnabled = enabled
@@ -199,18 +220,17 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
     private fun expertMode(b: Boolean?) {
         findPreference<Preference>(KEY_DEVICE)!!.isEnabled = b!!
         findPreference<Preference>(KEY_URL)!!.isVisible = b
-//        findPreference<Preference>(KEY_ACCURACY)!!.isVisible = b
         findPreference<Preference>(KEY_BUFFER)!!.isVisible = b
         findPreference<Preference>(KEY_WAKELOCK)!!.isVisible = b
         findPreference<Preference>(KEY_TRACKING)!!.isVisible = b
     }
 
     companion object {
-        private val TAG = SettingsFragment::class.java.simpleName
         const val KEY_DEVICE = "id"
         const val KEY_BOAT_NAME = "boat_name"
         const val KEY_URL = "url"
         const val KEY_URL_GATES = "urlgates"
+        const val KEY_INITIAL_INTERVAL = "initialinterval"
         const val KEY_INTERVAL = "interval"
         const val KEY_DISTANCE = "distance"
         const val KEY_ANGLE = "angle"
@@ -226,5 +246,6 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         const val KEY_TRACKING = "trackingenabled"
         const val KEY_MAGNETIC = "magnetic"
         const val KEY_IS_UI_VISIBLE = "uivisibility"
+        const val KEY_ADAPTIVE_INTERVAL = "adaptiveinterval"
     }
 }
