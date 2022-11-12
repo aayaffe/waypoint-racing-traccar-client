@@ -29,9 +29,7 @@ import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.firebase.ui.auth.AuthUI
@@ -43,7 +41,6 @@ import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
@@ -99,15 +96,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false)) {
             startTrackingService(checkPermission = true, initialPermission = false)
         }
-        val mCalendar: Calendar = GregorianCalendar() //TODO: move to onstart
-        val mTimeZone = mCalendar.timeZone
-        val mGMTOffset = mTimeZone.getOffset(mCalendar.timeInMillis)
-        binding.time.setLabel(
-            "UTC " + (if (mGMTOffset > 0) "+" else "") + TimeUnit.HOURS.convert(
-                mGMTOffset.toLong(),
-                TimeUnit.MILLISECONDS
-            )
-        )
+
+        binding.time.setLabel(getTimeZoneString())
         if (route.isValidWpt(nextWpt)){
             getNextWpt()
         }

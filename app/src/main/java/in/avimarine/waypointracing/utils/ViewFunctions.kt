@@ -4,6 +4,8 @@ import android.location.Location
 import android.widget.TextView
 import java.lang.Math.abs
 import java.lang.Math.floor
+import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 /**
@@ -135,3 +137,14 @@ val metersConversion = mapOf(
     DistanceUnits.Yards to 1.09361,
     DistanceUnits.Meters to 1.0
 )
+
+fun getTimeZoneString() : String {
+    val mCalendar: Calendar = GregorianCalendar() //TODO: move to onstart
+    val mTimeZone = mCalendar.timeZone
+    val mGMTOffset = mTimeZone.getOffset(mCalendar.timeInMillis)
+
+    return "UTC " + (if (mGMTOffset > 0) "+" else "") + TimeUnit.HOURS.convert(
+        mGMTOffset.toLong(),
+        TimeUnit.MILLISECONDS
+    )
+}
