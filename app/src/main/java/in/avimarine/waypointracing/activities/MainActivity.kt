@@ -216,23 +216,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             Toast.makeText(applicationContext,"Loaded route\n ${route.eventName}",Toast.LENGTH_LONG).show()
         }
         createAlarmIntent()
-        val s = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES, "")
-        var gp = GatePassings("")
-        if (s != null) {
-            gp = try {
-                GatePassings.fromJson(s)
-            } catch (e: Exception) {
-                Log.d(TAG, "Failed to load gate passings", e)
-                GatePassings("")
-            }
-        }
-        if (gp.eventId != route.id){
-            with(sharedPreferences.edit()) {
-                putString(SettingsFragment.KEY_GATE_PASSES, GatePassings(route.id).toJson())
-                commit()
-            }
-        }
-
     }
 
 
@@ -392,7 +375,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 extras.getString("RouteJson")?.let {
                     Log.d(TAG, it)
                     sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS,  false).apply()
-                    resetRoute()
+                    resetRoute(false)
                     RouteLoader.loadRouteFromString(this, it, this::loadRoute)
                 }
             }
@@ -456,9 +439,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
-    private fun resetRoute() {
+    private fun resetRoute(resetGatePasses: Boolean = true) {
         setNextWpt(0)
-        GatePassings.reset(this, route)
+        if (resetGatePasses) {
+            GatePassings.reset(this, route)
+        }
         populateRouteElementSpinner(route)
         binding.lastPassTextView.text = ""
     }
@@ -632,7 +617,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun updateLastPass() {
-        val gp = GatePassings.getLastGatePass(this)
+        val gp = GatePassings.getLastGatePass(this, route.id)
         if (gp!=null) {
             binding.lastPassTextView.text = getString(R.string.lastpass_message,gp.gateName, timeStamptoDateString(gp.time.time))
         }

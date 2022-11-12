@@ -13,75 +13,78 @@ import kotlinx.serialization.json.Json
 @Serializable
 class GatePassings {
 
-    var eventId : String = ""
+    var eventId: String = ""
     val passes = arrayListOf<GatePassing>()
 
     constructor(id: String) {
         eventId = id
     }
 
-    fun toJson():String{
+    fun toJson(): String {
         return Json.encodeToString(this)
+    }
+    private fun filterByRouteId(routeId: String) {
+        passes.retainAll { gp -> gp.routeId == routeId }
+    }
+    private fun filterAllButRouteId(routeId: String) {
+        passes.retainAll { gp -> gp.routeId != routeId }
     }
 
     companion object {
-        fun getGatePassings(appContext: Context): GatePassings{
-            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext)
-            val s = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES, "")?:""
-            return try {
+        fun getCurrentRouteGatePassings(appContext: Context, routeId: String = ""): GatePassings {
+            val gatePassings = getGatePassings(appContext, routeId)
+            if (routeId.isNotEmpty()) {
+                gatePassings.filterByRouteId(routeId)
+            }
+            return gatePassings
+        }
+
+        private fun getGatePassings(appContext: Context, routeId: String = ""): GatePassings {
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(appContext.applicationContext)
+            val s = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES, "") ?: ""
+            val gatePassings = try {
                 fromJson(s)
             } catch (e: Exception) {
                 Log.d(TAG, "Failed to load gate passings", e)
-                GatePassings("")
+                GatePassings(routeId)
             }
+            return gatePassings
         }
 
-        fun fromJson(s: String): GatePassings{
+
+        private fun fromJson(s: String): GatePassings {
             return Json.decodeFromString(s)
         }
 
         fun addGatePass(context: Context, gp: GatePassing) {
             val sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-            val gps = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES,"")?.let {
-                try {
-                    fromJson(
-                        it
-                    )
-                }catch (e: Exception){
-                    Log.d(TAG, "Error loading gate passes")
-                    GatePassings(gp.routeId)
-                }
-            }
-            gps?.passes?.add(gp)
+            val gps = getGatePassings(context, gp.routeId)
+            gps.passes.removeAll{ item -> (item.routeId == gp.routeId) && (item.gateId == gp.gateId) }
+            gps.passes.add(gp)
             with(sharedPreferences.edit()) {
-                putString(SettingsFragment.KEY_GATE_PASSES, gps?.toJson())
+                putString(SettingsFragment.KEY_GATE_PASSES, gps.toJson())
                 commit()
             }
         }
 
-        fun getLastGatePass(context: Context): GatePassing? {
-            val sharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-            val gps = sharedPreferences.getString(SettingsFragment.KEY_GATE_PASSES,"")?.let {
-                try {
-                    fromJson(
-                        it
-                    )
-                }catch (e: Exception){
-                    Log.d(TAG, "Error loading gate passes")
-                    return null
-                }
-            }
-            if (gps?.passes?.size!! > 0)
+        fun getLastGatePass(context: Context, routeId: String): GatePassing? {
+            val gps = getCurrentRouteGatePassings(context,routeId)
+            if (gps.passes.size > 0)
                 return gps.passes.last()
             return null
         }
 
-        fun reset(context: Context, route: Route) {
-            val gps = GatePassings(route.id)
+        fun reset(context: Context, route: Route, resetCurrentRouteOnly: Boolean = true) {
             val sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
+            val gps = if (resetCurrentRouteOnly) {
+                val temp = getCurrentRouteGatePassings(context)
+                temp.filterAllButRouteId(route.id)
+                temp
+            } else {
+                GatePassings(route.id)
+            }
             with(sharedPreferences.edit()) {
                 putString(
                     SettingsFragment.KEY_GATE_PASSES,
@@ -89,7 +92,6 @@ class GatePassings {
                 )
                 commit()
             }
-
         }
     }
 

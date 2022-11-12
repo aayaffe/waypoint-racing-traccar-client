@@ -21,7 +21,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
 import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
@@ -89,7 +88,7 @@ class RouteActivity : AppCompatActivity() {
 
     private fun calculatePoints(route: Route): Double {
         var ret = 0.0
-        val gp = GatePassings.getGatePassings(applicationContext)
+        val gp = GatePassings.getCurrentRouteGatePassings(applicationContext, route.id)
         for (re in route.elements){
             if (gp.passes.find {it.gateId == re.id} != null) {
                 ret += re.points
@@ -122,7 +121,7 @@ class RouteActivity : AppCompatActivity() {
 
     private fun createRecList(): MutableList<RouteElementConcat> {
         val ret = mutableListOf<RouteElementConcat>()
-        val gp = GatePassings.getGatePassings(applicationContext)
+        val gp = GatePassings.getCurrentRouteGatePassings(applicationContext, route.id)
         route.elements.forEachIndexed{ index, re ->
             val rec = RouteElementConcat(re,getLatestGatePass(index,gp))
             ret.add(rec)

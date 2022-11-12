@@ -120,9 +120,9 @@ class TrackingController(private val context: Context) :
             sendPosition(position)
         }
         if (inArea && route != null) {
-            if ((GatePassings.getLastGatePass(context)?.gateId
+            if ((GatePassings.getLastGatePass(context, route!!.id)?.gateId
                     ?: "") == route!!.elements[nextWpt].id &&
-                (GatePassings.getLastGatePass(context)?.routeId ?: "") == route!!.id
+                (GatePassings.getLastGatePass(context, route!!.id)?.routeId ?: "") == route!!.id
             ) {
                 return
             }
@@ -165,7 +165,7 @@ class TrackingController(private val context: Context) :
         val uiVisible = sharedPreferences.getBoolean(SettingsFragment.KEY_IS_UI_VISIBLE,true)
         if (route!=null && !uiVisible){
             val wpt = route.elements.elementAtOrNull(nextWpt)
-            val lastGatePass = GatePassings.getLastGatePass(context)
+            val lastGatePass = GatePassings.getLastGatePass(context, route.id)
 
             if (wpt != null){
                 if ((lastGatePass != null) && (lastGatePass.routeId == route.id) && (lastGatePass.gateId == wpt.id)){
