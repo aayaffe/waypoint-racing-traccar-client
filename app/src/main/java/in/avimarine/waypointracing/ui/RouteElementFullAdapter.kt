@@ -69,10 +69,14 @@ class RouteElementFullAdapter() :
                 gpLocTextView.text = getLatString(rec.gp.latitude) + " " + getLonString(rec.gp.longitude)
                 if (rec.gp.mock){
                     locStatusImageView.visibility=View.VISIBLE
+                } else {
+                    locStatusImageView.visibility=View.INVISIBLE
                 }
             } else {
                 passedImageView.setImageResource(R.drawable.ic_baseline_x_24)
                 gatePassTextView.text = "Last Gate Pass: Never"
+                gpLocTextView.text = ""
+                locStatusImageView.visibility=View.INVISIBLE
             }
         }
     }
