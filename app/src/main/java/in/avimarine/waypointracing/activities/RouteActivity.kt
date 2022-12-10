@@ -122,16 +122,16 @@ class RouteActivity : AppCompatActivity() {
     private fun createRecList(): MutableList<RouteElementConcat> {
         val ret = mutableListOf<RouteElementConcat>()
         val gp = GatePassings.getCurrentRouteGatePassings(applicationContext, route.id)
-        route.elements.forEachIndexed{ index, re ->
-            val rec = RouteElementConcat(re,getLatestGatePass(index,gp))
+        route.elements.forEach { re ->
+            val rec = RouteElementConcat(re,getLatestGatePass(re.id,gp))
             ret.add(rec)
         }
         return ret
 
     }
 
-    private fun getLatestGatePass(ordinal: Int, gps: GatePassings): GatePassing? {
-        val thisGps = gps.passes.filter{ it.gateId == ordinal}
+    private fun getLatestGatePass(id: Int, gps: GatePassings): GatePassing? {
+        val thisGps = gps.passes.filter{ it.gateId == id}
         return thisGps.maxByOrNull { it.time.time }
     }
 
