@@ -66,7 +66,8 @@ class RouteElementFullAdapter() :
 
                 //TODO: in treasure hunt mode, find first gate pass
                 gatePassTextView.text = timeStamptoDateString(rec.gp.time.time)
-                gpLocTextView.text = getLatString(rec.gp.latitude) + " " + getLonString(rec.gp.longitude)
+                gpLocTextView.text =
+                    "${getLatString(rec.gp.latitude)} ${getLonString(rec.gp.longitude)}"
                 if (rec.gp.mock){
                     locStatusImageView.visibility=View.VISIBLE
                 } else {
@@ -74,7 +75,7 @@ class RouteElementFullAdapter() :
                 }
             } else {
                 passedImageView.setImageResource(R.drawable.ic_baseline_x_24)
-                gatePassTextView.text = "Last Gate Pass: Never"
+                gatePassTextView.text = ""
                 gpLocTextView.text = ""
                 locStatusImageView.visibility=View.INVISIBLE
             }
