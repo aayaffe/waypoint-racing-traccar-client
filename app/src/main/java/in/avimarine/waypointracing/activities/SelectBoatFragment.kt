@@ -1,6 +1,7 @@
 package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.*
+import `in`.avimarine.waypointracing.database.Boat
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.FragmentSelectBoatBinding
 import `in`.avimarine.waypointracing.ui.RouteViewHolder

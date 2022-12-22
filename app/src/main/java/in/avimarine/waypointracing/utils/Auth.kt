@@ -1,6 +1,6 @@
 package `in`.avimarine.waypointracing.utils
 
-import `in`.avimarine.waypointracing.Boat
+import `in`.avimarine.waypointracing.database.Boat
 import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.database.FirestoreDatabase

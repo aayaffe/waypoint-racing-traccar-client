@@ -1,6 +1,7 @@
 package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.*
+import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.ActivityMainBinding
 import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.LocationViewModel
@@ -446,11 +447,13 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         populateRouteElementSpinner(route)
         binding.lastPassTextView.text = ""
+        FirestoreDatabase.addEvent(`in`.avimarine.waypointracing.database.EventType.RESET_ROUTE)
     }
 
     fun startButtonClick(view: View) {
         val checked = sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, true)
         sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS,  checked.not()).apply()
+        FirestoreDatabase.addEvent(if (checked) `in`.avimarine.waypointracing.database.EventType.TRACKING_STOP else `in`.avimarine.waypointracing.database.EventType.TRACKING_START)
     }
 
     fun loginButtonClick(view: View) {

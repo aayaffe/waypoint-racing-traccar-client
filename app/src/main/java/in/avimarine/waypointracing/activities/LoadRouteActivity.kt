@@ -1,5 +1,7 @@
 package `in`.avimarine.waypointracing.activities
 
+import `in`.avimarine.waypointracing.database.EventType
+import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.ActivityLoadRouteBinding
 import `in`.avimarine.waypointracing.route.RouteDetails
 import `in`.avimarine.waypointracing.ui.RouteViewHolder
@@ -48,7 +50,7 @@ class LoadRouteActivity : AppCompatActivity() {
                 tvName.text = model.name
                 tvOrganizer.text = model.organizing
                 holder.itemView.setOnClickListener {
-                    selectRoute(model.route)
+                    selectRoute(model.route, model.name, model.lastUpdate)
                 }
             }
         }
@@ -62,7 +64,7 @@ class LoadRouteActivity : AppCompatActivity() {
         ab?.setSubtitle(subTitle)
     }
 
-    private fun selectRoute(json: String){
+    private fun selectRoute(json: String, name: String, lastUpdate: String){
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Are you sure?")
         builder.setMessage("Loading new route will delete all previous mark passings and reset route")
@@ -71,6 +73,7 @@ class LoadRouteActivity : AppCompatActivity() {
             val i = Intent()
             i.putExtra("RouteJson", json)
             setResult(RESULT_OK, i)
+            FirestoreDatabase.addEvent(EventType.LOAD_ROUTE, "$name $lastUpdate")
             finish()
         }
         builder.setNegativeButton("No"){ _, _ ->
