@@ -20,6 +20,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.math.cos
 
 
 /**
@@ -163,7 +164,11 @@ fun getDirection(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double
         lon2,
         GeodesicMask.DISTANCE_IN or GeodesicMask.LATITUDE or GeodesicMask.LONGITUDE
     )
-    return line.Azimuth()
+    if (line.Azimuth() >= 0.0) {
+        return line.Azimuth()
+    } else {
+        return 360.0 + line.Azimuth()
+    }
 }
 
 fun getDirection(firstLocation: Point, secondLocation: Point): Double{
@@ -284,6 +289,12 @@ fun toListOfListOfLocs(wpts : ArrayList<Location>):List<List<Point>>{
     return ret
 }
 
+/**
+ * Checks if an angle is inside the arc created by two angles.
+ * @param from: The start angle of the arc in degrees from north
+ * @param to: The end angle of the arc in degrees from north
+ * @param angle: The angle to test for in degrees from norht
+ */
 fun isBetweenAngles(from: Double, to:Double, angle:Double): Boolean{
     var b2 = to
     var a = angle
@@ -293,7 +304,6 @@ fun isBetweenAngles(from: Double, to:Double, angle:Double): Boolean{
     if (angle < from) {
         a = angle + 360
     }
-    // compare
     return a in from..b2
 }
 
@@ -302,4 +312,11 @@ fun createLocation(lat: Double, lon: Double) : Location{
     ret.latitude = lat
     ret.longitude = lon
     return ret
+}
+
+fun getVMG(position: Position, portWpt: Location, stbdWpt: Location): Double {
+    val s = position.speed;
+    val brg = pointToLineDir(position.toLocation(), portWpt, stbdWpt)
+    val dif = if ((brg - position.course)<0) brg - position.course + 360 else brg - position.course
+    return s * cos(Math.toRadians(dif))
 }

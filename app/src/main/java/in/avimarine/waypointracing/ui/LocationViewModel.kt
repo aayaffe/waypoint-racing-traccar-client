@@ -7,6 +7,7 @@ import `in`.avimarine.waypointracing.route.RouteElement
 import `in`.avimarine.waypointracing.route.RouteElementType
 import `in`.avimarine.waypointracing.utils.*
 import android.content.SharedPreferences
+import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import kotlin.math.cos
 
@@ -18,6 +19,23 @@ class LocationViewModel(
     fun getCOGData(): String{
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
         return getDirString(position.course, magnetic, false, position, position.time.time)
+    }
+    fun getCOGColor(): Int{
+        if (wpt== null)
+            return -65536
+        return when (wpt.routeElementType) {
+            RouteElementType.WAYPOINT -> Color.BLACK
+            else -> {
+                val portBearing = getDirection(position, wpt.portWpt)
+                val stbdBearing = getDirection(position, wpt.stbdWpt)
+                if (isBetweenAngles(portBearing, stbdBearing, position.course) && getVMG(position, wpt.portWpt, wpt.stbdWpt)>0) {
+                    Color.GREEN
+                } else {
+                    Color.BLACK
+                }
+
+            }
+        }
     }
     fun getSOGData(): String{
         return getSpeedString(position.speed)
@@ -82,9 +100,7 @@ class LocationViewModel(
         if (wpt==null){
             return "-----"
         }
-        val s = position.speed;
-        val brg = pointToLineDir(position.toLocation(), wpt.portWpt, wpt.stbdWpt)
-        val dif = if ((brg - position.course)<0) brg - position.course + 360 else brg - position.course
-        return getSpeedString(s * cos(Math.toRadians(dif)))
+        val vmg = getVMG(position, wpt.portWpt, wpt.stbdWpt)
+        return getSpeedString(vmg)
     }
 }
