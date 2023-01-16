@@ -14,7 +14,7 @@
       "properties": {
         "name": "Atlit Gate",
         "routeElementType": "GATE",
-        "ordinal": 1,
+        "id": 1,
         "mandatory": true,
         "proofAreaType": "POLYGON",
         "proofAreaBearings": [135, 225],
@@ -33,7 +33,7 @@
       "properties": {
         "name": "Hadera Gate",
         "routeElementType": "GATE",
-        "ordinal": 1,
+        "id": 1,
         "mandatory": true,
         "proofAreaType": "POLYGON",
         "proofAreaBearings": [135, 225],
@@ -52,7 +52,7 @@
       "properties": {
         "name": "Netanya Gate",
         "routeElementType": "GATE",
-        "ordinal": 1,
+        "id": 1,
         "mandatory": true,
         "proofAreaType": "POLYGON",
         "proofAreaBearings": [135, 225],
@@ -71,7 +71,7 @@
       "properties": {
         "name": "Herzliya Finish Line",
         "routeElementType": "FINISH",
-        "ordinal": 4,
+        "id": 4,
         "mandatory": true,
         "proofAreaType": "POLYGON",
         "proofAreaSize": [0.15]
@@ -89,7 +89,7 @@
       "properties": {
         "name": "Ashdod Gate",
         "routeElementType": "GATE",
-        "ordinal": 1,
+        "id": 1,
         "mandatory": true,
         "proofAreaType": "POLYGON",
         "proofAreaBearings": [135, 225],
@@ -108,7 +108,7 @@
       "properties": {
         "name": "Ashkelon Finish Line",
         "routeElementType": "FINISH",
-        "ordinal": 4,
+        "id": 4,
         "mandatory": true,
         "proofAreaType": "POLYGON",
         "proofAreaSize": [0.15]

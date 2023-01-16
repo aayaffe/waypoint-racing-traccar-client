@@ -6,6 +6,7 @@ import android.os.Parcelable
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
+import com.google.gson.JsonPrimitive
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
 //import kotlinx.android.parcel.Parcelize
@@ -99,8 +100,13 @@ class Waypoint(
                     Waypoint(name, loc, man, b1, b2, id, points)
                 }
                 ProofAreaType.CIRCLE -> {
-                    val d = (props.get("proofAreaSize") as JsonElement).asDouble
-                    Waypoint(name, loc, man, d, id, points)
+                    val pas = props.get("proofAreaSize")
+                    val dist = if (pas is JsonPrimitive) {
+                        pas.asDouble
+                    } else {
+                        (pas as JsonArray).get(0).asDouble
+                    }
+                    Waypoint(name, loc, man, dist, id, points)
                 }
                 else -> {
                     throw JsonParseException("Improper proof area for waypoint")

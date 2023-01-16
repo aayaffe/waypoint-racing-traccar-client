@@ -4,6 +4,7 @@ import `in`.avimarine.waypointracing.utils.Serializers
 import android.location.Location
 import android.os.Parcelable
 import com.google.gson.JsonArray
+import com.google.gson.JsonPrimitive
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.LineString
 //import kotlinx.android.parcel.Parcelize
@@ -112,10 +113,20 @@ class Gate(
             return if (props.has("proofAreaBearings")) {
                 val b1 = (props.get("proofAreaBearings") as JsonArray).get(0).asDouble
                 val b2 = (props.get("proofAreaBearings") as JsonArray).get(1).asDouble
-                val dist = (props.get("proofAreaSize") as JsonArray).get(0).asDouble
+                val pas = props.get("proofAreaSize")
+                val dist = if (pas is JsonPrimitive) {
+                    pas.asDouble
+                } else {
+                    (pas as JsonArray).get(0).asDouble
+                }
                 Gate(name, stbdloc, portloc, man, b1, b2, dist, id, points)
             } else {
-                val dist = (props.get("proofAreaSize") as JsonArray).get(0).asDouble
+                val pas = props.get("proofAreaSize")
+                val dist = if (pas is JsonPrimitive) {
+                    pas.asDouble
+                } else {
+                    (pas as JsonArray).get(0).asDouble
+                }
                 Gate(name, stbdloc, portloc, man, dist, id, points)
             }
         }

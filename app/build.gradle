@@ -27,8 +27,8 @@ android {
         buildConfigField 'boolean', 'HIDDEN_APP', 'false'
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 33
-        versionName '3.11'
+        versionCode 34
+        versionName '3.11.1'
         signingConfig signingConfigs.debug
     }
     buildTypes{
@@ -85,9 +85,9 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     def fragment_version = "1.5.5"
     implementation platform('com.google.firebase:firebase-bom:29.0.0')
-    implementation 'com.google.android.material:material:1.8.0-beta01'
+    implementation 'com.google.android.material:material:1.8.0-rc01'
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'net.sf.geographiclib:GeographicLib-Java:1.49'
     implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:4.9.0'

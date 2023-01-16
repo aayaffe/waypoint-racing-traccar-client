@@ -14,7 +14,7 @@
         "mandatory": true,
         "proofAreaType" : "POLYGON",
         "proofAreaBearings" : [315,45],
-        "proofAreaSize" : [0.25]
+        "proofAreaSize" : 0.25
       },
       "geometry": {
         "type": "LineString",
@@ -39,7 +39,7 @@
         "mandatory": true,
         "proofAreaType" : "POLYGON",
         "proofAreaBearings" : [315,45],
-        "proofAreaSize" : [0.25]
+        "proofAreaSize" : 0.25
       },
       "geometry": {
         "type": "LineString",

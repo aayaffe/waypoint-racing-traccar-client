@@ -38,6 +38,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import org.json.JSONException
 import java.util.*
 
@@ -93,6 +95,7 @@ class TrackingService() : Service(), SharedPreferences.OnSharedPreferenceChangeL
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        Firebase.crashlytics.log("In onStartCommand, startId: $startId, sharedPreferences: ${sharedPreferences!=null}, intent: ${intent!=null}")
         Log.d(TAG, "OnStart, startId: $startId")
         WakefulBroadcastReceiver.completeWakefulIntent(intent)
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
