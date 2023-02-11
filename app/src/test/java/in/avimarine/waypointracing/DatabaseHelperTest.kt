@@ -18,7 +18,8 @@ class DatabaseHelperTest {
 
         val databaseHelper = DatabaseHelper(ApplicationProvider.getApplicationContext())
 
-        var position: Position? = Position("123456789012345", "name", Location("gps"), 0.0)
+        var position: Position? = Position("123456789012345", "name", Location("gps"), BatteryStatus())
+
 
         Assert.assertNull(databaseHelper.selectPosition())
 

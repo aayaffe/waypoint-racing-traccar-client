@@ -131,7 +131,7 @@ class ManualInputFragment : Fragment() {
             gateId,
             gateName,
             Date(time),
-            Position("-444", viewModel.boatName.value, l, -1.0)
+            Position("-444", viewModel.boatName.value, l, BatteryStatus())
         )
         FirestoreDatabase.addManualGatePass(gp, { documentReference ->
             Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")

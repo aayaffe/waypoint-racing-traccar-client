@@ -32,12 +32,13 @@ data class Position(
     val accuracy: Double = 0.0,
     val battery: Double = 0.0,
     val boatName: String = "",
-    val mock: Boolean = false,
-) {
+val charging: Boolean = false,
 
-    constructor(deviceId: String, boatName: String, location: Location, battery: Double) : this(
+val mock: Boolean = false,
+) {
+    constructor(deviceId: String, boatName: String, location: Location, battery: BatteryStatus) : this(
         deviceId = deviceId,
-        time = Date(location.time),
+        time = Date(location.time.correctRollover()),
         latitude = location.latitude,
         longitude = location.longitude,
         altitude = location.altitude,
@@ -48,13 +49,24 @@ data class Position(
         } else {
             0.0
         },
-        battery = battery,
         boatName = boatName,
         mock = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            location.isMock
-        } else {
+        location.isMock
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             @Suppress("DEPRECATION")
             location.isFromMockProvider
-        }
+        } else {
+            false
+        },
+        battery = battery.level,
+        charging = battery.charging,
+
     )
+}
+
+private const val rolloverDate = 1554508800000L // April 6, 2019
+private const val rolloverOffset = 619315200000L // 1024 weeks
+
+private fun Long.correctRollover(): Long {
+    return if (this < rolloverDate) this + rolloverOffset else this
 }

@@ -75,6 +75,7 @@ class TrackingService() : Service(), SharedPreferences.OnSharedPreferenceChangeL
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
         sendBroadcast(Intent(ACTION_STARTED))
         StatusActivity.addMessage(getString(R.string.status_service_create))
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.KEY_WAKELOCK, true)) {
                 val powerManager = getSystemService(POWER_SERVICE) as PowerManager
