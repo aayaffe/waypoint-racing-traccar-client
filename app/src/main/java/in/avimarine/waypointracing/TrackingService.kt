@@ -95,16 +95,18 @@ class TrackingService() : Service(), SharedPreferences.OnSharedPreferenceChangeL
         return null
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        Firebase.crashlytics.log("In onStartCommand, startId: $startId, sharedPreferences: ${sharedPreferences!=null}, intent: ${intent!=null}")
-        Log.d(TAG, "OnStart, startId: $startId")
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         WakefulBroadcastReceiver.completeWakefulIntent(intent)
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         return START_STICKY
     }
 
     override fun onDestroy() {
-        stopForeground(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            stopForeground(true)
+        }
         Log.i(TAG, "service destroy")
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
         sendBroadcast(Intent(ACTION_STOPPED))
