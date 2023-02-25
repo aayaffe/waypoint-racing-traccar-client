@@ -97,5 +97,10 @@
     <string name="login_btn">Login\nTo enable tracking</string>
     <string name="boat">Boat:</string>
     <string name="settings_adaptiveinterval">Adaptive interval</string>
+    <string name="dlg_ok">OK</string>
+    <string name="dlg_cancel">Cancel</string>
+    <string name="version_not_supported_dialog_title">Version not supported</string>
+    <string name="version_not_supported_dialog_message">The version installed is not supported any more. Press OK to open Play store and download a newer version.</string>
+
 
 </resources>

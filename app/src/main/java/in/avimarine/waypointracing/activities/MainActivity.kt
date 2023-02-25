@@ -1,13 +1,5 @@
 package `in`.avimarine.waypointracing.activities
 
-import `in`.avimarine.waypointracing.*
-import `in`.avimarine.waypointracing.database.FirestoreDatabase
-import `in`.avimarine.waypointracing.databinding.ActivityMainBinding
-import `in`.avimarine.waypointracing.route.*
-import `in`.avimarine.waypointracing.ui.LocationViewModel
-import `in`.avimarine.waypointracing.ui.RouteElementAdapter
-import `in`.avimarine.waypointracing.utils.*
-import `in`.avimarine.waypointracing.utils.LocationPermissions.Companion.PERMISSIONS_REQUEST_LOCATION_UI
 import android.Manifest
 import android.app.Activity
 import android.app.AlarmManager
@@ -41,6 +33,14 @@ import com.google.firebase.auth.FirebaseUser
 import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
+import `in`.avimarine.waypointracing.*
+import `in`.avimarine.waypointracing.database.FirestoreDatabase
+import `in`.avimarine.waypointracing.databinding.ActivityMainBinding
+import `in`.avimarine.waypointracing.route.*
+import `in`.avimarine.waypointracing.ui.LocationViewModel
+import `in`.avimarine.waypointracing.ui.RouteElementAdapter
+import `in`.avimarine.waypointracing.utils.*
+import `in`.avimarine.waypointracing.utils.LocationPermissions.Companion.PERMISSIONS_REQUEST_LOCATION_UI
 import java.util.*
 
 
@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             .withPermissionRequestCode(REQUEST_SCREENSHOT_PERMISSION) //optional, 888 by default
             .build()
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
+        checkVersion()
         if (intent.action == Intent.ACTION_MAIN) {
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
@@ -128,6 +129,19 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             putBoolean(SettingsFragment.KEY_EXPERT_MODE, false)
             commit()
         }
+    }
+
+    private fun checkVersion() {
+        FirestoreDatabase.getSupportedVersion({
+            if (it != null) {
+                val ver = it.getLong("ver")?:-1
+                if (ver > Utils.getInstalledVersion(this)){
+                    Utils.alertOnUnsupportedVersion(this)
+                }
+            }
+        },{
+            Log.w(TAG, "Failed to get minimal version", it)
+        })
     }
 
     private fun createAlarmIntent() {

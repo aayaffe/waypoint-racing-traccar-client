@@ -19,6 +19,7 @@ class FirestoreDatabase {
         private const val COLLECTION_ROUTES = "routes"
         private const val COLLECTION_REPORTS = "reports"
         private const val COLLECTION_EVENTS = "events"
+        private const val COLLECTION_GENERAL = "general"
 
 
         fun getRoutesNames(onSuccess: (List<String>) -> Unit, onFailure: OnFailureListener){
@@ -118,6 +119,16 @@ class FirestoreDatabase {
             val event = Event(uid, e, System.currentTimeMillis(), extraData)
             db.collection(COLLECTION_EVENTS).document().set(event)
 
+        }
+
+        fun getSupportedVersion(onSuccess: (DocumentSnapshot?) -> Unit, onFailure: OnFailureListener){
+            val db = Firebase.firestore
+            val docRef = db.collection(COLLECTION_GENERAL).document("MinVersion")
+            docRef.get()
+                .addOnSuccessListener (onSuccess)
+                .addOnFailureListener { exception ->
+                    Log.d(TAG, "get failed with ", exception)
+                }
         }
     }
 
