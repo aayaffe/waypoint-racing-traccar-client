@@ -23,6 +23,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
+import `in`.avimarine.androidutils.Position
 import java.util.*
 
 class AndroidPositionProvider(context: Context, listener: PositionListener) :

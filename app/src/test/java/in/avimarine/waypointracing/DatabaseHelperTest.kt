@@ -4,6 +4,8 @@ import `in`.avimarine.waypointracing.database.DatabaseHelper
 import android.location.Location
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
+import `in`.avimarine.androidutils.BatteryStatus
+import `in`.avimarine.androidutils.Position
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith

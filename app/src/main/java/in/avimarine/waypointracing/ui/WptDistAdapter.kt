@@ -2,7 +2,6 @@ package `in`.avimarine.waypointracing.ui
 
 import `in`.avimarine.waypointracing.ManualInputFragment
 import `in`.avimarine.waypointracing.R
-import `in`.avimarine.waypointracing.utils.timeStamptoDateString
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View

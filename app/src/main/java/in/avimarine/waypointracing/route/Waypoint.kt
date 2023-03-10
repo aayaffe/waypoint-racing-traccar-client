@@ -1,6 +1,6 @@
 package `in`.avimarine.waypointracing.route
 
-import `in`.avimarine.waypointracing.utils.Serializers
+import `in`.avimarine.androidutils.Serializers
 import android.location.Location
 import android.os.Parcelable
 import com.google.gson.JsonArray
@@ -9,7 +9,6 @@ import com.google.gson.JsonParseException
 import com.google.gson.JsonPrimitive
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
-//import kotlinx.android.parcel.Parcelize
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.json.JSONException

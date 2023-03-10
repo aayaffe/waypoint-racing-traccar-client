@@ -24,6 +24,8 @@ import android.location.Location
 import android.os.BatteryManager
 import androidx.preference.PreferenceManager
 import android.util.Log
+import `in`.avimarine.androidutils.BatteryStatus
+import `in`.avimarine.androidutils.Position
 import kotlin.math.abs
 
 abstract class PositionProvider(

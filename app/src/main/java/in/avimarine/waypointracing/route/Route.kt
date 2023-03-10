@@ -1,11 +1,10 @@
 package `in`.avimarine.waypointracing.route
 
-import `in`.avimarine.waypointracing.utils.Serializers
+import `in`.avimarine.androidutils.Serializers
 import android.os.Parcelable
 import com.google.gson.JsonParseException
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
-//import kotlinx.android.parcel.Parcelize
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -13,7 +12,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.json.JSONException
 import org.json.JSONObject
-import java.time.LocalDate
 import java.util.*
 
 @Parcelize

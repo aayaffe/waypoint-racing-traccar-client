@@ -33,6 +33,9 @@ import com.google.firebase.auth.FirebaseUser
 import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
+import `in`.avimarine.androidutils.LocationPermissions
+import `in`.avimarine.androidutils.Position
+import `in`.avimarine.androidutils.Utils
 import `in`.avimarine.waypointracing.*
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.ActivityMainBinding
@@ -40,7 +43,8 @@ import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.LocationViewModel
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.utils.*
-import `in`.avimarine.waypointracing.utils.LocationPermissions.Companion.PERMISSIONS_REQUEST_LOCATION_UI
+import `in`.avimarine.androidutils.LocationPermissions.Companion.PERMISSIONS_REQUEST_LOCATION_UI
+import `in`.avimarine.androidutils.ScreenShot
 import java.util.*
 
 
@@ -636,7 +640,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private fun updateLastPass() {
         val gp = GatePassings.getLastGatePass(this, route.id)
         if (gp!=null) {
-            binding.lastPassTextView.text = getString(R.string.lastpass_message,gp.gateName, timeStamptoDateString(gp.time.time))
+            binding.lastPassTextView.text = getString(R.string.lastpass_message,gp.gateName, timeStampToDateString(gp.time.time))
         }
     }
 
@@ -734,7 +738,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private fun takeScreenshot(){
         val screenshotResult = screenshotManager.makeScreenshot()
         screenshotResult.observe(
-            onSuccess = { ScreenShot.processScreenshot(it, this) },
+            onSuccess = { ScreenShot.processScreenshot(it, BuildConfig.APPLICATION_ID, this) },
             onError = { /*onMakeScreenshotFailed(it)*/ }
         )
     }

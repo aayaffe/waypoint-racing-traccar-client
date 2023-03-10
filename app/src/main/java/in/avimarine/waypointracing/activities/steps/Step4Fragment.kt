@@ -17,17 +17,15 @@ package `in`.avimarine.waypointracing.activities.steps
 
 import `in`.avimarine.waypointracing.BatteryOptimizationHelper
 import `in`.avimarine.waypointracing.databinding.GrantPermissionFragmentBinding
-import `in`.avimarine.waypointracing.utils.LocationPermissions
+import `in`.avimarine.androidutils.LocationPermissions
 import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**

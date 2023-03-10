@@ -4,7 +4,7 @@ import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.FragmentManualInputBinding
 import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.ui.WptDistAdapter
-import `in`.avimarine.waypointracing.utils.CoordinatesFormat
+import `in`.avimarine.androidutils.units.GeoCoordinatesFormat
 import `in`.avimarine.waypointracing.utils.createLocation
 import `in`.avimarine.waypointracing.utils.getDistance
 import `in`.avimarine.waypointracing.utils.toNM
@@ -23,6 +23,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.santalu.maskara.Mask
 import com.santalu.maskara.MaskChangedListener
 import com.santalu.maskara.MaskStyle
+import `in`.avimarine.androidutils.BatteryStatus
+import `in`.avimarine.androidutils.Position
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -42,7 +44,7 @@ class ManualInputFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
     private lateinit var viewBinding: FragmentManualInputBinding
-    private var currentFormat = CoordinatesFormat.D
+    private var currentFormat = GeoCoordinatesFormat.D
     private lateinit var sharedPreferences: SharedPreferences
     private val viewModel: ExpertViewModel by activityViewModels()
     private var gateId = -1
@@ -159,16 +161,16 @@ class ManualInputFragment : Fragment() {
         viewBinding.dateInput.setText(format.format(d))
     }
     private fun setRadioButtons() {
-        viewBinding.DRadioButton.setOnClickListener { changeFormat(CoordinatesFormat.D) }
-        viewBinding.DMRadioButton.setOnClickListener { changeFormat(CoordinatesFormat.DM) }
-        viewBinding.DMSRadioButton.setOnClickListener { changeFormat(CoordinatesFormat.DMS) }
+        viewBinding.DRadioButton.setOnClickListener { changeFormat(GeoCoordinatesFormat.D) }
+        viewBinding.DMRadioButton.setOnClickListener { changeFormat(GeoCoordinatesFormat.DM) }
+        viewBinding.DMSRadioButton.setOnClickListener { changeFormat(GeoCoordinatesFormat.DMS) }
     }
 
-    private fun changeFormat(format: CoordinatesFormat) {
+    private fun changeFormat(format: GeoCoordinatesFormat) {
         val lat = getLatitude(currentFormat)
         val lon = getLongitude(currentFormat)
         when (format){
-            CoordinatesFormat.D -> {
+            GeoCoordinatesFormat.D -> {
                 val maskLat = Mask(
                     value = "__.______°",
                     character = '_',
@@ -186,7 +188,7 @@ class ManualInputFragment : Fragment() {
                 viewBinding.lonInput.addTextChangedListener(listenerLon)
 
             }
-            CoordinatesFormat.DM -> {
+            GeoCoordinatesFormat.DM -> {
                 val maskLat = Mask(
                     value = "__° __.____''",
                     character = '_',
@@ -202,7 +204,7 @@ class ManualInputFragment : Fragment() {
                 val listenerLon = MaskChangedListener(maskLon)
                 viewBinding.lonInput.addTextChangedListener(listenerLon)
             }
-            CoordinatesFormat.DMS -> {
+            GeoCoordinatesFormat.DMS -> {
                 val maskLat = Mask(
                     value = "__° __' __''",
                     character = '_',
@@ -224,17 +226,17 @@ class ManualInputFragment : Fragment() {
         currentFormat = format
     }
 
-    private fun formatLatMasked(lat: Double, format: CoordinatesFormat): String {
+    private fun formatLatMasked(lat: Double, format: GeoCoordinatesFormat): String {
         when (format){
-            CoordinatesFormat.D -> {
+            GeoCoordinatesFormat.D -> {
                 return String.format("%09.06f", lat).replace(".","")
             }
-            CoordinatesFormat.DM -> {
+            GeoCoordinatesFormat.DM -> {
                 val deg = lat.toInt()
                 val min = (lat - deg) * 60
                 return String.format("%02d", deg) + String.format("%07.04f", min).replace(".","")
             }
-            CoordinatesFormat.DMS -> {
+            GeoCoordinatesFormat.DMS -> {
                 var deg = lat.toInt()
                 var min = (lat - deg) * 60
                 var sec = (min - min.toInt()) * 60
@@ -251,17 +253,17 @@ class ManualInputFragment : Fragment() {
         }
     }
 
-    private fun formatLonMasked(lon: Double, format: CoordinatesFormat): String {
+    private fun formatLonMasked(lon: Double, format: GeoCoordinatesFormat): String {
         when (format){
-            CoordinatesFormat.D -> {
+            GeoCoordinatesFormat.D -> {
                 return String.format("%010.06f", lon).replace(".","")
             }
-            CoordinatesFormat.DM -> {
+            GeoCoordinatesFormat.DM -> {
                 val deg = lon.toInt()
                 val min = (lon - deg) * 60
                 return String.format("%03d", deg) + String.format("%07.04f", min).replace(".","")
             }
-            CoordinatesFormat.DMS -> {
+            GeoCoordinatesFormat.DMS -> {
                 var deg = lon.toInt()
                 var min = (lon - deg) * 60
                 var sec = (min - min.toInt()) * 60
@@ -278,7 +280,7 @@ class ManualInputFragment : Fragment() {
         }
     }
 
-    private fun getLatitude(format: CoordinatesFormat): Double {
+    private fun getLatitude(format: GeoCoordinatesFormat): Double {
         Log.d(TAG, "Format = $format")
         val lat = viewBinding.latInput.unMasked
         Log.d(TAG, "unmasked lat = $lat")
@@ -286,7 +288,7 @@ class ManualInputFragment : Fragment() {
         Log.d(TAG, "Validated Lat = $ret")
         return ret?:0.0
     }
-    private fun getLongitude(format: CoordinatesFormat): Double {
+    private fun getLongitude(format: GeoCoordinatesFormat): Double {
         Log.d(TAG, "Format = $format")
         val lon = viewBinding.lonInput.unMasked
         Log.d(TAG, "unmasked lon = $lon")
@@ -295,9 +297,9 @@ class ManualInputFragment : Fragment() {
         return ret?:0.0
     }
 
-    private fun validateLatitude(lat: String, format: CoordinatesFormat): Double? {
+    private fun validateLatitude(lat: String, format: GeoCoordinatesFormat): Double? {
         when (format) {
-            CoordinatesFormat.DMS -> {
+            GeoCoordinatesFormat.DMS -> {
                 try{
                     val deg = lat.substring(0,2).toInt()
                     if (deg > 90) return null
@@ -311,7 +313,7 @@ class ManualInputFragment : Fragment() {
                     return null
                 }
             }
-            CoordinatesFormat.DM -> {
+            GeoCoordinatesFormat.DM -> {
                 try{
                     val deg = lat.substring(0,2).toInt()
                     if (deg > 90) return null
@@ -323,7 +325,7 @@ class ManualInputFragment : Fragment() {
                     return null
                 }
             }
-            CoordinatesFormat.D -> {
+            GeoCoordinatesFormat.D -> {
                 try{
                     val deg = (lat.substring(0,2)+ "." + lat.substring(2)).toDouble()
                     if (deg > 90) return null
@@ -336,9 +338,9 @@ class ManualInputFragment : Fragment() {
         }
     }
 
-    private fun validateLongitude(lon: String, format: CoordinatesFormat): Double? {
+    private fun validateLongitude(lon: String, format: GeoCoordinatesFormat): Double? {
         when (format) {
-            CoordinatesFormat.DMS -> {
+            GeoCoordinatesFormat.DMS -> {
                 try{
                     val deg = lon.substring(0,3).toInt()
                     if (deg > 180) return null
@@ -352,7 +354,7 @@ class ManualInputFragment : Fragment() {
                     return null
                 }
             }
-            CoordinatesFormat.DM -> {
+            GeoCoordinatesFormat.DM -> {
                 try{
                     val deg = lon.substring(0,3).toInt()
                     if (deg > 180) return null
@@ -364,7 +366,7 @@ class ManualInputFragment : Fragment() {
                     return null
                 }
             }
-            CoordinatesFormat.D -> {
+            GeoCoordinatesFormat.D -> {
                 try{
                     val deg = (lon.substring(0,3)+ "." + lon.substring(3)).toDouble()
                     if (deg > 180) return null

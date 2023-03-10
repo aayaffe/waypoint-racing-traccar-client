@@ -1,6 +1,6 @@
 package `in`.avimarine.waypointracing.ui
 
-import `in`.avimarine.waypointracing.Position
+import `in`.avimarine.androidutils.Position
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.route.ProofAreaType
 import `in`.avimarine.waypointracing.route.RouteElement
@@ -9,7 +9,6 @@ import `in`.avimarine.waypointracing.utils.*
 import android.content.SharedPreferences
 import android.graphics.Color
 import androidx.lifecycle.ViewModel
-import kotlin.math.cos
 
 class LocationViewModel(
     val position: Position,
@@ -49,7 +48,7 @@ class LocationViewModel(
     }
 
     fun getTimeData():String {
-        return timeStamptoDateString(position.time.time)
+        return timeStampToDateString(position.time.time)
     }
     fun getPortData(): String {
         if (wpt == null){

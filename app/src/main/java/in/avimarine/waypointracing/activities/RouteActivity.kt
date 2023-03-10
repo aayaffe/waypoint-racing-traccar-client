@@ -9,8 +9,8 @@ import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.ui.RouteElementConcat
 import `in`.avimarine.waypointracing.ui.RouteElementFullAdapter
-import `in`.avimarine.waypointracing.utils.ScreenShot
-import `in`.avimarine.waypointracing.utils.timeStamptoDateString
+import `in`.avimarine.androidutils.ScreenShot
+import `in`.avimarine.waypointracing.utils.timeStampToDateString
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
+import `in`.avimarine.waypointracing.BuildConfig
 
 class RouteActivity : AppCompatActivity() {
 
@@ -100,7 +101,7 @@ class RouteActivity : AppCompatActivity() {
 
     private fun setDetailsBox(route: Route) {
         binding.idValue.text = route.id
-        binding.lastupdateValue.text = timeStamptoDateString(route.lastUpdate.time)
+        binding.lastupdateValue.text = timeStampToDateString(route.lastUpdate.time)
         binding.organizerValue.text = route.organizing
         binding.boatnameValue.text = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "Undefined")
     }
@@ -163,7 +164,7 @@ class RouteActivity : AppCompatActivity() {
     private fun takeScreenshot(){
         val screenshotResult = screenshotManager.makeScreenshot()
         screenshotResult.observe(
-            onSuccess = { ScreenShot.processScreenshot(it, this) },
+            onSuccess = { ScreenShot.processScreenshot(it, BuildConfig.APPLICATION_ID, this) },
             onError = { /*onMakeScreenshotFailed(it)*/ }
         )
     }

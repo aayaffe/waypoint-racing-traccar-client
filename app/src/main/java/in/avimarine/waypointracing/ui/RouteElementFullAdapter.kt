@@ -5,8 +5,7 @@ import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.utils.getLatString
 import `in`.avimarine.waypointracing.utils.getLonString
-import `in`.avimarine.waypointracing.utils.timeStamptoDateString
-import android.content.Context
+import `in`.avimarine.waypointracing.utils.timeStampToDateString
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
@@ -65,7 +64,7 @@ class RouteElementFullAdapter() :
                 })
 
                 //TODO: in treasure hunt mode, find first gate pass
-                gatePassTextView.text = timeStamptoDateString(rec.gp.time.time)
+                gatePassTextView.text = timeStampToDateString(rec.gp.time.time)
                 gpLocTextView.text =
                     "${getLatString(rec.gp.latitude)} ${getLonString(rec.gp.longitude)}"
                 if (rec.gp.mock){
