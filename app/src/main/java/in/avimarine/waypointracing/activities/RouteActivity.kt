@@ -1,7 +1,6 @@
 package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.R
-import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.databinding.ActivityRouteBinding
 import `in`.avimarine.waypointracing.route.EventType
 import `in`.avimarine.waypointracing.route.GatePassing
@@ -10,7 +9,6 @@ import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.ui.RouteElementConcat
 import `in`.avimarine.waypointracing.ui.RouteElementFullAdapter
 import `in`.avimarine.androidutils.ScreenShot
-import `in`.avimarine.waypointracing.utils.timeStampToDateString
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -24,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
+import `in`.avimarine.androidutils.TAG
+import `in`.avimarine.androidutils.timeStampToDateString
 import `in`.avimarine.waypointracing.BuildConfig
 
 class RouteActivity : AppCompatActivity() {

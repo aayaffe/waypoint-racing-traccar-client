@@ -1,8 +1,9 @@
 package `in`.avimarine.waypointracing.route
 
 import android.location.Location
-import `in`.avimarine.waypointracing.utils.getDirection
-import `in`.avimarine.waypointracing.utils.getLocFromDirDist
+import `in`.avimarine.androidutils.getDirection
+import `in`.avimarine.androidutils.getLocFromDirDist
+
 
 class ProofAreaFactory {
     companion object {

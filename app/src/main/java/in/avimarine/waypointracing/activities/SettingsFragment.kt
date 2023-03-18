@@ -17,7 +17,6 @@ package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.MainApplication
 import `in`.avimarine.waypointracing.R
-import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -31,6 +30,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.preference.*
 import com.google.firebase.auth.FirebaseAuth
+import `in`.avimarine.androidutils.TAG
 import java.util.*
 
 class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeListener {

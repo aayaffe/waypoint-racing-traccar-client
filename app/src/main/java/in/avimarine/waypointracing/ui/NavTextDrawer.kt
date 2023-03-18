@@ -8,13 +8,12 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import `in`.avimarine.waypointracing.R
-//import kotlinx.android.synthetic.main.navtextdrawer.view.*
-import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.databinding.NavtextdrawerBinding
 import android.graphics.Color
 import android.os.Build
 import android.widget.TextView.AUTO_SIZE_TEXT_TYPE_NONE
 import android.widget.TextView.AUTO_SIZE_TEXT_TYPE_UNIFORM
+import `in`.avimarine.androidutils.TAG
 
 
 class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {

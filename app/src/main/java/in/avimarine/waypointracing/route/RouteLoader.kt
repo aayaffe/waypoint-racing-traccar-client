@@ -1,6 +1,5 @@
 package `in`.avimarine.waypointracing.route
 
-import `in`.avimarine.waypointracing.TAG
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -10,6 +9,7 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import `in`.avimarine.androidutils.TAG
 import org.json.JSONException
 import java.io.FileInputStream
 import java.io.FileNotFoundException

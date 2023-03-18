@@ -2,7 +2,6 @@ package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.ExpertViewModel
 import `in`.avimarine.waypointracing.R
-import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.databinding.ActivityExpertModeBinding
 import `in`.avimarine.waypointracing.route.Route
 import android.content.Intent
@@ -12,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import `in`.avimarine.androidutils.TAG
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 class ExpertModeActivity : AppCompatActivity() {

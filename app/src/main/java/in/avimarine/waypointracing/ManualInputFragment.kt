@@ -5,9 +5,6 @@ import `in`.avimarine.waypointracing.databinding.FragmentManualInputBinding
 import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.ui.WptDistAdapter
 import `in`.avimarine.androidutils.units.GeoCoordinatesFormat
-import `in`.avimarine.waypointracing.utils.createLocation
-import `in`.avimarine.waypointracing.utils.getDistance
-import `in`.avimarine.waypointracing.utils.toNM
 import android.content.SharedPreferences
 import android.location.Location
 import android.os.Bundle
@@ -23,8 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.santalu.maskara.Mask
 import com.santalu.maskara.MaskChangedListener
 import com.santalu.maskara.MaskStyle
-import `in`.avimarine.androidutils.BatteryStatus
-import `in`.avimarine.androidutils.Position
+import `in`.avimarine.androidutils.*
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt

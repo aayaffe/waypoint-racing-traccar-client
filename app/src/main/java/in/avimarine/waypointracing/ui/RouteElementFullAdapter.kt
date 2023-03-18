@@ -1,11 +1,7 @@
 package `in`.avimarine.waypointracing.ui
 
 import `in`.avimarine.waypointracing.R
-import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
-import `in`.avimarine.waypointracing.utils.getLatString
-import `in`.avimarine.waypointracing.utils.getLonString
-import `in`.avimarine.waypointracing.utils.timeStampToDateString
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,6 +14,10 @@ import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import `in`.avimarine.androidutils.TAG
+import `in`.avimarine.androidutils.getLatString
+import `in`.avimarine.androidutils.getLonString
+import `in`.avimarine.androidutils.timeStampToDateString
 
 class RouteElementFullAdapter() :
     ListAdapter<RouteElementConcat, RouteElementFullAdapter.RouteElementConcatViewHolder>(RouteElementConcatDiffCallback) {

@@ -16,7 +16,6 @@
 package `in`.avimarine.waypointracing.activities.steps
 
 import `in`.avimarine.waypointracing.database.Boat
-import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.SetBoatFragmentBinding
@@ -28,6 +27,7 @@ import android.view.ViewGroup
 import androidx.preference.PreferenceManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.toObject
+import `in`.avimarine.androidutils.TAG
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**

@@ -97,4 +97,5 @@
     <string name="login_btn">Login\nTo enable tracking</string>
     <string name="boat">Boat:</string>
     <string name="settings_adaptiveinterval">Adaptive interval</string>
+    <string name="permission_rationale">Waypoint Racing collects location data to enable boat tracking, and race course navigation even when the app is closed or not in use</string>
 </resources>

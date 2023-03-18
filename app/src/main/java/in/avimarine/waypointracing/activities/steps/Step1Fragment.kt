@@ -15,7 +15,6 @@
  */
 package `in`.avimarine.waypointracing.activities.steps
 
-import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.activities.SetupWizardActivity
 import `in`.avimarine.waypointracing.databinding.LoginFragmentBinding
 import android.os.Bundle
@@ -28,6 +27,7 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
+import `in`.avimarine.androidutils.TAG
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**

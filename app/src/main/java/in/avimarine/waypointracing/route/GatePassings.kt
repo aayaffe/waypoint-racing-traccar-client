@@ -1,10 +1,10 @@
 package `in`.avimarine.waypointracing.route
 
-import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import android.content.Context
 import android.util.Log
 import androidx.preference.PreferenceManager
+import `in`.avimarine.androidutils.TAG
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString

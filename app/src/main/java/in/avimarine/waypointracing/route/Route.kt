@@ -40,7 +40,6 @@ class Route(
         return nextWpt<elements.size && nextWpt > -1
     }
     companion object {
-        val TAG = "Route"
 
         fun fromString(s: String): Route{
             return Json.decodeFromString(s)

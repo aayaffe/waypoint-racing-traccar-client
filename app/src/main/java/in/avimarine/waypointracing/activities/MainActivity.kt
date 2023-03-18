@@ -33,9 +33,7 @@ import com.google.firebase.auth.FirebaseUser
 import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
-import `in`.avimarine.androidutils.LocationPermissions
-import `in`.avimarine.androidutils.Position
-import `in`.avimarine.androidutils.Utils
+import `in`.avimarine.androidutils.*
 import `in`.avimarine.waypointracing.*
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.ActivityMainBinding
@@ -44,7 +42,8 @@ import `in`.avimarine.waypointracing.ui.LocationViewModel
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.utils.*
 import `in`.avimarine.androidutils.LocationPermissions.Companion.PERMISSIONS_REQUEST_LOCATION_UI
-import `in`.avimarine.androidutils.ScreenShot
+import `in`.avimarine.waypointracing.BuildConfig
+import `in`.avimarine.waypointracing.R
 import java.util.*
 
 
@@ -271,7 +270,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             } else {
                 LocationPermissions.askForLocationPermission(
                     this,
-                    PERMISSIONS_REQUEST_LOCATION_UI
+                    PERMISSIONS_REQUEST_LOCATION_UI,
+                    getString(R.string.permission_rationale)
                 )
             }
         } catch (e: SecurityException) {

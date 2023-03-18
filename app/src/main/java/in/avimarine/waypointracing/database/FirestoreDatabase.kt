@@ -1,6 +1,5 @@
 package `in`.avimarine.waypointracing.database
 
-import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.route.GatePassing
 import android.util.Log
 import com.google.android.gms.tasks.OnFailureListener
@@ -11,6 +10,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import `in`.avimarine.androidutils.TAG
 
 class FirestoreDatabase {
 

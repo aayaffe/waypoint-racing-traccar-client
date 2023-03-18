@@ -1,6 +1,5 @@
 package `in`.avimarine.waypointracing.ui
 
-import `in`.avimarine.androidutils.Position
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.route.ProofAreaType
 import `in`.avimarine.waypointracing.route.RouteElement
@@ -9,6 +8,7 @@ import `in`.avimarine.waypointracing.utils.*
 import android.content.SharedPreferences
 import android.graphics.Color
 import androidx.lifecycle.ViewModel
+import `in`.avimarine.androidutils.*
 
 class LocationViewModel(
     val position: Position,

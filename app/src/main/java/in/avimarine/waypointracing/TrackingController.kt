@@ -32,16 +32,13 @@ import `in`.avimarine.waypointracing.database.DatabaseHelper
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.database.GatePassesDatabaseHelper
 import `in`.avimarine.waypointracing.route.*
-import `in`.avimarine.waypointracing.utils.pointToLineDist
-import `in`.avimarine.waypointracing.utils.toLocation
-import `in`.avimarine.waypointracing.utils.toNM
 import android.content.SharedPreferences
 import android.widget.Toast
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
-import `in`.avimarine.androidutils.Position
+import `in`.avimarine.androidutils.*
 import java.util.*
 
 class TrackingController(private val context: Context) :

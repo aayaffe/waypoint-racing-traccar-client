@@ -26,6 +26,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import `in`.avimarine.waypointracing.R
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
@@ -64,7 +65,8 @@ class Step4Fragment : SetupFragment() {
                 activity?.let { it1 ->
                     LocationPermissions.askForLocationPermission(
                         it1,
-                        LocationPermissions.PERMISSIONS_REQUEST_LOCATION_UI
+                        LocationPermissions.PERMISSIONS_REQUEST_LOCATION_UI,
+                        getString(R.string.permission_rationale)
                     )
                 }
                 viewBinding.locationPermissionsBtn.setBackgroundColor(Color.GREEN)

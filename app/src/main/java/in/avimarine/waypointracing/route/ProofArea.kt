@@ -1,14 +1,13 @@
 @file:UseSerializers(Serializers.Companion.LocationSerializer::class)
 package `in`.avimarine.waypointracing.route
 
-import `in`.avimarine.waypointracing.TAG
-import `in`.avimarine.waypointracing.utils.*
 import android.location.Location
-import android.util.Log
 import android.os.Parcelable
+import android.util.Log
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement.bearing
-import `in`.avimarine.androidutils.Serializers
+import `in`.avimarine.androidutils.*
+import `in`.avimarine.waypointracing.utils.*
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers

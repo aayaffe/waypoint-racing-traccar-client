@@ -1,7 +1,6 @@
 package `in`.avimarine.waypointracing.activities
 
 import `in`.avimarine.waypointracing.R
-import `in`.avimarine.waypointracing.TAG
 import `in`.avimarine.waypointracing.activities.steps.StepperViewModel
 import `in`.avimarine.waypointracing.databinding.ActivitySetupWizardBinding
 import android.os.Bundle
@@ -13,6 +12,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.aceinteract.android.stepper.StepperNavListener
 import com.aceinteract.android.stepper.StepperNavigationView
+import `in`.avimarine.androidutils.TAG
 
 class SetupWizardActivity : AppCompatActivity(), StepperNavListener {
 

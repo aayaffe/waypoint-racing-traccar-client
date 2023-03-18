@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.preference.PreferenceManager
+import `in`.avimarine.androidutils.TAG
 
 class AutostartReceiver : WakefulBroadcastReceiver() {
 
