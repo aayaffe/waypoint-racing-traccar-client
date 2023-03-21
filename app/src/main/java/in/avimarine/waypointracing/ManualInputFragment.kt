@@ -21,6 +21,7 @@ import com.santalu.maskara.Mask
 import com.santalu.maskara.MaskChangedListener
 import com.santalu.maskara.MaskStyle
 import `in`.avimarine.androidutils.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -35,6 +36,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [ManualInputFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class ManualInputFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null

@@ -23,6 +23,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import `in`.avimarine.androidutils.TAG
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -34,6 +35,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [SelectBoatFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class SelectBoatFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null

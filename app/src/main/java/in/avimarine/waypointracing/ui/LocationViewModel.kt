@@ -9,6 +9,8 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import `in`.avimarine.androidutils.*
+import `in`.avimarine.androidutils.geo.Speed
+import `in`.avimarine.androidutils.units.SpeedUnits
 
 class LocationViewModel(
     val position: Position,
@@ -37,7 +39,7 @@ class LocationViewModel(
         }
     }
     fun getSOGData(): String{
-        return getSpeedString(position.speed)
+        return getSpeedString(Speed(position.speed, SpeedUnits.Knots), SpeedUnits.Knots)
     }
     fun getLocationData(): String {
         return getLatString(position.latitude) + "\n" + getLonString(position.longitude)
@@ -100,6 +102,6 @@ class LocationViewModel(
             return "-----"
         }
         val vmg = getVMG(position, wpt.portWpt, wpt.stbdWpt)
-        return getSpeedString(vmg)
+        return getSpeedString(Speed(vmg,SpeedUnits.Knots),SpeedUnits.Knots)
     }
 }
