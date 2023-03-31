@@ -43,7 +43,7 @@ class ProofAreaFactory {
          */
         fun createProofArea(stbdWpt: Location, portWpt: Location, bearing1: Double, bearing2: Double, dist: Double): ProofArea {
             val wpts = arrayListOf(portWpt)
-            val gateDir = getDirection(portWpt, stbdWpt)
+            val gateDir = getDirection(portWpt, stbdWpt).value
             wpts.add(getLocFromDirDist(portWpt, bearing1, dist))
             wpts.add(getLocFromDirDist(portWpt, gateDir - 90, dist))
             wpts.add(getLocFromDirDist(stbdWpt, (gateDir + 270) % 360, dist))
@@ -62,7 +62,7 @@ class ProofAreaFactory {
          */
         fun createProofArea(stbdWpt: Location, portWpt: Location, dist: Double): ProofArea {
             val wpts = arrayListOf(portWpt)
-            val gateDir = getDirection(portWpt, stbdWpt)
+            val gateDir = getDirection(portWpt, stbdWpt).value
             wpts.add(getLocFromDirDist(portWpt, gateDir - 90, dist))
             wpts.add(getLocFromDirDist(stbdWpt, (gateDir + 270) % 360, dist))
             wpts.add(stbdWpt)

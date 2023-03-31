@@ -9,6 +9,7 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import `in`.avimarine.androidutils.*
+import `in`.avimarine.androidutils.geo.Direction
 import `in`.avimarine.androidutils.geo.Speed
 import `in`.avimarine.androidutils.units.SpeedUnits
 
@@ -19,7 +20,7 @@ class LocationViewModel(
 ) : ViewModel() {
     fun getCOGData(): String{
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
-        return getDirString(position.course, magnetic, false, position, position.time.time)
+        return getDirString(Direction(position.course), magnetic, false, position)
     }
     fun getCOGColor(): Int{
         if (wpt== null)
@@ -58,11 +59,10 @@ class LocationViewModel(
         }
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
         return getDirString(
-            getDirection(position, wpt.portWpt),
+            Direction(getDirection(position, wpt.portWpt)),
             magnetic,
             false,
-            position,
-            position.time.time
+            position
         ) + "/" + getDistString(getDistance(position, wpt.portWpt))
     }
 
@@ -82,11 +82,10 @@ class LocationViewModel(
         }
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
         return getDirString(
-            getDirection(position, wpt.stbdWpt),
+            Direction(getDirection(position, wpt.stbdWpt)),
             magnetic,
             false,
-            position,
-            position.time.time
+            position
         ) + "/" + getDistString(getDistance(position, wpt.stbdWpt))
     }
 
