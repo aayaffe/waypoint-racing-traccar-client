@@ -33,6 +33,7 @@ import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.database.GatePassesDatabaseHelper
 import `in`.avimarine.waypointracing.route.*
 import android.content.SharedPreferences
+import android.location.Location
 import android.widget.Toast
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
@@ -112,8 +113,8 @@ class TrackingController(private val context: Context) :
         }
     }
 
-    override fun onPositionUpdate(position: Position) {
-        val inArea = updateIsInArea(position, nextWpt)
+    override fun onPositionUpdate(position: Position, location: Location) {
+        val inArea = updateIsInArea(location, nextWpt)
         if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false) && sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)) {
             sendPosition(position)
         }
@@ -154,12 +155,12 @@ class TrackingController(private val context: Context) :
                 setNextWpt(nextWpt)
             }
         }
-        setNewGPSInterval(position, route, nextWpt)
+        setNewGPSInterval(location, route, nextWpt)
     }
 
 
 
-    private fun setNewGPSInterval(position: Position, route: Route?, nextWpt: Int) {
+    private fun setNewGPSInterval(location: Location, route: Route?, nextWpt: Int) {
         val uiVisible = sharedPreferences.getBoolean(SettingsFragment.KEY_IS_UI_VISIBLE,true)
         if (route!=null && !uiVisible){
             val wpt = route.elements.elementAtOrNull(nextWpt)
@@ -170,7 +171,7 @@ class TrackingController(private val context: Context) :
                     setGPSInterval(MAX_INTERVAL)
                 } else {
                     if (sharedPreferences.getBoolean(SettingsFragment.KEY_ADAPTIVE_INTERVAL, true)) {
-                        val interval = distance2interval(wpt, position)
+                        val interval = distance2interval(wpt, location)
                         setGPSInterval(interval)
                     } else {
                         setGPSInterval(sharedPreferences.getString(SettingsFragment.KEY_INITIAL_INTERVAL,"30")!!.toInt())
@@ -180,9 +181,9 @@ class TrackingController(private val context: Context) :
         }
     }
 
-    private fun distance2interval(wpt: RouteElement, position: Position): Int {
-        val dist = toNM(pointToLineDist(position.toLocation(), wpt.portWpt, wpt.stbdWpt))
-        val ttg = (dist/position.speed) * 3600 //Conversion to seconds
+    private fun distance2interval(wpt: RouteElement, location: Location): Int {
+        val dist = toNM(pointToLineDist(location, wpt.portWpt, wpt.stbdWpt))
+        val ttg = (dist/location.speed) * 3600 //Conversion to seconds
         return when {
             ttg > 120 -> MAX_INTERVAL
             ttg > 80 -> 40
@@ -422,8 +423,8 @@ class TrackingController(private val context: Context) :
     }
 
 
-    private fun updateIsInArea(location: Position, nextWpt: Int): Boolean {
-        val l = location.toLocation()
+    private fun updateIsInArea(location: Location, nextWpt: Int): Boolean {
+        val l = location
         val wpt = route?.elements?.elementAtOrNull(nextWpt)
         if (wpt != null) {
             return wpt.isInProofArea(l)

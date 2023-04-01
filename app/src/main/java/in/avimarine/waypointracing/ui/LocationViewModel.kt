@@ -7,6 +7,8 @@ import `in`.avimarine.waypointracing.route.RouteElementType
 import `in`.avimarine.waypointracing.utils.*
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.location.Location
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import `in`.avimarine.androidutils.*
 import `in`.avimarine.androidutils.geo.Direction
@@ -14,13 +16,20 @@ import `in`.avimarine.androidutils.geo.Speed
 import `in`.avimarine.androidutils.units.SpeedUnits
 
 class LocationViewModel(
-    val position: Position,
+    val location: Location,
     val wpt: RouteElement?,
     val sharedPreferences: SharedPreferences
 ) : ViewModel() {
+
+    val mock = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        location.isMock
+    } else {
+        location.isFromMockProvider
+    }
+
     fun getCOGData(): String{
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
-        return getDirString(Direction(position.course), magnetic, false, position)
+        return getDirString(Direction(location.bearing.toDouble()), magnetic, false, location)
     }
     fun getCOGColor(): Int{
         if (wpt== null)
@@ -28,9 +37,9 @@ class LocationViewModel(
         return when (wpt.routeElementType) {
             RouteElementType.WAYPOINT -> Color.BLACK
             else -> {
-                val portBearing = getDirection(position, wpt.portWpt)
-                val stbdBearing = getDirection(position, wpt.stbdWpt)
-                if (isBetweenAngles(portBearing, stbdBearing, position.course) && getVMG(position, wpt.portWpt, wpt.stbdWpt)>0) {
+                val portBearing = getDirection(location, wpt.portWpt)
+                val stbdBearing = getDirection(location, wpt.stbdWpt)
+                if (isBetweenAngles(portBearing, stbdBearing, Direction(location.bearing.toDouble(), location)) && getVMG(location, wpt.portWpt, wpt.stbdWpt).getValue(SpeedUnits.Knots)>0) {
                     Color.GREEN
                 } else {
                     Color.BLACK
@@ -40,18 +49,18 @@ class LocationViewModel(
         }
     }
     fun getSOGData(): String{
-        return getSpeedString(Speed(position.speed, SpeedUnits.Knots), SpeedUnits.Knots)
+        return getSpeedString(Speed(location.speed.toDouble(), SpeedUnits.MetersPerSecond), SpeedUnits.Knots)
     }
     fun getLocationData(): String {
-        return getLatString(position.latitude) + "\n" + getLonString(position.longitude)
+        return getLatString(location.latitude) + "\n" + getLonString(location.longitude)
     }
 
     fun getAccuracyData():String {
-        return if (position.accuracy>0) {position.accuracy.toString()} else ""
+        return getLocationAccuracyString(location)
     }
 
     fun getTimeData():String {
-        return timeStampToDateString(position.time.time)
+        return timeStampToDateString(location.time)
     }
     fun getPortData(): String {
         if (wpt == null){
@@ -59,11 +68,11 @@ class LocationViewModel(
         }
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
         return getDirString(
-            Direction(getDirection(position, wpt.portWpt)),
+            getDirection(location, wpt.portWpt),
             magnetic,
             false,
-            position
-        ) + "/" + getDistString(getDistance(position, wpt.portWpt))
+            location
+        ) + "/" + getDistString(getDistance(location, wpt.portWpt))
     }
 
     fun getStbdData(): String {
@@ -82,25 +91,26 @@ class LocationViewModel(
         }
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
         return getDirString(
-            Direction(getDirection(position, wpt.stbdWpt)),
+            getDirection(location, wpt.stbdWpt),
             magnetic,
             false,
-            position
-        ) + "/" + getDistString(getDistance(position, wpt.stbdWpt))
+            location
+        ) + "/" + getDistString(getDistance(location, wpt.stbdWpt))
     }
 
     fun getShortestDistanceToGateData(): String {
         if (wpt==null){
             return "-----"
         }
-        return getDistString(pointToLineDist(position.toLocation(), wpt.portWpt, wpt.stbdWpt))
+        return getDistString(pointToLineDist(location, wpt.portWpt, wpt.stbdWpt))
     }
 
     fun getVMGGateData(): String{
         if (wpt==null){
             return "-----"
         }
-        val vmg = getVMG(position, wpt.portWpt, wpt.stbdWpt)
-        return getSpeedString(Speed(vmg,SpeedUnits.Knots),SpeedUnits.Knots)
+        val vmg = getVMG(location, wpt.portWpt, wpt.stbdWpt)
+        return getSpeedString(vmg,SpeedUnits.Knots)
     }
+
 }

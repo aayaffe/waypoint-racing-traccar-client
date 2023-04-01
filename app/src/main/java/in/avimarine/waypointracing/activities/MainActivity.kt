@@ -10,6 +10,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -507,16 +508,16 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         Log.e(TAG, "Position Error: ", error)
     }
 
-    override fun onPositionUpdate(position: Position) {
-        updateUI(position)
+    override fun onPositionUpdate(position: Position, location: Location) {
+        updateUI(location)
     }
 
-    private fun updateUI(position: Position) {
+    private fun updateUI(location: Location) {
         val wpt = route.elements.elementAtOrNull(nextWpt)
-        binding.viewmodel = LocationViewModel(position,wpt,sharedPreferences)
+        binding.viewmodel = LocationViewModel(location, wpt,sharedPreferences)
         setUiForGPS(true)
         if (wpt != null) {
-            binding.location.setTextColor(if (wpt.isInProofArea(position.toLocation())) Color.GREEN else Color.BLACK )
+            binding.location.setTextColor(if (wpt.isInProofArea(location)) Color.GREEN else Color.BLACK )
         } else {
             binding.location.setTextColor(Color.BLACK)
         }
@@ -595,6 +596,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             binding.time.setTextColor(Color.RED)
             binding.shortestDistanceToGate.setTextColor(Color.RED)
             binding.vmg.setTextColor(Color.RED)
+            binding.location.setLabel("Accuracy - Unknown")
         }
     }
 

@@ -35,7 +35,7 @@ abstract class PositionProvider(
 
 
     interface PositionListener {
-        fun onPositionUpdate(position: Position)
+        fun onPositionUpdate(position: Position, location: Location)
         fun onPositionError(error: Throwable)
     }
 
@@ -63,7 +63,7 @@ abstract class PositionProvider(
         ) {
             Log.v(TAG, "location new")
             this.lastLocation = location
-            listener.onPositionUpdate(Position(deviceId, boatName, location, getBatteryStatus(context)))
+            listener.onPositionUpdate(Position(deviceId, boatName, location, getBatteryStatus(context)), location)
 
         } else {
             Log.v(TAG, if (location != null) "location ignored" else "location nil")

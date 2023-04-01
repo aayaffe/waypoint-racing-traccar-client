@@ -241,7 +241,7 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="Is position mocked"
                     android:src="@drawable/ic_baseline_not_listed_location_24"
-                    android:visibility="@{viewmodel.position.mock? View.VISIBLE : View.INVISIBLE}"
+                    android:visibility="@{viewmodel.mock? View.VISIBLE : View.INVISIBLE}"
                     app:layout_constraintBottom_toBottomOf="@+id/location"
                     app:layout_constraintEnd_toEndOf="@+id/location"
                     tools:ignore="ImageContrastCheck" />
