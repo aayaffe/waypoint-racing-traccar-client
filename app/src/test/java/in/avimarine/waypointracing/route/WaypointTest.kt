@@ -1,7 +1,7 @@
 package `in`.avimarine.waypointracing.route
 
-import `in`.avimarine.waypointracing.utils.createLocation
 import android.os.Build
+import `in`.avimarine.androidutils.createLocation
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith

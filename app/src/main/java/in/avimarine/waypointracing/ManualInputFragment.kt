@@ -21,6 +21,7 @@ import com.santalu.maskara.Mask
 import com.santalu.maskara.MaskChangedListener
 import com.santalu.maskara.MaskStyle
 import `in`.avimarine.androidutils.*
+import `in`.avimarine.androidutils.units.DistanceUnits
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.text.SimpleDateFormat
 import java.util.*
@@ -405,7 +406,7 @@ class ManualInputFragment : Fragment() {
         val ret = arrayListOf<WptDistance>()
         val route = viewModel.route.value
         for (elem in route.elements){
-            val dist = toNM(getDistance(elem.stbdWpt.latitude, elem.stbdWpt.longitude, l.latitude, l.longitude))
+            val dist = getDistance(elem.stbdWpt.latitude, elem.stbdWpt.longitude, l.latitude, l.longitude).getValue(DistanceUnits.NauticalMiles)
             ret.add(WptDistance(elem.name, elem.stbdWpt.latitude, elem.stbdWpt.longitude, dist, elem.id))
         }
         ret.sortBy{ it.dist }

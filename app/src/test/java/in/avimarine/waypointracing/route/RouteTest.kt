@@ -1,6 +1,7 @@
 package `in`.avimarine.waypointracing.route
 
 import android.os.Build
+import `in`.avimarine.androidutils.units.DistanceUnits
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,7 +34,7 @@ class RouteTest {
         Assert.assertEquals(EventType.TREASUREHUNT, r.eventType)
         val waypoint1 = r.elements[0]
         Assert.assertEquals(ProofAreaType.CIRCLE, waypoint1.proofArea.type)
-        Assert.assertEquals(0.06, waypoint1.proofArea.distance, 0.01)
+        Assert.assertEquals(0.06, waypoint1.proofArea.distance.getValue(DistanceUnits.NauticalMiles), 0.01)
     }
 
 }

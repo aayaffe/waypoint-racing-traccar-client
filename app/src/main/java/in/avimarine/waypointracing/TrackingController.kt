@@ -40,6 +40,7 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import `in`.avimarine.androidutils.*
+import `in`.avimarine.androidutils.units.DistanceUnits
 import java.util.*
 
 class TrackingController(private val context: Context) :
@@ -182,7 +183,7 @@ class TrackingController(private val context: Context) :
     }
 
     private fun distance2interval(wpt: RouteElement, location: Location): Int {
-        val dist = toNM(pointToLineDist(location, wpt.portWpt, wpt.stbdWpt))
+        val dist = pointToLineDist(location, wpt.portWpt, wpt.stbdWpt).getValue(DistanceUnits.NauticalMiles)
         val ttg = (dist/location.speed) * 3600 //Conversion to seconds
         return when {
             ttg > 120 -> MAX_INTERVAL

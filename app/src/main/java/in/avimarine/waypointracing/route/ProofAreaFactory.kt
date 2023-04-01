@@ -1,6 +1,7 @@
 package `in`.avimarine.waypointracing.route
 
 import android.location.Location
+import `in`.avimarine.androidutils.geo.Distance
 import `in`.avimarine.androidutils.getDirection
 import `in`.avimarine.androidutils.getLocFromDirDist
 
@@ -41,7 +42,7 @@ class ProofAreaFactory {
          * @param dist - in Nautical miles
          * @return ProofArea
          */
-        fun createProofArea(stbdWpt: Location, portWpt: Location, bearing1: Double, bearing2: Double, dist: Double): ProofArea {
+        fun createProofArea(stbdWpt: Location, portWpt: Location, bearing1: Double, bearing2: Double, dist: Distance): ProofArea {
             val wpts = arrayListOf(portWpt)
             val gateDir = getDirection(portWpt, stbdWpt).value
             wpts.add(getLocFromDirDist(portWpt, bearing1, dist))
@@ -60,7 +61,7 @@ class ProofAreaFactory {
          * @param dist - in Nautical miles
          * @return ProofArea
          */
-        fun createProofArea(stbdWpt: Location, portWpt: Location, dist: Double): ProofArea {
+        fun createProofArea(stbdWpt: Location, portWpt: Location, dist: Distance): ProofArea {
             val wpts = arrayListOf(portWpt)
             val gateDir = getDirection(portWpt, stbdWpt).value
             wpts.add(getLocFromDirDist(portWpt, gateDir - 90, dist))
@@ -74,7 +75,7 @@ class ProofAreaFactory {
          * @param dist - in Nautical miles
          * @return ProofArea
          */
-        fun createProofArea(dist: Double): ProofArea {
+        fun createProofArea(dist: Distance): ProofArea {
             return ProofArea(dist)
         }
     }

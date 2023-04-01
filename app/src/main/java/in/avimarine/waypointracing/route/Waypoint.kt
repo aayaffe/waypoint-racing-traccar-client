@@ -9,6 +9,8 @@ import com.google.gson.JsonParseException
 import com.google.gson.JsonPrimitive
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
+import `in`.avimarine.androidutils.geo.Distance
+import `in`.avimarine.androidutils.units.DistanceUnits
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.json.JSONException
@@ -50,7 +52,7 @@ class Waypoint(
         name: String,
         location: Location,
         mandatory: Boolean,
-        dist: Double,
+        dist: Distance,
         id: Int,
         points: Double
     ) : this(
@@ -105,7 +107,7 @@ class Waypoint(
                     } else {
                         (pas as JsonArray).get(0).asDouble
                     }
-                    Waypoint(name, loc, man, dist, id, points)
+                    Waypoint(name, loc, man, Distance(dist, DistanceUnits.NauticalMiles), id, points)
                 }
                 else -> {
                     throw JsonParseException("Improper proof area for waypoint")

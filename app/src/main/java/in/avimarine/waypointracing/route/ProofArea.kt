@@ -7,6 +7,8 @@ import android.util.Log
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement.bearing
 import `in`.avimarine.androidutils.*
+import `in`.avimarine.androidutils.geo.Distance
+import `in`.avimarine.androidutils.units.DistanceUnits
 import `in`.avimarine.waypointracing.utils.*
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -21,14 +23,14 @@ class ProofArea  (
     //Waypoints will be defined in order, as to create a valid polygon
 //    @Serializable(with = Serializers.Companion.LocationSerializer::class)
     var wpts : ArrayList<Location>,
-    var distance : Double
+    var distance : Distance
 ) : Parcelable{
 
-    constructor(dist: Double) : this(ProofAreaType.CIRCLE, arrayListOf(), arrayListOf(), dist)
+    constructor(dist: Distance) : this(ProofAreaType.CIRCLE, arrayListOf(), arrayListOf(), dist)
 
-    constructor(bearings: ArrayList<Double>) : this(ProofAreaType.QUADRANT, bearings, arrayListOf(),0.0)
+    constructor(bearings: ArrayList<Double>) : this(ProofAreaType.QUADRANT, bearings, arrayListOf(),Distance(0.0, DistanceUnits.NauticalMiles))
 
-    constructor(type: ProofAreaType, wpts: ArrayList<Location>):this(type, arrayListOf(), wpts, 0.0)
+    constructor(type: ProofAreaType, wpts: ArrayList<Location>):this(type, arrayListOf(), wpts, Distance(0.0, DistanceUnits.NauticalMiles))
 
     fun isInProofArea(portWpt: Location, stbdWpt: Location, loc:Location):Boolean{
         if (type== ProofAreaType.POLYGON){
@@ -52,7 +54,7 @@ class ProofArea  (
                 return (isBetweenAngles(bearings[0], bearings[1], b1))
             }
             ProofAreaType.CIRCLE -> {
-                return getDistance(wpt, loc) < toMeters(distance)
+                return getDistance(wpt, loc).getValue(DistanceUnits.NauticalMiles) < distance.getValue(DistanceUnits.NauticalMiles)
             }
             else -> {
                 Log.e(TAG, "Unknown type of ProofArea for isInProofArea")
