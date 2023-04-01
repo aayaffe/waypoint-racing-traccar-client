@@ -15,7 +15,7 @@
  */
 @file:Suppress("DEPRECATION", "StaticFieldLeak")
 package `in`.avimarine.waypointracing.database;
-import `in`.avimarine.androidutils.Position
+import `in`.avimarine.waypointracing.Position
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context

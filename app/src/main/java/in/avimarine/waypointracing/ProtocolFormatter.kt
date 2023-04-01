@@ -17,7 +17,6 @@ package `in`.avimarine.waypointracing;
 
 import `in`.avimarine.waypointracing.route.GatePassing
 import android.net.Uri
-import `in`.avimarine.androidutils.Position
 import java.util.*
 
 object ProtocolFormatter {

@@ -1,6 +1,6 @@
 package `in`.avimarine.waypointracing.route
 
-import `in`.avimarine.androidutils.Position
+import `in`.avimarine.waypointracing.Position
 import `in`.avimarine.androidutils.Serializers
 import kotlinx.serialization.Serializable
 import java.util.*
