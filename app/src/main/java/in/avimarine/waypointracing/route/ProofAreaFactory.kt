@@ -44,10 +44,10 @@ class ProofAreaFactory {
          */
         fun createProofArea(stbdWpt: Location, portWpt: Location, bearing1: Double, bearing2: Double, dist: Distance): ProofArea {
             val wpts = arrayListOf(portWpt)
-            val gateDir = getDirection(portWpt, stbdWpt).value
+            val gateDir = getDirection(portWpt, stbdWpt)
             wpts.add(getLocFromDirDist(portWpt, bearing1, dist))
             wpts.add(getLocFromDirDist(portWpt, gateDir - 90, dist))
-            wpts.add(getLocFromDirDist(stbdWpt, (gateDir + 270) % 360, dist))
+            wpts.add(getLocFromDirDist(stbdWpt, gateDir + 270, dist))
             wpts.add(getLocFromDirDist(stbdWpt, bearing2, dist))
             wpts.add(stbdWpt)
             return ProofArea(ProofAreaType.POLYGON, wpts)
@@ -63,9 +63,9 @@ class ProofAreaFactory {
          */
         fun createProofArea(stbdWpt: Location, portWpt: Location, dist: Distance): ProofArea {
             val wpts = arrayListOf(portWpt)
-            val gateDir = getDirection(portWpt, stbdWpt).value
+            val gateDir = getDirection(portWpt, stbdWpt)
             wpts.add(getLocFromDirDist(portWpt, gateDir - 90, dist))
-            wpts.add(getLocFromDirDist(stbdWpt, (gateDir + 270) % 360, dist))
+            wpts.add(getLocFromDirDist(stbdWpt, gateDir + 270, dist))
             wpts.add(stbdWpt)
             return ProofArea(ProofAreaType.POLYGON, wpts)
         }

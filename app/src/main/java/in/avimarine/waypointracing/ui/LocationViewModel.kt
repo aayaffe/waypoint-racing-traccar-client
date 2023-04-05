@@ -29,7 +29,7 @@ class LocationViewModel(
 
     fun getCOGData(): String{
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
-        return getDirString(Direction(location.bearing.toDouble()), magnetic, false, location)
+        return getDirString(Direction(location.bearing.toDouble(), location), magnetic, false, location)
     }
     fun getCOGColor(): Int{
         if (wpt== null)

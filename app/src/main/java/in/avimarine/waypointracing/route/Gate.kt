@@ -8,6 +8,7 @@ import com.google.gson.JsonPrimitive
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.LineString
 import `in`.avimarine.androidutils.geo.Distance
+import `in`.avimarine.androidutils.geo.nauticalMiles
 import `in`.avimarine.androidutils.units.DistanceUnits
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -120,7 +121,7 @@ class Gate(
                 } else {
                     (pas as JsonArray).get(0).asDouble
                 }
-                Gate(name, stbdloc, portloc, man, b1, b2, Distance(dist, DistanceUnits.NauticalMiles), id, points)
+                Gate(name, stbdloc, portloc, man, b1, b2, dist.nauticalMiles, id, points)
             } else {
                 val pas = props.get("proofAreaSize")
                 val dist = if (pas is JsonPrimitive) {
@@ -128,7 +129,7 @@ class Gate(
                 } else {
                     (pas as JsonArray).get(0).asDouble
                 }
-                Gate(name, stbdloc, portloc, man, Distance(dist, DistanceUnits.NauticalMiles), id, points)
+                Gate(name, stbdloc, portloc, man, dist.nauticalMiles, id, points)
             }
         }
     }
