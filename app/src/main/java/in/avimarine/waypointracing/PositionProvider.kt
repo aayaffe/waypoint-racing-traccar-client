@@ -58,8 +58,8 @@ abstract class PositionProvider(
         val lastLocation = this.lastLocation
         if (location != null &&
                 (lastLocation == null || location.time - lastLocation!!.time >= 0.5 * interval || distance > 0
-                && location.distanceTo(lastLocation!!) >= distance || angle > 0
-                && abs(location.bearing - lastLocation!!.bearing) >= angle)
+                && location.distanceTo(lastLocation) >= distance || angle > 0
+                && abs(location.bearing - lastLocation.bearing) >= angle)
         ) {
             Log.v(TAG, "location new")
             this.lastLocation = location
