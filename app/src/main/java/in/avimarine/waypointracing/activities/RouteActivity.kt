@@ -112,12 +112,37 @@ class RouteActivity : AppCompatActivity() {
                 finish()
                 return true
             }
+            R.id.share_route_results_menu_action -> {
+                return shareRouteResults()
+            }
             R.id.send_screenshot_menu_action -> {
                 takeScreenshot()
                 return true
             }
         }
         return super.onContextItemSelected(item)
+    }
+
+    private fun shareRouteResults(): Boolean {
+        val results = createRecList()
+        var text = "Results for ${route.eventName}, *${sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME,"Unknown Boat")}*: \n"
+        for (r in results){
+            text = if (r.gp?.time == null) {
+                val t = "* " + r.re.name + ": " + "Never" + " " + (if (r.gp?.mock == true) "M" else "") + "\n"
+                text.plus(t)
+            }else {
+                val t = "* " + r.re.name + ": " + timeStampToDateString(r.gp.time.time) + " " + (if (r.gp.mock) "M" else "") + "\n"
+                text.plus(t)
+            }
+        }
+        text = text.plus(text.hashCode().toString().takeLast(3))
+        text = "DO NOT EDIT THIS MESSAGE\n ===== \n$text\n ===== \n"
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.type = "text/plain"
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Route results")
+        shareIntent.putExtra(Intent.EXTRA_TEXT, text)
+        startActivity(Intent.createChooser(shareIntent, "Share route results"))
+        return true
     }
 
     private fun createRecList(): MutableList<RouteElementConcat> {
