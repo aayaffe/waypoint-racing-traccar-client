@@ -155,7 +155,10 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         findPreference<Preference>(KEY_TRACKING)?.isEnabled = enabled
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (sharedPreferences== null) {
+            return
+        }
         when (key) {
             KEY_DEVICE -> findPreference<Preference>(KEY_DEVICE)!!.summary =
                 sharedPreferences.getString(KEY_DEVICE, null)

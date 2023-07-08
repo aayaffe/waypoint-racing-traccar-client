@@ -100,10 +100,4 @@ class NavTextDrawer(context: Context, attrs: AttributeSet) : ConstraintLayout(co
         typedArray.recycle()
     }
 
-    override fun onDraw(canvas: Canvas?) {
-        Log.d(TAG,"onDraw")
-        super.onDraw(canvas)
-
-    }
-
 }

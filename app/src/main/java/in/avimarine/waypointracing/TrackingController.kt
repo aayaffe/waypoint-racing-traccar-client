@@ -438,16 +438,19 @@ class TrackingController(private val context: Context) :
         this.route = route
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == SettingsFragment.KEY_NEXT_WPT) {
-            nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
+            nextWpt = sharedPreferences?.getInt(SettingsFragment.KEY_NEXT_WPT, 0) ?: nextWpt
         }
     }
+
 
     companion object {
         private const val RETRY_DELAY = 30 * 1000
         private const val MAX_INTERVAL = 60
     }
+
+
 
 
 }

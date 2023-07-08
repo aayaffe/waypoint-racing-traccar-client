@@ -83,9 +83,9 @@ abstract class PositionProvider(
         }
         return BatteryStatus()
     }
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == SettingsFragment.KEY_INTERVAL) {
-            interval = sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
+            interval = sharedPreferences?.getString(SettingsFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
             stopUpdates()
             startUpdates()
         }

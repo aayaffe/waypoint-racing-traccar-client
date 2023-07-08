@@ -113,9 +113,9 @@ class TrackingService() : Service(), SharedPreferences.OnSharedPreferenceChangeL
         trackingController?.stop()
     }
 
-    override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
+    override fun onSharedPreferenceChanged(sp: SharedPreferences?, key: String?) {
         if (key == SettingsFragment.KEY_ROUTE) {
-            parseRoute(sp)
+            sp?.let { parseRoute(it) }
         }
     }
 

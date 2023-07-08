@@ -612,7 +612,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         invalidateOptionsMenu()
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (sharedPreferences == null) return
         if (key == SettingsFragment.KEY_STATUS) {
             setButton(sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false))
             if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false)) {
