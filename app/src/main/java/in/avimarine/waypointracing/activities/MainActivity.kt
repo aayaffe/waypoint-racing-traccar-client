@@ -43,8 +43,10 @@ import `in`.avimarine.waypointracing.ui.LocationViewModel
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.utils.*
 import `in`.avimarine.androidutils.LocationPermissions.Companion.PERMISSIONS_REQUEST_LOCATION_UI
+import `in`.avimarine.androidutils.Utils.Companion.getInstalledVersion
 import `in`.avimarine.waypointracing.BuildConfig
 import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.ui.VersionViewModel
 import java.util.*
 
 
@@ -72,6 +74,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
+        binding.versionViewModel = VersionViewModel(getInstalledVersion(this))
         setContentView(view)
         launchAuthenticationProcess()
         screenshotManager = ScreenshotManagerBuilder(this)
