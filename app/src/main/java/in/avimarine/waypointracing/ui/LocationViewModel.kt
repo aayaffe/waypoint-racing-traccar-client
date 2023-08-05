@@ -17,7 +17,7 @@ import `in`.avimarine.androidutils.units.SpeedUnits
 
 class LocationViewModel(
     val location: Location,
-    val wpt: RouteElement?,
+    private val wpt: RouteElement?,
     val sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
@@ -112,5 +112,4 @@ class LocationViewModel(
         val vmg = getVMG(location, wpt.portWpt, wpt.stbdWpt)
         return getSpeedString(vmg,SpeedUnits.Knots)
     }
-
 }

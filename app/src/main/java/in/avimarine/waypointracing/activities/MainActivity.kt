@@ -514,7 +514,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private fun updateUI(location: Location) {
         val wpt = route.elements.elementAtOrNull(nextWpt)
-        binding.viewmodel = LocationViewModel(location, wpt,sharedPreferences)
+        binding.viewmodel = LocationViewModel(location, wpt, sharedPreferences)
         setUiForGPS(true)
         if (wpt != null) {
             binding.location.setTextColor(if (wpt.isInProofArea(location)) Color.GREEN else Color.BLACK )
