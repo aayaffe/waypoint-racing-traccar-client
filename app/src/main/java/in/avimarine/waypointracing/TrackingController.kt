@@ -40,6 +40,7 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import `in`.avimarine.androidutils.*
+import `in`.avimarine.androidutils.Utils.Companion.getInstalledVersion
 import `in`.avimarine.androidutils.units.DistanceUnits
 import java.util.*
 
@@ -131,7 +132,7 @@ class TrackingController(private val context: Context) :
             val gp = GatePassing(
                 route!!.eventName, route!!.id, route!!.lastUpdate,
                 deviceId!!,
-                boatName!!, route!!.elements[nextWpt].id, route!!.elements[nextWpt].name, position.time, position
+                boatName!!, route!!.elements[nextWpt].id, route!!.elements[nextWpt].name, position.time, position, getInstalledVersion(context)
             )
             if (buffer) {
                 write(gp)
