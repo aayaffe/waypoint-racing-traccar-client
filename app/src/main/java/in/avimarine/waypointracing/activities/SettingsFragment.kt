@@ -238,7 +238,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         const val KEY_DISTANCE = "distance"
         const val KEY_ANGLE = "angle"
         const val KEY_ACCURACY = "accuracy"
-        const val KEY_STATUS = "status"
+        const val KEY_STATUS = "status" //Tracking status
         const val KEY_BUFFER = "buffer"
         const val KEY_WAKELOCK = "wakelock"
         const val KEY_NEXT_WPT = "nextwpt"
@@ -250,5 +250,6 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         const val KEY_MAGNETIC = "magnetic"
         const val KEY_IS_UI_VISIBLE = "uivisibility"
         const val KEY_ADAPTIVE_INTERVAL = "adaptiveinterval"
+        const val KEY_ROUTE_UPDATED_VERSION = "routeupdatedversion" // used to check to what version route updated and that user refused to update
     }
 }

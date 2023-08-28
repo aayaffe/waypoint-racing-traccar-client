@@ -60,8 +60,8 @@ class LoadRouteActivity : AppCompatActivity() {
     }
     private fun setTitle(title: String, subTitle: String) {
         val ab = supportActionBar
-        ab?.setTitle(title)
-        ab?.setSubtitle(subTitle)
+        ab?.title = title
+        ab?.subtitle = subTitle
     }
 
     private fun selectRoute(json: String, name: String, lastUpdate: String){

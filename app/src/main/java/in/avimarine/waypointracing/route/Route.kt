@@ -91,11 +91,8 @@ class Route(
                 }
             }
         }
-
         fun emptyRoute(): Route {
             return Route("", "", "", Date(), arrayListOf(), Date(), EventType.WPTRACING)
         }
-
-
     }
 }

@@ -99,4 +99,7 @@
     <string name="settings_adaptiveinterval">Adaptive interval</string>
     <string name="permission_rationale">Waypoint Racing collects location data to enable boat tracking, and race course navigation even when the app is closed or not in use</string>
     <string name="share_results">Share results</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="route_updated_dialog_message">A newer version of the currently used route is available on the server.\nDownloading the new route will delete all previous waypoint and gate passes.\nDo you want to load new route?</string>
 </resources>

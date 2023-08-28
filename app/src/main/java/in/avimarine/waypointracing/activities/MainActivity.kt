@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -23,7 +24,9 @@ import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.firebase.ui.auth.AuthUI
@@ -31,6 +34,9 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.ktx.toObject
 import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
@@ -76,7 +82,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         val view = binding.root
         binding.versionViewModel = VersionViewModel(getInstalledVersion(this))
         setContentView(view)
-        launchAuthenticationProcess()
+        Auth.launchAuthenticationProcess(signInLauncher)
         screenshotManager = ScreenshotManagerBuilder(this)
             .withCustomActionOrder(ScreenshotActionOrder.pixelCopyFirst()) //optional, ScreenshotActionOrder.pixelCopyFirst() by default
             .withPermissionRequestCode(REQUEST_SCREENSHOT_PERMISSION) //optional, 888 by default
@@ -85,6 +91,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         checkVersion()
         if (intent.action == Intent.ACTION_MAIN) {
             val r = RouteLoader.loadRouteFromFile(this)
+            if (!r.isEmpty()) {
+                FirestoreDatabase.getRoute(r.id, this::isRouteUpdated) { exception ->
+                    Log.d(TAG, "get failed with ", exception)
+                }
+            }
             loadRoute(r)
         } else {
             RouteLoader.handleIntent(this, intent, this::loadRoute)
@@ -138,11 +149,46 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
     }
 
+    private fun isRouteUpdated(docs: QuerySnapshot?) {
+        if (docs == null) {
+            Log.d(TAG, "No such route")
+            return
+        }
+        for (doc in docs){
+            val rd = doc.toObject<RouteDetails>()
+            val r = Route.fromGeoJson(rd.route)
+            if (r.lastUpdate > this.route.lastUpdate) {
+                val lastCheckedVersion = sharedPreferences.getLong(SettingsFragment.KEY_ROUTE_UPDATED_VERSION, 0)
+                if (lastCheckedVersion == r.lastUpdate.time) {
+                    //User already decided not to update route to this version
+                    break
+                }
+                //Show dialog to ask if user wants to load updated route
+                val builder = AlertDialog.Builder(this)
+                builder.setMessage(R.string.route_updated_dialog_message)
+                    .setPositiveButton(R.string.yes) { _, _ ->
+                        sharedPreferences.edit()
+                            .putLong(SettingsFragment.KEY_ROUTE_UPDATED_VERSION, 0)
+                            .apply()
+                        RouteLoader.loadRouteFromString(this, rd.route, this::loadRoute)
+                    }
+                    .setNegativeButton(R.string.no) { _, _ ->
+                        sharedPreferences.edit()
+                            .putLong(SettingsFragment.KEY_ROUTE_UPDATED_VERSION, r.lastUpdate.time)
+                            .apply()
+                    }
+                builder.create().show()
+            }
+            break
+        }
+
+    }
+
     private fun checkVersion() {
         FirestoreDatabase.getSupportedVersion({
             if (it != null) {
                 val ver = it.getLong("ver")?:-1
-                if (ver > Utils.getInstalledVersion(this)){
+                if (ver > getInstalledVersion(this)){
                     Utils.alertOnUnsupportedVersion(this)
                 }
             }
@@ -162,21 +208,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         alarmIntent = PendingIntent.getBroadcast(applicationContext, 0, originalIntent, flags)
     }
 
-    private fun launchAuthenticationProcess() {
-        if (FirebaseAuth.getInstance().currentUser!=null){
-            return
-        }
-        // Choose authentication providers
-        val providers = arrayListOf(
-            AuthUI.IdpConfig.GoogleBuilder().build())
 
-        // Create and launch sign-in intent
-        val signInIntent = AuthUI.getInstance()
-            .createSignInIntentBuilder()
-            .setAvailableProviders(providers)
-            .build()
-        signInLauncher.launch(signInIntent)
-    }
 
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
         val response = result.idpResponse
@@ -219,11 +251,17 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
 
-    private fun loadRoute(r: Route?) {
+    private fun loadRoute(r: Route?, newRoute: Boolean = false) {
         if (r == null) {
             errorLoadingRoute("Error Loading Route")
             loadRoute(RouteLoader.loadRouteFromFile(this))
             return
+        }
+        if (newRoute) {
+            //Loading new route, reset last checked version
+            sharedPreferences.edit()
+                .putLong(SettingsFragment.KEY_ROUTE_UPDATED_VERSION, 0)
+                .apply()
         }
         route = r
         sharedPreferences.edit().putString(SettingsFragment.KEY_ROUTE,  route.toString()).apply()
@@ -458,7 +496,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                     setUiForLogin(FirebaseAuth.getInstance().currentUser)
                 }
         } else {
-            launchAuthenticationProcess()
+            Auth.launchAuthenticationProcess(signInLauncher)
         }
     }
 

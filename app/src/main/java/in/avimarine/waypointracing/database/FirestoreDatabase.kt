@@ -11,6 +11,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import `in`.avimarine.androidutils.TAG
+import `in`.avimarine.waypointracing.route.Route
+import `in`.avimarine.waypointracing.route.RouteDetails
 
 class FirestoreDatabase {
 
@@ -38,8 +40,8 @@ class FirestoreDatabase {
                 .addOnFailureListener (onFailure)
         }
 
-        fun getRoute(id: String,onSuccess: (DocumentSnapshot?) -> Unit, onFailure: OnFailureListener) {
-            val docRef = Firebase.firestore.collection(COLLECTION_ROUTES).document(id)
+        fun getRoute(id: String,onSuccess: (QuerySnapshot?) -> Unit, onFailure: OnFailureListener) {
+            val docRef = Firebase.firestore.collection(COLLECTION_ROUTES).whereEqualTo("id", id)
             docRef.get()
                 .addOnSuccessListener (onSuccess)
                 .addOnFailureListener { exception ->
