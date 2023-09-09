@@ -63,4 +63,31 @@ class ProofArea  (
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ProofArea
+
+        if (type != other.type) return false
+        val allwpts = wpts.zip(other.wpts)
+        for (wpt in allwpts){
+            if (wpt.first.latitude != wpt.second.latitude) return false
+            if (wpt.first.longitude != wpt.second.longitude) return false
+        }
+        if (bearings != other.bearings) return false
+        if (distance != other.distance) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = type.hashCode()
+        result = 31 * result + bearings.hashCode()
+        result = 31 * result + wpts.hashCode()
+        result = 31 * result + distance.hashCode()
+        return result
+    }
+
+
 }

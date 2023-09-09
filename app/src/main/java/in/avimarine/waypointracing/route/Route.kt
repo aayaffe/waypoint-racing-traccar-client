@@ -5,6 +5,7 @@ import android.os.Parcelable
 import com.google.gson.JsonParseException
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
+import `in`.avimarine.androidutils.Utils.Companion.convertStandardJSONString
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -67,13 +68,7 @@ class Route(
         }
 
 
-        private fun convertStandardJSONString(data_json: String): String {
-            var ret = data_json.replace("\\\\r\\\\n", "");
-            ret = ret.replace("\"{", "{");
-            ret = ret.replace("}\",", "},");
-            ret = ret.replace("}\"", "}");
-            return ret;
-        }
+
 
         private fun parseRouteElement(f: Feature): RouteElement {
             return when {

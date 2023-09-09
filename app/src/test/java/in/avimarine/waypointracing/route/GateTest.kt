@@ -15,26 +15,25 @@ import org.robolectric.annotation.Config
 
 @Config(sdk = [Build.VERSION_CODES.P])
 @RunWith(RobolectricTestRunner::class)
-class WaypointTest {
+class GateTest {
 
     @Test
-    fun testParseCircleWaypoint() {
-        val jsonText =this::class.java.classLoader.getResource("test_treasure.json").readText()
+    fun testParseGate() {
+        val jsonText =this::class.java.classLoader.getResource("test_wptracing.json").readText()
         val r = Route.fromGeoJson(jsonText)
         val waypoint1 = r.elements[0]
-        Assert.assertEquals(ProofAreaType.CIRCLE, waypoint1.proofArea.type)
-        Assert.assertTrue(waypoint1.isInProofArea(createLocation(32.835, 35.02)))
+        Assert.assertEquals(ProofAreaType.POLYGON, waypoint1.proofArea.type)
+        Assert.assertTrue(waypoint1.isInProofArea(createLocation(32.683, 34.84)))
     }
 
     @Test
     fun testToGeoJson(){
-        val jsonText =this::class.java.classLoader.getResource("test_treasure.json").readText()
+        val jsonText =this::class.java.classLoader.getResource("test_wptracing.json").readText()
         val r = Route.fromGeoJson(jsonText)
         val waypoint1 = r.elements[0]
         val geoJson = waypoint1.toGeoJson()
-        Assert.assertEquals(geoJson, "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[35.019288,32.834881]},\"properties\":{\"name\":\"Treasure 1\",\"mandatory\":false,\"points\":0.0,\"proofAreaType\":\"CIRCLE\",\"proofAreaSize\":0.06,\"routeElementType\":\"WAYPOINT\",\"id\":0}}")
         val feature = Feature.fromJson(convertStandardJSONString(geoJson))
-        val reparsedWaypoint = Waypoint.fromGeoJson(feature)
+        val reparsedWaypoint = Gate.fromGeoJson(feature)
         Assert.assertEquals(waypoint1, reparsedWaypoint)
     }
 

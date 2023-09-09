@@ -50,7 +50,7 @@ class ProofAreaFactory {
             wpts.add(getLocFromDirDist(stbdWpt, gateDir + 270, dist))
             wpts.add(getLocFromDirDist(stbdWpt, bearing2, dist))
             wpts.add(stbdWpt)
-            return ProofArea(ProofAreaType.POLYGON, wpts)
+            return ProofArea(ProofAreaType.POLYGON, arrayListOf(bearing1,bearing2), wpts, dist)
         }
 
         /**
