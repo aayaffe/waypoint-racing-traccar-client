@@ -415,6 +415,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main, menu)
         menu.findItem(R.id.expert_mode_menu_action).isVisible = expertMode
+        menu.findItem(R.id.map_activity_menu_action).isVisible = expertMode
         if (FirebaseAuth.getInstance().currentUser == null) {
             menu.findItem(R.id.login_menu_action).icon =
                 getDrawable(R.drawable.ic_baseline_login_24)
@@ -480,6 +481,12 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             R.id.expert_mode_menu_action -> {
                 val intent = Intent(this, ExpertModeActivity::class.java)
                 intent.putExtra("route", route)
+                this.startActivity(intent)
+                return true
+            }
+            R.id.map_activity_menu_action -> {
+                val intent = Intent(this, MapActivity::class.java)
+//                intent.putExtra("route", route)
                 this.startActivity(intent)
                 return true
             }

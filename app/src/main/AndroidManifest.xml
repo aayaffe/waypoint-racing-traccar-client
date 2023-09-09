@@ -25,6 +25,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".activities.MapActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.SetupWizardActivity"
             android:exported="false" />
         <activity
@@ -108,7 +111,7 @@
             android:foregroundServiceType="location" />
         <service
             android:name=".TrackingService$HideNotificationService"
-            android:exported="false" >
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
             </intent-filter>

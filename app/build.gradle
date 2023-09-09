@@ -27,8 +27,8 @@ android {
         buildConfigField 'boolean', 'HIDDEN_APP', 'false'
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 35
-        versionName '3.11.2'
+        versionCode 36
+        versionName '3.12'
         signingConfig signingConfigs.debug
     }
     buildTypes{
@@ -82,6 +82,8 @@ android {
 dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation project(path: ':AviMarineAndroidUtils')
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
     def fragment_version = "1.6.1"
     implementation platform('com.google.firebase:firebase-bom:29.0.0')
     implementation 'com.google.android.material:material:1.11.0-alpha01'
@@ -108,6 +110,7 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
     implementation 'com.github.acefalobi:android-stepper:0.3.0'
     implementation 'com.github.santalu:maskara:1.0.0'
+    implementation 'com.mapbox.maps:android:10.16.0'
     testImplementation "org.robolectric:robolectric:4.10.3"
     implementation('dev.doubledot.doki:library:0.0.1@aar') {
         transitive = true

@@ -48,5 +48,9 @@
         android:id="@+id/expert_mode_menu_action"
         android:title="@string/menu_expert_mode"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/map_activity_menu_action"
+        android:title="@string/menu_map"
+        app:showAsAction="ifRoom" />
 
 </menu>
