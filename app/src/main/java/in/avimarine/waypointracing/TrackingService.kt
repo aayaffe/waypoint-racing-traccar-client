@@ -36,6 +36,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import `in`.avimarine.androidutils.TAG
+import `in`.avimarine.waypointracing.utils.RouteParser.Companion.parseRoute
 import org.json.JSONException
 import java.util.*
 
@@ -115,25 +116,12 @@ class TrackingService() : Service(), SharedPreferences.OnSharedPreferenceChangeL
 
     override fun onSharedPreferenceChanged(sp: SharedPreferences?, key: String?) {
         if (key == SettingsFragment.KEY_ROUTE) {
-            sp?.let { parseRoute(it) }
-        }
-    }
+            sp?.let {
+                route = parseRoute(it)
+                trackingController?.updateRoute(route)
 
-    private fun parseRoute(sp: SharedPreferences) {
-        val s = sp.getString(SettingsFragment.KEY_ROUTE, null)
-        route = if (s!= null) {
-            try {
-                Route.fromString(s)
-            } catch (e: JSONException){
-                Log.e(TAG,"Error parsing route", e)
-                Route.emptyRoute()
             }
-        } else {
-            Log.e(TAG,"Error loading route from sharedpreferences (null)")
-            Route.emptyRoute()
         }
-        Log.d(TAG, "Received route: ${route.eventName}")
-        trackingController?.updateRoute(route)
     }
 
     companion object {
