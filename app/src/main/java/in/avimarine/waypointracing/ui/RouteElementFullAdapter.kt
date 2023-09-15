@@ -84,7 +84,7 @@ class RouteElementFullAdapter() :
     /* Creates and inflates view and return FlowerViewHolder. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RouteElementConcatViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.route_element_concat_item, parent, false)
+            .inflate(R.layout.route_element_result_item, parent, false)
         return RouteElementConcatViewHolder(view)
     }
 
