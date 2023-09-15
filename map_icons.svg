@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   sodipodi:docname="map_icons.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.4485269"
+     inkscape:cx="394.88392"
+     inkscape:cy="324.81274"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <ellipse
+       style="fill:#000080;fill-rule:evenodd;stroke:#000080;stroke-width:2.01882;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;paint-order:markers stroke fill"
+       id="path1"
+       cx="64.61602"
+       cy="55.848469"
+       rx="6.490591"
+       ry="6.4905696"
+       inkscape:export-filename="ic_selected.svg"
+       inkscape:export-xdpi="301.62387"
+       inkscape:export-ydpi="301.62387" />
+    <ellipse
+       style="fill:#cbcbff;fill-rule:evenodd;stroke:none;stroke-width:1.93603;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill;fill-opacity:1"
+       id="path2"
+       cx="64.61602"
+       cy="55.848469"
+       rx="4.0319862"
+       ry="4.0319848" />
+    <rect
+       style="fill:#ffd700;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.06089;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       id="rect2"
+       width="10.606602"
+       height="10.606602"
+       x="21.303219"
+       y="99.586525"
+       transform="rotate(-45)"
+       inkscape:export-filename="ic_gold_wpt.svg"
+       inkscape:export-xdpi="301.62387"
+       inkscape:export-ydpi="301.62387" />
+    <rect
+       style="fill:#ffffbd;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.565806;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       id="rect2-6"
+       width="5.6568542"
+       height="5.6568542"
+       x="23.778091"
+       y="102.0614"
+       transform="rotate(-45)" />
+    <rect
+       style="fill:#00ff03;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.06089;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       id="rect2-5"
+       width="10.606602"
+       height="10.606602"
+       x="1.7851197"
+       y="118.92598"
+       transform="rotate(-45)"
+       inkscape:export-filename="ic_green_wpt.svg"
+       inkscape:export-xdpi="301.62387"
+       inkscape:export-ydpi="301.62387" />
+    <rect
+       style="fill:#d3ffd3;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.565806;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       id="rect2-6-51"
+       width="5.6568542"
+       height="5.6568542"
+       x="4.2599921"
+       y="121.40086"
+       transform="rotate(-45)" />
+    <rect
+       style="fill:#c0c0c0;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.06089;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       id="rect2-4"
+       width="10.606602"
+       height="10.606602"
+       x="34.307297"
+       y="112.67796"
+       transform="rotate(-45)"
+       inkscape:export-filename="ic_silver_wpt.svg"
+       inkscape:export-xdpi="301.62387"
+       inkscape:export-ydpi="301.62387" />
+    <rect
+       style="fill:#eeeeee;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.565806;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       id="rect2-6-5"
+       width="5.6568542"
+       height="5.6568542"
+       x="36.782169"
+       y="115.15283"
+       transform="rotate(-45)" />
+    <rect
+       style="fill:#cd7f32;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.06089;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       id="rect2-4-4"
+       width="10.606602"
+       height="10.606602"
+       x="48.036888"
+       y="126.17019"
+       transform="rotate(-45)"
+       inkscape:export-filename="ic_bronze_wpt.svg"
+       inkscape:export-xdpi="301.62387"
+       inkscape:export-ydpi="301.62387" />
+    <rect
+       style="fill:#f3dfcc;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.565806;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       id="rect2-6-5-8"
+       width="5.6568542"
+       height="5.6568542"
+       x="50.511761"
+       y="128.64505"
+       transform="rotate(-45)" />
+  </g>
+</svg>
