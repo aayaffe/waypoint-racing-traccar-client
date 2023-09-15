@@ -42,6 +42,7 @@ import com.google.firebase.ktx.Firebase
 import `in`.avimarine.androidutils.*
 import `in`.avimarine.androidutils.Utils.Companion.getInstalledVersion
 import `in`.avimarine.androidutils.units.DistanceUnits
+import `in`.avimarine.waypointracing.utils.RouteParser
 import java.util.*
 
 class TrackingController(private val context: Context) :
@@ -80,6 +81,7 @@ class TrackingController(private val context: Context) :
 
 
     fun start() {
+        Log.d(TAG, "TrackingController started")
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         firebaseAnalytics = Firebase.analytics
         nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
@@ -116,6 +118,9 @@ class TrackingController(private val context: Context) :
     }
 
     override fun onPositionUpdate(position: Position, location: Location) {
+        if (route == null) {
+            route = RouteParser.parseRoute(sharedPreferences)
+        }
         val inArea = updateIsInArea(location, nextWpt)
         if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false) && sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)) {
             sendPosition(position)
@@ -434,14 +439,14 @@ class TrackingController(private val context: Context) :
         return false
     }
 
-
-    fun updateRoute(route: Route?) {
-        this.route = route
-    }
-
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == SettingsFragment.KEY_NEXT_WPT) {
             nextWpt = sharedPreferences?.getInt(SettingsFragment.KEY_NEXT_WPT, 0) ?: nextWpt
+        }
+        if (key == SettingsFragment.KEY_ROUTE) {
+            sharedPreferences?.let {
+                route = RouteParser.parseRoute(it)
+            }
         }
     }
 

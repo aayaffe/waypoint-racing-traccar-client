@@ -41,7 +41,7 @@ import org.json.JSONException
 import java.util.*
 
 
-class TrackingService() : Service(), SharedPreferences.OnSharedPreferenceChangeListener {
+class TrackingService() : Service() {
 
 
     private var wakeLock: WakeLock? = null
@@ -94,7 +94,6 @@ class TrackingService() : Service(), SharedPreferences.OnSharedPreferenceChangeL
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         WakefulBroadcastReceiver.completeWakefulIntent(intent)
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         return START_STICKY
     }
 
@@ -105,23 +104,12 @@ class TrackingService() : Service(), SharedPreferences.OnSharedPreferenceChangeL
             stopForeground(true)
         }
         Log.i(TAG, "service destroy")
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
         sendBroadcast(Intent(ACTION_STOPPED))
         StatusActivity.addMessage(getString(R.string.status_service_destroy))
         if (wakeLock?.isHeld == true) {
             wakeLock?.release()
         }
         trackingController?.stop()
-    }
-
-    override fun onSharedPreferenceChanged(sp: SharedPreferences?, key: String?) {
-        if (key == SettingsFragment.KEY_ROUTE) {
-            sp?.let {
-                route = parseRoute(it)
-                trackingController?.updateRoute(route)
-
-            }
-        }
     }
 
     companion object {
