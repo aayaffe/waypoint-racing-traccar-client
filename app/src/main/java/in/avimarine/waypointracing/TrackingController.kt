@@ -118,6 +118,7 @@ class TrackingController(private val context: Context) :
     }
 
     override fun onPositionUpdate(position: Position, location: Location) {
+        Log.d(TAG, "onPositionUpdate")
         if (route == null) {
             route = RouteParser.parseRoute(sharedPreferences)
         }

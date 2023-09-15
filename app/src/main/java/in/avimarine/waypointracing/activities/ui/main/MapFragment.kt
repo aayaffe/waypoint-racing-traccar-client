@@ -9,11 +9,13 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
+import androidx.databinding.DataBindingUtil.setContentView
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.google.gson.JsonParser
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.plugin.LocationPuck2D
@@ -44,6 +46,8 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     private var bp_bronze: Bitmap? = null
     private var nextWpt = -1
 
+
+
     companion object {
         fun newInstance() = MapFragment()
     }
@@ -52,6 +56,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+
     }
 
     override fun onCreateView(
@@ -74,24 +79,19 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
             "mapbox://styles/aayaffe/clmbnvfaa018401pjfbco00px"
         ) {
             mapView!!.gestures.rotateEnabled = false
-            mapView!!.location.updateSettings {
-                enabled = true
-
-            }
-            mapView!!.location2.puckBearingSource = PuckBearingSource.COURSE
-
             nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, -1)
             sharedPreferences.getString(SettingsFragment.KEY_ROUTE, null)?.let {
                 route = parseRoute(sharedPreferences)
                 addRouteWaypoints(route, nextWpt)
             }
+            initLocationComponent()
+            val cameraPosition = CameraOptions.Builder()
+                .zoom(9.0)
+                .center(Point.fromLngLat(35.0, 33.0))
+                .build()
+            mapView?.getMapboxMap()?.setCamera(cameraPosition)
         }
-        val cameraPosition = CameraOptions.Builder()
-            .zoom(9.0)
-            .center(Point.fromLngLat(35.0, 33.0))
-            .build()
-        mapView?.getMapboxMap()?.setCamera(cameraPosition)
-        initLocationComponent()
+
         return view
     }
 
@@ -122,8 +122,6 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
                 }.toJson()
             )
         }
-//        locationComponentPlugin.addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
-//        locationComponentPlugin.addOnIndicatorBearingChangedListener(onIndicatorBearingChangedListener)
     }
 
     override fun onStart() {
