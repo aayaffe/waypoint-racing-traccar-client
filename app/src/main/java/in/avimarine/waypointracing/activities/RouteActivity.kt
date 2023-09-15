@@ -149,16 +149,11 @@ class RouteActivity : AppCompatActivity() {
         val ret = mutableListOf<RouteElementConcat>()
         val gp = GatePassings.getCurrentRouteGatePassings(applicationContext, route.id)
         route.elements.forEach { re ->
-            val rec = RouteElementConcat(re,getLatestGatePass(re.id,gp))
+            val rec = RouteElementConcat(re,gp.getLatestGatePassForGate(re.id))
             ret.add(rec)
         }
         return ret
 
-    }
-
-    private fun getLatestGatePass(id: Int, gps: GatePassings): GatePassing? {
-        val thisGps = gps.passes.filter{ it.gateId == id}
-        return thisGps.maxByOrNull { it.time.time }
     }
 
     private fun parseRouteIntent(i: Intent?){

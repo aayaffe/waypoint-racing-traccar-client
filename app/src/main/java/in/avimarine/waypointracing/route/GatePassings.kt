@@ -30,6 +30,11 @@ class GatePassings {
         passes.retainAll { gp -> gp.routeId != routeId }
     }
 
+    fun getLatestGatePassForGate(id: Int): GatePassing? {
+        val thisGps = passes.filter{ it.gateId == id}
+        return thisGps.maxByOrNull { it.time.time }
+    }
+
     companion object {
         fun getCurrentRouteGatePassings(appContext: Context, routeId: String = ""): GatePassings {
             val gatePassings = getGatePassings(appContext, routeId)
