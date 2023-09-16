@@ -24,8 +24,8 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="1.4485269"
-     inkscape:cx="394.88392"
-     inkscape:cy="324.81274"
+     inkscape:cx="395.22911"
+     inkscape:cy="324.12239"
      inkscape:window-width="1920"
      inkscape:window-height="1009"
      inkscape:window-x="1912"
@@ -53,6 +53,23 @@
        id="path2"
        cx="64.61602"
        cy="55.848469"
+       rx="4.0319862"
+       ry="4.0319848" />
+    <ellipse
+       style="fill:#00ff03;fill-rule:evenodd;stroke:#00ff03;stroke-width:2.01882;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;paint-order:markers stroke fill;fill-opacity:1;stroke-opacity:1"
+       id="path1-3"
+       cx="53.415245"
+       cy="86.664146"
+       rx="6.490591"
+       ry="6.4905696"
+       inkscape:export-filename="ic_selected_wpt_green.svg"
+       inkscape:export-xdpi="301.62387"
+       inkscape:export-ydpi="301.62387" />
+    <ellipse
+       style="fill:#d3ffd3;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.93603;stroke-linejoin:round;stroke-miterlimit:4.2;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       id="path2-5"
+       cx="53.415245"
+       cy="86.664146"
        rx="4.0319862"
        ry="4.0319848" />
     <rect

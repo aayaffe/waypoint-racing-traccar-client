@@ -87,7 +87,7 @@ class TrackingController(private val context: Context) :
         nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
         if (isOnline) {
             read()
-            readGatePass()
+//            readGatePass()
         }
         try {
             positionProvider.startUpdates()
@@ -140,11 +140,11 @@ class TrackingController(private val context: Context) :
                 deviceId!!,
                 boatName!!, route!!.elements[nextWpt].id, route!!.elements[nextWpt].name, position.time, position, getInstalledVersion(context)
             )
-            if (buffer) {
-                write(gp)
-            } else {
-                send(gp)
-            }
+//            if (buffer) {
+//                write(gp)
+//            } else {
+//                send(gp)
+//            }
             firebaseAnalytics.logEvent("gate_pass") {
                 param("route", route!!.eventName)
                 param("next_wpt", nextWpt.toString())
@@ -225,20 +225,20 @@ class TrackingController(private val context: Context) :
         val message =
             if (isOnline) R.string.status_network_online else R.string.status_network_offline
         StatusActivity.addMessage(context.getString(message))
-        if (!this.isOnline && isOnline) {
-            read()
-        }
+//        if (!this.isOnline && isOnline) {
+//            read()
+//        }
         this.isOnline = isOnline
     }
 
+////
+//// State transition examples:
+////
+//// write -> read -> send -> delete -> read
+////
+//// read -> send -> retry -> read -> send
+////
 //
-// State transition examples:
-//
-// write -> read -> send -> delete -> read
-//
-// read -> send -> retry -> read -> send
-//
-
     private fun log(action: String, position: Position?) {
         var formattedAction: String = action
         if (position != null) {
@@ -250,17 +250,17 @@ class TrackingController(private val context: Context) :
         }
         Log.d(TAG, formattedAction)
     }
-
-    private fun log(action: String, gatePass: GatePassing) {
-        var formattedAction: String = action
-        formattedAction +=
-            " (id:" + gatePass.id +
-                    " time:" + gatePass.time.time / 1000 +
-                    " lat:" + gatePass.latitude +
-                    " lon:" + gatePass.longitude + ")" //TODO: Add more logging
-        Log.d(TAG, formattedAction)
-    }
-
+//
+//    private fun log(action: String, gatePass: GatePassing) {
+//        var formattedAction: String = action
+//        formattedAction +=
+//            " (id:" + gatePass.id +
+//                    " time:" + gatePass.time.time / 1000 +
+//                    " lat:" + gatePass.latitude +
+//                    " lon:" + gatePass.longitude + ")" //TODO: Add more logging
+//        Log.d(TAG, formattedAction)
+//    }
+//
     private fun write(position: Position) {
         log("write", position)
         databaseHelper.insertPositionAsync(position, object : DatabaseHandler<Unit?> {
@@ -274,23 +274,23 @@ class TrackingController(private val context: Context) :
             }
         })
     }
-
-    private fun write(gatePass: GatePassing) {
-        log("writeGatePass", gatePass)
-        gatePassDatabaseHelper.insertGatePassAsync(
-            gatePass,
-            object : GatePassesDatabaseHelper.DatabaseHandler<Unit?> {
-                override fun onComplete(success: Boolean, result: Unit?) {
-                    if (success) {
-                        if (isOnline && isWaitingGP) {
-                            readGatePass()
-                            isWaitingGP = false
-                        }
-                    }
-                }
-            })
-    }
-
+//
+//    private fun write(gatePass: GatePassing) {
+//        log("writeGatePass", gatePass)
+//        gatePassDatabaseHelper.insertGatePassAsync(
+//            gatePass,
+//            object : GatePassesDatabaseHelper.DatabaseHandler<Unit?> {
+//                override fun onComplete(success: Boolean, result: Unit?) {
+//                    if (success) {
+//                        if (isOnline && isWaitingGP) {
+//                            readGatePass()
+//                            isWaitingGP = false
+//                        }
+//                    }
+//                }
+//            })
+//    }
+//
     private fun read() {
         log("read", null)
         databaseHelper.selectPositionAsync(object : DatabaseHandler<Position?> {
@@ -315,33 +315,33 @@ class TrackingController(private val context: Context) :
             }
         })
     }
-
-    private fun readGatePass() {
-        log("readGatePass", null)
-        gatePassDatabaseHelper.selectGatePassAsync(object :
-            GatePassesDatabaseHelper.DatabaseHandler<GatePassing?> {
-            override fun onComplete(success: Boolean, result: GatePassing?) {
-                if (success) {
-                    if (result != null) {
-                        if (result.deviceId == sharedPreferences.getString(
-                                SettingsFragment.KEY_DEVICE,
-                                null
-                            )
-                        ) {
-                            send(result)
-                        } else {
-                            delete(result)
-                        }
-                    } else {
-                        isWaitingGP = true
-                    }
-                } else {
-                    retryGatePass()
-                }
-            }
-        })
-    }
-
+//
+//    private fun readGatePass() {
+//        log("readGatePass", null)
+//        gatePassDatabaseHelper.selectGatePassAsync(object :
+//            GatePassesDatabaseHelper.DatabaseHandler<GatePassing?> {
+//            override fun onComplete(success: Boolean, result: GatePassing?) {
+//                if (success) {
+//                    if (result != null) {
+//                        if (result.deviceId == sharedPreferences.getString(
+//                                SettingsFragment.KEY_DEVICE,
+//                                null
+//                            )
+//                        ) {
+//                            send(result)
+//                        } else {
+//                            delete(result)
+//                        }
+//                    } else {
+//                        isWaitingGP = true
+//                    }
+//                } else {
+//                    retryGatePass()
+//                }
+//            }
+//        })
+//    }
+//
     private fun delete(position: Position) {
         log("delete", position)
         databaseHelper.deletePositionAsync(position.id, object : DatabaseHandler<Unit?> {
@@ -354,22 +354,22 @@ class TrackingController(private val context: Context) :
             }
         })
     }
-
-    private fun delete(gatePass: GatePassing) {
-        log("deleteGatePass", gatePass)
-        gatePassDatabaseHelper.deleteGatePassAsync(
-            gatePass.id,
-            object : GatePassesDatabaseHelper.DatabaseHandler<Unit?> {
-                override fun onComplete(success: Boolean, result: Unit?) {
-                    if (success) {
-                        readGatePass()
-                    } else {
-                        retryGatePass()
-                    }
-                }
-            })
-    }
-
+//
+//    private fun delete(gatePass: GatePassing) {
+//        log("deleteGatePass", gatePass)
+//        gatePassDatabaseHelper.deleteGatePassAsync(
+//            gatePass.id,
+//            object : GatePassesDatabaseHelper.DatabaseHandler<Unit?> {
+//                override fun onComplete(success: Boolean, result: Unit?) {
+//                    if (success) {
+//                        readGatePass()
+//                    } else {
+//                        retryGatePass()
+//                    }
+//                }
+//            })
+//    }
+//
     private fun send(position: Position) {
         log("send", position)
         val request = formatRequest(url, position)
@@ -392,26 +392,26 @@ class TrackingController(private val context: Context) :
             }
         })
     }
-
-    private fun send(gatePass: GatePassing) {
-        log("sendGatePass", gatePass)
-        val request = formatRequest(urlGates, gatePass)
-        sendRequestAsync(request, object : RequestHandler {
-            override fun onComplete(success: Boolean) {
-                if (success) {
-                    if (buffer) {
-                        delete(gatePass)
-                    }
-                } else {
-                    StatusActivity.addMessage(context.getString(R.string.status_send_fail))
-                    if (buffer) {
-                        retryGatePass()
-                    }
-                }
-            }
-        })
-    }
-
+//
+//    private fun send(gatePass: GatePassing) {
+//        log("sendGatePass", gatePass)
+//        val request = formatRequest(urlGates, gatePass)
+//        sendRequestAsync(request, object : RequestHandler {
+//            override fun onComplete(success: Boolean) {
+//                if (success) {
+//                    if (buffer) {
+//                        delete(gatePass)
+//                    }
+//                } else {
+//                    StatusActivity.addMessage(context.getString(R.string.status_send_fail))
+//                    if (buffer) {
+//                        retryGatePass()
+//                    }
+//                }
+//            }
+//        })
+//    }
+//
     private fun retry() {
         log("retry", null)
         handler.postDelayed({
@@ -420,15 +420,15 @@ class TrackingController(private val context: Context) :
             }
         }, RETRY_DELAY.toLong())
     }
-
-    private fun retryGatePass() {
-        log("retryGatePass", null)
-        handlerGP.postDelayed({ //TODO: Might need to use a different handler!
-            if (isOnline) {
-                readGatePass()
-            }
-        }, RETRY_DELAY.toLong())
-    }
+//
+//    private fun retryGatePass() {
+//        log("retryGatePass", null)
+//        handlerGP.postDelayed({ //TODO: Might need to use a different handler!
+//            if (isOnline) {
+//                readGatePass()
+//            }
+//        }, RETRY_DELAY.toLong())
+//    }
 
 
     private fun updateIsInArea(location: Location, nextWpt: Int): Boolean {
@@ -443,6 +443,7 @@ class TrackingController(private val context: Context) :
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == SettingsFragment.KEY_NEXT_WPT) {
             nextWpt = sharedPreferences?.getInt(SettingsFragment.KEY_NEXT_WPT, 0) ?: nextWpt
+            setGPSInterval(1)
         }
         if (key == SettingsFragment.KEY_ROUTE) {
             sharedPreferences?.let {
