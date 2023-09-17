@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     val delayedHandler = Handler(Looper.getMainLooper())
     private var isFirstSpinnerLoad = true
     private lateinit var binding: ActivityMainBinding
-    private val expertMode = BuildConfig.DEBUG
+    private val debugMode = BuildConfig.DEBUG
     // See: https://developer.android.com/training/basics/intents/result
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
@@ -397,8 +397,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main, menu)
-        menu.findItem(R.id.expert_mode_menu_action).isVisible = expertMode
-        menu.findItem(R.id.map_activity_menu_action).isVisible = expertMode
+        menu.findItem(R.id.expert_mode_menu_action).isVisible = debugMode
         if (FirebaseAuth.getInstance().currentUser == null) {
             menu.findItem(R.id.login_menu_action).icon =
                 getDrawable(R.drawable.ic_baseline_login_24)

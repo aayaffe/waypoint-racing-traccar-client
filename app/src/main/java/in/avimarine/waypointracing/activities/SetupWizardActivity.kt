@@ -1,5 +1,6 @@
 package `in`.avimarine.waypointracing.activities
 
+import android.app.Activity
 import android.content.Intent
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.activities.steps.StepperViewModel
@@ -78,7 +79,7 @@ class SetupWizardActivity : AppCompatActivity(), StepperNavListener {
     }
 
     companion object{
-        fun runSetupWizardIfNeeded(activity: AppCompatActivity){
+        fun runSetupWizardIfNeeded(activity: Activity){
             val settings = activity.getSharedPreferences("MyPrefsFile", 0)
             if (settings.getBoolean("my_first_time", true)) {
                 activity.startActivity(
