@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -26,7 +25,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.firebase.ui.auth.AuthUI
@@ -34,7 +32,6 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.toObject
 import eu.bolt.screenshotty.ScreenshotActionOrder
@@ -52,6 +49,7 @@ import `in`.avimarine.androidutils.LocationPermissions.Companion.PERMISSIONS_REQ
 import `in`.avimarine.androidutils.Utils.Companion.getInstalledVersion
 import `in`.avimarine.waypointracing.BuildConfig
 import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.activities.SetupWizardActivity.Companion.runSetupWizardIfNeeded
 import `in`.avimarine.waypointracing.ui.VersionViewModel
 import java.util.*
 
@@ -61,6 +59,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private lateinit var positionProvider: PositionProvider
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var prefs: Preferences
     private lateinit var alarmManager: AlarmManager
     private lateinit var alarmIntent: PendingIntent
     private var nextWpt: Int = 0
@@ -88,6 +87,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             .withPermissionRequestCode(REQUEST_SCREENSHOT_PERMISSION) //optional, 888 by default
             .build()
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
+        prefs = Preferences(sharedPreferences)
         checkVersion()
         if (intent.action == Intent.ACTION_MAIN) {
             val r = RouteLoader.loadRouteFromFile(this)
@@ -101,19 +101,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             RouteLoader.handleIntent(this, intent, this::loadRoute)
         }
         setEmptyRouteUI(route.isEmpty())
-        val PREFS_NAME = "MyPrefsFile"
-        val settings = getSharedPreferences(PREFS_NAME, 0)
+        runSetupWizardIfNeeded(this)
 
-        if (settings.getBoolean("my_first_time", true)) {
-            //the app is being launched for first time
-            Log.d(TAG, "First time run")
-            val intent = Intent(this, SetupWizardActivity::class.java)
-            this.startActivity(intent)
-        }
-
-        setButton(sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false))
+        setButton(prefs.status)
         alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false)) {
+        if (prefs.status) {
             startTrackingService(checkPermission = true, initialPermission = false)
         }
 
@@ -143,10 +135,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 // write code to perform some action
             }
         }
-        with(sharedPreferences.edit()) {
-            putBoolean(SettingsFragment.KEY_EXPERT_MODE, false)
-            commit()
-        }
+        prefs.expertMode = false
     }
 
     private fun isRouteUpdated(docs: QuerySnapshot?) {
@@ -158,7 +147,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             val rd = doc.toObject<RouteDetails>()
             val r = Route.fromGeoJson(rd.route)
             if (r.lastUpdate > this.route.lastUpdate) {
-                val lastCheckedVersion = sharedPreferences.getLong(SettingsFragment.KEY_ROUTE_UPDATED_VERSION, 0)
+                val lastCheckedVersion = prefs.routeUpdatedVersion
                 if (lastCheckedVersion == r.lastUpdate.time) {
                     //User already decided not to update route to this version
                     break
@@ -167,15 +156,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 val builder = AlertDialog.Builder(this)
                 builder.setMessage(R.string.route_updated_dialog_message)
                     .setPositiveButton(R.string.yes) { _, _ ->
-                        sharedPreferences.edit()
-                            .putLong(SettingsFragment.KEY_ROUTE_UPDATED_VERSION, 0)
-                            .apply()
+                        prefs.routeUpdatedVersion = 0
                         RouteLoader.loadRouteFromString(this, rd.route, this::loadRoute)
                     }
                     .setNegativeButton(R.string.no) { _, _ ->
-                        sharedPreferences.edit()
-                            .putLong(SettingsFragment.KEY_ROUTE_UPDATED_VERSION, r.lastUpdate.time)
-                            .apply()
+                        prefs.routeUpdatedVersion = r.lastUpdate.time
                     }
                 builder.create().show()
             }
@@ -259,12 +244,10 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         if (newRoute) {
             //Loading new route, reset last checked version
-            sharedPreferences.edit()
-                .putLong(SettingsFragment.KEY_ROUTE_UPDATED_VERSION, 0)
-                .apply()
+            prefs.routeUpdatedVersion = 0
         }
         route = r
-        sharedPreferences.edit().putString(SettingsFragment.KEY_ROUTE,  route.toString()).apply()
+        prefs.currentRoute = route.toString()
         populateRouteElementSpinner(r)
         setEmptyRouteUI(route.isEmpty())
         if (route.eventType == EventType.WPTRACING) {
@@ -337,11 +320,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun setBoatName() {
-        binding.boatNameTextView.text = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "Undefined")
+        binding.boatNameTextView.text = prefs.boatName
     }
 
     private fun getNextWpt() {
-        nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
+        nextWpt = prefs.nextWpt
         if (nextWpt >= route.elements.size) {
             setNextWpt(0)
         }
@@ -383,7 +366,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     override fun onPause() {
         super.onPause()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-        setGPSInterval(sharedPreferences.getString(SettingsFragment.KEY_INITIAL_INTERVAL, "30")!!.toInt())
+        setGPSInterval(prefs.initialGPSInterval.toInt())
         setMainActivityVisibilityStatus(false)
         stopPositionProvider()
     }
@@ -436,7 +419,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             if (extras != null) {
                 extras.getString("RouteJson")?.let {
                     Log.d(TAG, it)
-                    sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS,  false).apply()
+                    prefs.status = false
                     resetRoute(false)
                     RouteLoader.loadRouteFromString(this, it, this::loadRoute)
                 }
@@ -518,8 +501,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     fun startButtonClick(view: View) {
-        val checked = sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, true)
-        sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS,  checked.not()).apply()
+        val checked = prefs.status
+        prefs.status = checked.not()
         FirestoreDatabase.addEvent(if (checked) `in`.avimarine.waypointracing.database.EventType.TRACKING_STOP else `in`.avimarine.waypointracing.database.EventType.TRACKING_START)
     }
 
@@ -529,27 +512,15 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     fun setNextWpt(n: Int){
         nextWpt = n
-        val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
-        with(sharedPref.edit()) {
-            putInt(SettingsFragment.KEY_NEXT_WPT, n)
-            commit()
-        }
+        prefs.nextWpt = n
     }
 
     private fun setGPSInterval(i: Int){
-        val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
-        with(sharedPref.edit()) {
-            putString(SettingsFragment.KEY_INTERVAL, i.toString())
-            commit()
-        }
+        prefs.GPSInterval = i.toString()
     }
 
     private fun setMainActivityVisibilityStatus(b: Boolean){
-        val sharedPref: SharedPreferences = getDefaultSharedPreferences(this)
-        with(sharedPref.edit()) {
-            putBoolean(SettingsFragment.KEY_IS_UI_VISIBLE, b)
-            commit()
-        }
+        prefs.uiVisible = b
     }
 
     override fun onPositionError(error: Throwable) {
@@ -569,20 +540,17 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else {
             binding.location.setTextColor(Color.BLACK)
         }
-        val interval = (sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")?.toLong()
+        val interval = (prefs.GPSInterval.toLong()
             ?: 600) * 4000 //After four times interval
         delayedHandler.removeCallbacksAndMessages(null)
         delayedHandler.postDelayed({
             setUiForGPS(false)
         }, interval)
-        if (sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)) {
+        if (prefs.tracking) {
             binding.lastSend.visibility = View.VISIBLE
-            val lastLocationSentTime = sharedPreferences.getLong(SettingsFragment.KEY_LAST_SEND, -1)
-            if (lastLocationSentTime > 0 && Utils.timeDiffInSeconds(lastLocationSentTime,Date().time) < (sharedPreferences.getString(
-                    SettingsFragment.KEY_INTERVAL,
-                    8.toString()
-                )
-                    ?.toInt() ?: 8)*1.5) {
+            val lastLocationSentTime = prefs.lastSend
+            if (lastLocationSentTime > 0 && Utils.timeDiffInSeconds(lastLocationSentTime,Date().time) < (prefs.GPSInterval
+                .toInt())*1.5) {
                 binding.lastSend.setImageResource(R.drawable.btn_rnd_grn)
             } else {
                 binding.lastSend.setImageResource(R.drawable.btn_rnd_red)
@@ -593,7 +561,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun setEmptyRouteUI(isEmpty: Boolean) {
-        if (sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)) {
+        if (prefs.tracking) {
             binding.lastSend.visibility = View.VISIBLE
         } else {
             binding.lastSend.visibility = View.GONE
@@ -650,7 +618,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private fun setUiForLogin(user: FirebaseUser?) {
         if (user == null) {
-            sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS,  false).apply()
+            prefs.status = false
             binding.startBtn.visibility = View.INVISIBLE
             binding.loginBtn.visibility = View.VISIBLE
         } else {
@@ -663,8 +631,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (sharedPreferences == null) return
         if (key == SettingsFragment.KEY_STATUS) {
-            setButton(sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false))
-            if (sharedPreferences.getBoolean(SettingsFragment.KEY_STATUS, false)) {
+            setButton(prefs.status)
+            if (prefs.status) {
                 startTrackingService(true, false)
             } else {
                 stopTrackingService()
@@ -672,11 +640,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else if (key == SettingsFragment.KEY_NEXT_WPT) {
             getNextWpt()
         } else if (key == SettingsFragment.KEY_LAST_SEND) {
-            if (Utils.timeDiffInSeconds(sharedPreferences.getLong(SettingsFragment.KEY_LAST_SEND, Long.MAX_VALUE),Date().time) < (sharedPreferences.getString(
-                    SettingsFragment.KEY_INTERVAL,
-                    8.toString()
-                )
-                    ?.toInt() ?: 8)*1.5) {
+            if (Utils.timeDiffInSeconds(prefs.lastSend,Date().time) < (prefs.GPSInterval.toInt())*1.5) {
                 binding.lastSend.setImageResource(R.drawable.btn_rnd_grn)
             } else {
                 binding.lastSend.setImageResource(R.drawable.btn_rnd_red)
@@ -737,7 +701,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 BatteryOptimizationHelper().requestException(this)
             }
         } else {
-            sharedPreferences.edit().putBoolean(SettingsFragment.KEY_STATUS, false).apply()
+            prefs.status = false
         }
     }
 

@@ -1,5 +1,6 @@
 package `in`.avimarine.waypointracing.activities
 
+import android.content.Intent
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.activities.steps.StepperViewModel
 import `in`.avimarine.waypointracing.databinding.ActivitySetupWizardBinding
@@ -73,6 +74,20 @@ class SetupWizardActivity : AppCompatActivity(), StepperNavListener {
             super.onBackPressed()
         } else {
             findNavController(R.id.frame_stepper).navigateUp()
+        }
+    }
+
+    companion object{
+        fun runSetupWizardIfNeeded(activity: AppCompatActivity){
+            val settings = activity.getSharedPreferences("MyPrefsFile", 0)
+            if (settings.getBoolean("my_first_time", true)) {
+                activity.startActivity(
+                    Intent(
+                        activity,
+                        SetupWizardActivity::class.java
+                    )
+                )
+            }
         }
     }
 }

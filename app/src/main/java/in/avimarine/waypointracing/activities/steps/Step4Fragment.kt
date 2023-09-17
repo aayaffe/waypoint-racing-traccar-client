@@ -15,18 +15,16 @@
  */
 package `in`.avimarine.waypointracing.activities.steps
 
-import `in`.avimarine.waypointracing.BatteryOptimizationHelper
-import `in`.avimarine.waypointracing.databinding.GrantPermissionFragmentBinding
-import `in`.avimarine.androidutils.LocationPermissions
-import android.Manifest
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
+import `in`.avimarine.androidutils.LocationPermissions
+import `in`.avimarine.waypointracing.BatteryOptimizationHelper
 import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.databinding.GrantPermissionFragmentBinding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
@@ -57,7 +55,6 @@ class Step4Fragment : SetupFragment() {
 
     private fun setupUI() {
         viewBinding.locationPermissionsBtn.setOnClickListener {
-//            getLocationPermissions()
             if (LocationPermissions.arePermissionsGranted(activity as Context)) {
                 viewBinding.locationPermissionsBtn.setBackgroundColor(Color.GREEN)
                 viewBinding.locationPermissionsBtn.isEnabled = false
@@ -84,37 +81,4 @@ class Step4Fragment : SetupFragment() {
         viewBinding.preventSleepBtn.isEnabled = false
     }
 
-//    private fun getLocationPermissions() {
-//        activity?.let {
-//            if (arePermissionsGranted(activity as Context)) {
-//                viewBinding.locationPermissionsBtn.setBackgroundColor(Color.GREEN)
-//                viewBinding.locationPermissionsBtn.isEnabled = false
-//            } else {
-//                permReqLauncher.launch(
-//                    PERMISSIONS
-//                )
-//            }
-//        }
-//    }
-    // util method
-//    private fun hasPermissions(context: Context, permissions: Array<String>): Boolean = permissions.all {
-//        ActivityCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-//    }
-
-    companion object {
-        var PERMISSIONS = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-        )
-    }
-
-    private val permReqLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val granted = permissions.entries.all {
-                it.value == true
-            }
-            if (granted) {
-                viewBinding.locationPermissionsBtn.setBackgroundColor(Color.GREEN)
-                viewBinding.locationPermissionsBtn.isEnabled = false
-            }
-        }
 }

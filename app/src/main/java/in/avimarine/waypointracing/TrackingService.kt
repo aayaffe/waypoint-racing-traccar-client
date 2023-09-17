@@ -37,12 +37,10 @@ import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.waypointracing.utils.RouteParser.Companion.parseRoute
-import org.json.JSONException
 import java.util.*
 
 
 class TrackingService() : Service() {
-
 
     private var wakeLock: WakeLock? = null
     private var trackingController: TrackingController? = null
