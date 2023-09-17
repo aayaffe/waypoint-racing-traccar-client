@@ -3,7 +3,6 @@ package `in`.avimarine.waypointracing.activities
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.databinding.ActivityRouteBinding
 import `in`.avimarine.waypointracing.route.EventType
-import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.ui.RouteElementConcat
@@ -45,7 +44,7 @@ class RouteActivity : AppCompatActivity() {
         parseRouteIntent(intent)
         val routeElementAdapter = RouteElementFullAdapter()
 
-        val recyclerView: RecyclerView = findViewById(R.id.recycler_view)
+        val recyclerView: RecyclerView = findViewById(R.id.route_recycler_view)
         recyclerView.adapter = routeElementAdapter
 
         routeElementAdapter.submitList(createRecList())

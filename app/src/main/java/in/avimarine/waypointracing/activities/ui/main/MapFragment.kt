@@ -3,6 +3,7 @@ package `in`.avimarine.waypointracing.activities.ui.main
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +27,7 @@ import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.scalebar.scalebar
+import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.androidutils.Utils.Companion.mapRange
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.activities.SettingsFragment
@@ -144,8 +146,10 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        Log.d(TAG, "onDestroyView")
+        mapView.onDestroy()
         _binding = null
+        super.onDestroyView()
     }
 
     override fun onSharedPreferenceChanged(sp: SharedPreferences?, key: String?) {

@@ -19,6 +19,27 @@
         android:layout_height="match_parent"
         tools:context="in.avimarine.waypointracing.activities.MainActivity">
 
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/map_fragment_view"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/navigation_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.5"
+            android:visibility="gone"/>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/navigation_view"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/map_fragment_view">
+
 
         <Button
             android:id="@+id/start_btn"
@@ -299,4 +320,6 @@
             app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

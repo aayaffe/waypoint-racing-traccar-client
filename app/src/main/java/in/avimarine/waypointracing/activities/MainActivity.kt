@@ -26,6 +26,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -38,19 +40,20 @@ import eu.bolt.screenshotty.ScreenshotActionOrder
 import eu.bolt.screenshotty.ScreenshotManager
 import eu.bolt.screenshotty.ScreenshotManagerBuilder
 import `in`.avimarine.androidutils.*
+import `in`.avimarine.androidutils.LocationPermissions.Companion.PERMISSIONS_REQUEST_LOCATION_UI
+import `in`.avimarine.androidutils.Utils.Companion.getInstalledVersion
 import `in`.avimarine.waypointracing.*
+import `in`.avimarine.waypointracing.BuildConfig
+import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.activities.SetupWizardActivity.Companion.runSetupWizardIfNeeded
+import `in`.avimarine.waypointracing.activities.ui.main.MapFragment
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.ActivityMainBinding
 import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.LocationViewModel
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
-import `in`.avimarine.waypointracing.utils.*
-import `in`.avimarine.androidutils.LocationPermissions.Companion.PERMISSIONS_REQUEST_LOCATION_UI
-import `in`.avimarine.androidutils.Utils.Companion.getInstalledVersion
-import `in`.avimarine.waypointracing.BuildConfig
-import `in`.avimarine.waypointracing.R
-import `in`.avimarine.waypointracing.activities.SetupWizardActivity.Companion.runSetupWizardIfNeeded
 import `in`.avimarine.waypointracing.ui.VersionViewModel
+import `in`.avimarine.waypointracing.utils.*
 import java.util.*
 
 
@@ -317,6 +320,25 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         setMainActivityVisibilityStatus(true)
         updateLastPass()
         setBoatName()
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // Create new fragment and transaction
+            val newFragment = MapFragment()
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.map_fragment_view, newFragment)
+            transaction.addToBackStack(null)
+            transaction.commit()
+            binding.mapFragmentView.visibility = View.VISIBLE
+        } else {
+            binding.mapFragmentView.visibility = View.GONE
+            // Get fragment instance
+            val oldFragment = supportFragmentManager.findFragmentById(R.id.map_fragment_view)
+            oldFragment?.let {
+                // Create new transaction and remove the fragment
+                val transaction = supportFragmentManager.beginTransaction()
+                transaction.remove(it)
+                transaction.commit()
+            }
+        }
     }
 
     private fun setBoatName() {
