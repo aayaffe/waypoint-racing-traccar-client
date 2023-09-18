@@ -115,10 +115,10 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
                     requireContext(),
                     R.drawable.user_puck,
                 ),
-                shadowImage = AppCompatResources.getDrawable(
-                    requireContext(),
-                    R.drawable.mapbox_user_icon_shadow,
-                ),
+//                shadowImage = AppCompatResources.getDrawable(
+//                    requireContext(),
+//                    R.drawable.mapbox_user_icon_shadow,
+//                ),
                 scaleExpression = interpolate {
                     linear()
                     zoom()
@@ -162,7 +162,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         if (key == SettingsFragment.KEY_NEXT_WPT) {
             sp?.let {
                 nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, -1)
-                addRouteWaypoints(route, nextWpt,false)
+                addRouteWaypoints(route, nextWpt)
             }
         }
         if (key == SettingsFragment.KEY_GATE_PASSES) {

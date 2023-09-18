@@ -26,8 +26,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -71,6 +69,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private var isFirstSpinnerLoad = true
     private lateinit var binding: ActivityMainBinding
     private val debugMode = BuildConfig.DEBUG
+
     // See: https://developer.android.com/training/basics/intents/result
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
@@ -113,7 +112,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
 
         binding.time.setLabel(getTimeZoneString())
-        if (route.isValidWpt(nextWpt)){
+        if (route.isValidWpt(nextWpt)) {
             getNextWpt()
         }
 
@@ -126,7 +125,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             ) {
                 if (isFirstSpinnerLoad) {
                     isFirstSpinnerLoad = false
-                    if (route.isValidWpt(nextWpt)){
+                    if (route.isValidWpt(nextWpt)) {
                         parent?.setSelection(nextWpt)
                     }
                     return
@@ -146,7 +145,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             Log.d(TAG, "No such route")
             return
         }
-        for (doc in docs){
+        for (doc in docs) {
             val rd = doc.toObject<RouteDetails>()
             val r = Route.fromGeoJson(rd.route)
             if (r.lastUpdate > this.route.lastUpdate) {
@@ -175,12 +174,12 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private fun checkVersion() {
         FirestoreDatabase.getSupportedVersion({
             if (it != null) {
-                val ver = it.getLong("ver")?:-1
-                if (ver > getInstalledVersion(this)){
+                val ver = it.getLong("ver") ?: -1
+                if (ver > getInstalledVersion(this)) {
                     Utils.alertOnUnsupportedVersion(this)
                 }
             }
-        },{
+        }, {
             Log.w(TAG, "Failed to get minimal version", it)
         })
     }
@@ -195,7 +194,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         alarmIntent = PendingIntent.getBroadcast(applicationContext, 0, originalIntent, flags)
     }
-
 
 
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
@@ -227,9 +225,9 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         super.attachBaseContext(newBase)
     }
 
-    override fun onNewIntent(i: Intent){
+    override fun onNewIntent(i: Intent) {
         super.onNewIntent(i)
-        if (RouteLoader.handleIntent(this, i, this::loadRoute)){
+        if (RouteLoader.handleIntent(this, i, this::loadRoute)) {
             setNextWpt(0)
         }
     }
@@ -259,9 +257,14 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             setTitle(getString(R.string.title_treasure_hunting), r.eventName)
         }
         if (!route.isEmpty()) {
-            Toast.makeText(applicationContext,"Loaded route\n ${route.eventName}",Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                applicationContext,
+                "Loaded route\n ${route.eventName}",
+                Toast.LENGTH_LONG
+            ).show()
         }
         createAlarmIntent()
+        prefs.status = true
     }
 
 
@@ -286,6 +289,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             return
         }
         startPositionProvider()
+        prefs.status = true
     }
 
     private fun startPositionProvider() {
@@ -310,7 +314,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     override fun onResume() {
         super.onResume()
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-        if (route.isEmpty()){
+        if (route.isEmpty()) {
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
         }
@@ -408,6 +412,24 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         super.onStop()
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        AlertDialog.Builder(this)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle("Closing Waypoint Racing")
+            .setMessage("Are you sure you want to stop tracking and exit?")
+            .setPositiveButton("Yes") { dialog, which ->
+                run {
+                    stopTrackingService()
+                    prefs.status = false
+                    finish()
+                }
+            }
+            .setNegativeButton("No", null)
+            .show()
+        super.onBackPressed()
+    }
+
     private fun populateRouteElementSpinner(route: Route) {
         val adapter = RouteElementAdapter(
             this,
@@ -433,21 +455,24 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         return true
     }
-    private val getRouteStartForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
-    { result: ActivityResult ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val extras = result.data?.extras
-            if (extras != null) {
-                extras.getString("RouteJson")?.let {
-                    Log.d(TAG, it)
-                    prefs.status = false
-                    resetRoute(false)
-                    RouteLoader.loadRouteFromString(this, it, this::loadRoute)
+
+    private val getRouteStartForResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+        { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val extras = result.data?.extras
+                if (extras != null) {
+                    extras.getString("RouteJson")?.let {
+                        Log.d(TAG, it)
+                        prefs.status = false
+                        resetRoute(false)
+                        RouteLoader.loadRouteFromString(this, it, this::loadRoute)
+                    }
                 }
             }
+
         }
 
-    }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.settings_menu_action -> {
@@ -455,39 +480,47 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 this.startActivity(intent)
                 return true
             }
+
             R.id.history_menu_action -> {
                 val intent = Intent(this, StatusActivity::class.java)
                 this.startActivity(intent)
                 return true
             }
+
             R.id.login_menu_action -> {
                 login()
                 return true
             }
+
             R.id.send_screenshot_menu_action -> {
                 takeScreenshot()
                 return true
             }
+
             R.id.reset_route_menu_action -> {
                 resetRoute()
                 return true
             }
+
             R.id.route_activity_menu_action -> {
                 val intent = Intent(this, RouteActivity::class.java)
                 intent.putExtra("route", route)
                 this.startActivity(intent)
                 return true
             }
+
             R.id.download_latest_menu_action -> {
                 getRouteStartForResult.launch(Intent(this, LoadRouteActivity::class.java))
                 return true
             }
+
             R.id.expert_mode_menu_action -> {
                 val intent = Intent(this, ExpertModeActivity::class.java)
                 intent.putExtra("route", route)
                 this.startActivity(intent)
                 return true
             }
+
             R.id.map_activity_menu_action -> {
                 val intent = Intent(this, MapActivity::class.java)
 //                intent.putExtra("route", route)
@@ -499,7 +532,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun login() {
-        if (FirebaseAuth.getInstance().currentUser!=null){
+        if (FirebaseAuth.getInstance().currentUser != null) {
             AuthUI.getInstance()
                 .signOut(this)
                 .addOnCompleteListener {
@@ -531,16 +564,16 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         login()
     }
 
-    fun setNextWpt(n: Int){
+    fun setNextWpt(n: Int) {
         nextWpt = n
         prefs.nextWpt = n
     }
 
-    private fun setGPSInterval(i: Int){
+    private fun setGPSInterval(i: Int) {
         prefs.GPSInterval = i.toString()
     }
 
-    private fun setMainActivityVisibilityStatus(b: Boolean){
+    private fun setMainActivityVisibilityStatus(b: Boolean) {
         prefs.uiVisible = b
     }
 
@@ -557,7 +590,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         binding.viewmodel = LocationViewModel(location, wpt, sharedPreferences)
         setUiForGPS(true)
         if (wpt != null) {
-            binding.location.setTextColor(if (wpt.isInProofArea(location)) Color.GREEN else Color.BLACK )
+            binding.location.setTextColor(if (wpt.isInProofArea(location)) Color.GREEN else Color.BLACK)
         } else {
             binding.location.setTextColor(Color.BLACK)
         }
@@ -570,8 +603,12 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (prefs.tracking) {
             binding.lastSend.visibility = View.VISIBLE
             val lastLocationSentTime = prefs.lastSend
-            if (lastLocationSentTime > 0 && Utils.timeDiffInSeconds(lastLocationSentTime,Date().time) < (prefs.GPSInterval
-                .toInt())*1.5) {
+            if (lastLocationSentTime > 0 && Utils.timeDiffInSeconds(
+                    lastLocationSentTime,
+                    Date().time
+                ) < (prefs.GPSInterval
+                    .toInt()) * 1.5
+            ) {
                 binding.lastSend.setImageResource(R.drawable.btn_rnd_grn)
             } else {
                 binding.lastSend.setImageResource(R.drawable.btn_rnd_red)
@@ -589,7 +626,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         setBoatName()
 //        binding.location.setTextColor(Color.BLACK)
-        if (isEmpty){
+        if (isEmpty) {
             binding.routeElementSpinner.visibility = View.INVISIBLE
             binding.nextWptHeader.text = getString(R.string.no_route_loaded)
             binding.portGate.visibility = View.GONE
@@ -606,9 +643,9 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             binding.shortestDistanceToGate.visibility = View.VISIBLE
             binding.vmg.visibility = View.VISIBLE
             if (FirebaseAuth.getInstance().currentUser == null) {
-                binding.startBtn.visibility = View.INVISIBLE
+//                binding.startBtn.visibility = View.INVISIBLE
             } else {
-                binding.startBtn.visibility = View.VISIBLE
+//                binding.startBtn.visibility = View.VISIBLE
             }
         }
         setUiForLogin(FirebaseAuth.getInstance().currentUser)
@@ -640,11 +677,12 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private fun setUiForLogin(user: FirebaseUser?) {
         if (user == null) {
             prefs.status = false
-            binding.startBtn.visibility = View.INVISIBLE
+//            binding.startBtn.visibility = View.INVISIBLE
             binding.loginBtn.visibility = View.VISIBLE
         } else {
-            binding.startBtn.visibility = View.VISIBLE
+//            binding.startBtn.visibility = View.VISIBLE
             binding.loginBtn.visibility = View.GONE
+            prefs.status = true
         }
         invalidateOptionsMenu()
     }
@@ -661,7 +699,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else if (key == SettingsFragment.KEY_NEXT_WPT) {
             getNextWpt()
         } else if (key == SettingsFragment.KEY_LAST_SEND) {
-            if (Utils.timeDiffInSeconds(prefs.lastSend,Date().time) < (prefs.GPSInterval.toInt())*1.5) {
+            if (Utils.timeDiffInSeconds(
+                    prefs.lastSend,
+                    Date().time
+                ) < (prefs.GPSInterval.toInt()) * 1.5
+            ) {
                 binding.lastSend.setImageResource(R.drawable.btn_rnd_grn)
             } else {
                 binding.lastSend.setImageResource(R.drawable.btn_rnd_red)
@@ -675,8 +717,12 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
 
     private fun updateLastPass() {
         val gp = GatePassings.getLastGatePass(this, route.id)
-        if (gp!=null) {
-            binding.lastPassTextView.text = getString(R.string.lastpass_message,gp.gateName, timeStampToDateString(gp.time.time))
+        if (gp != null) {
+            binding.lastPassTextView.text = getString(
+                R.string.lastpass_message,
+                gp.gateName,
+                timeStampToDateString(gp.time.time)
+            )
         }
     }
 
@@ -694,7 +740,11 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         var permission = initialPermission
         if (checkPermission) {
             val requiredPermissions: MutableSet<String> = HashSet()
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
             }
             permission = requiredPermissions.isEmpty()
@@ -762,7 +812,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private val REQUEST_SCREENSHOT_PERMISSION: Int = 1234
-    private lateinit var screenshotManager : ScreenshotManager
+    private lateinit var screenshotManager: ScreenshotManager
 
 
     @Deprecated("Deprecated in Java")
@@ -771,7 +821,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         screenshotManager.onActivityResult(requestCode, resultCode, data)
     }
 
-    private fun takeScreenshot(){
+    private fun takeScreenshot() {
         val screenshotResult = screenshotManager.makeScreenshot()
         screenshotResult.observe(
             onSuccess = { ScreenShot.processScreenshot(it, BuildConfig.APPLICATION_ID, this) },
@@ -779,7 +829,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         )
     }
 
-    companion object{
+    companion object {
         private const val PERMISSIONS_REQUEST_LOCATION = 2
         private const val ALARM_MANAGER_INTERVAL = 15000
     }
