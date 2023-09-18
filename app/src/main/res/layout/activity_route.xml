@@ -143,8 +143,8 @@
         android:layout_height="1dp"
         android:background="?android:attr/listDivider"
         app:layout_constraintBottom_toTopOf="@+id/points_title"
-        app:layout_constraintEnd_toEndOf="@+id/recycler_view"
-        app:layout_constraintStart_toStartOf="@+id/recycler_view" />
+        app:layout_constraintEnd_toEndOf="@+id/route_recycler_view"
+        app:layout_constraintStart_toStartOf="@+id/route_recycler_view" />
 
     <TextView
         android:id="@+id/points_title"
@@ -157,7 +157,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/points_value"
         app:layout_constraintHorizontal_bias="0.28"
-        app:layout_constraintStart_toStartOf="@+id/recycler_view" />
+        app:layout_constraintStart_toStartOf="@+id/route_recycler_view" />
 
     <TextView
         android:id="@+id/points_value"
