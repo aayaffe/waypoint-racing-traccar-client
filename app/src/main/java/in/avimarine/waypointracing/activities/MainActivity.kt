@@ -21,6 +21,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -138,6 +139,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             }
         }
         prefs.expertMode = false
+        setOnBackPressed()
     }
 
     private fun isRouteUpdated(docs: QuerySnapshot?) {
@@ -412,22 +414,25 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         super.onStop()
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        AlertDialog.Builder(this)
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .setTitle("Closing Waypoint Racing")
-            .setMessage("Are you sure you want to stop tracking and exit?")
-            .setPositiveButton("Yes") { dialog, which ->
-                run {
-                    stopTrackingService()
-                    prefs.status = false
-                    finish()
-                }
+    private fun setOnBackPressed(){
+        val callback = object : OnBackPressedCallback(true /* enabled by default */) {
+            override fun handleOnBackPressed() {
+                AlertDialog.Builder(this@MainActivity)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Closing Waypoint Racing")
+                    .setMessage("Are you sure you want to stop tracking and exit?")
+                    .setPositiveButton("Yes") { dialog, which ->
+                        run {
+                            stopTrackingService()
+                            prefs.status = false
+                            finish()
+                        }
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
             }
-            .setNegativeButton("No", null)
-            .show()
-        super.onBackPressed()
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
     }
 
     private fun populateRouteElementSpinner(route: Route) {
