@@ -78,13 +78,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/gradient_spinner"
             android:popupBackground="@drawable/blue_outline_white_background"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/nextWptHeader" />
+            app:layout_constraintStart_toEndOf="@+id/nextWptHeader"
+            app:layout_constraintTop_toTopOf="@+id/nextWptHeader"
+            app:layout_constraintBottom_toBottomOf="@+id/nextWptHeader"/>
 
 
         <TextView
@@ -92,7 +92,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="10dp"
             android:layout_weight="1"
             android:text="@string/next_waypoint_gate"
             android:textSize="18sp"
@@ -103,7 +103,7 @@
             android:id="@+id/nav_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="10dp"
             app:layout_constraintBottom_toTopOf="@+id/start_btn"
             app:layout_constraintTop_toBottomOf="@id/routeElementSpinner">
@@ -117,7 +117,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginStart="4dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="4dp"
                     android:layout_marginBottom="1dp"
                     android:layout_marginEnd="1dp"
                     app:autoTextSize="true"
@@ -125,7 +125,7 @@
                     app:dataTextSize="15sp"
                     app:labelText="@string/port_gate"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toTopOf="@+id/cog"
+                    app:layout_constraintBottom_toTopOf="@+id/cogsog"
                     app:layout_constraintEnd_toStartOf="@+id/stbdGate"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintHorizontal_weight="1"
@@ -151,41 +151,23 @@
                     app:unitsText="@string/nm" />
 
                 <in.avimarine.waypointracing.ui.NavTextDrawer
-                    android:id="@+id/cog"
+                    android:id="@+id/cogsog"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="1dp"
                     app:autoTextSize="true"
-                    app:data="@{viewmodel!=null ? viewmodel.COGData : `------`}"
+                    app:data="@{viewmodel!=null ? viewmodel.COGSOGData : `------`}"
                     app:dataTextSize="16sp"
-                    app:labelText="COG"
+                    app:labelText="COG/SOG"
                     app:layout_constraintBottom_toTopOf="@+id/location"
-                    app:layout_constraintEnd_toStartOf="@+id/sog"
+                    app:layout_constraintEnd_toStartOf="@+id/vmg"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/portGate"
                     app:textColor="@{viewmodel!=null ? viewmodel.COGColor : -65536}"
-                    app:unitsText="\u00B0" />
-
-
-                <in.avimarine.waypointracing.ui.NavTextDrawer
-                    android:id="@+id/sog"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="1dp"
-                    android:layout_marginEnd="4dp"
-                    app:autoTextSize="true"
-                    app:data="@{viewmodel!=null ? viewmodel.SOGData : `------`}"
-                    app:dataTextSize="16sp"
-                    app:labelText="SOG"
-                    app:layout_constraintBottom_toBottomOf="@+id/cog"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintStart_toEndOf="@+id/cog"
-                    app:layout_constraintTop_toTopOf="@+id/cog"
-                    app:textColor="-65536"
                     app:unitsText="Kt" />
+
 
                 <in.avimarine.waypointracing.ui.NavTextDrawer
                     android:id="@+id/location"
@@ -203,8 +185,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/time"
                     app:textColor="-65536"
-                    app:unitsEnabled="true"
-                    android:visibility="gone"/>
+                    app:unitsEnabled="true" />
 
                 <in.avimarine.waypointracing.ui.NavTextDrawer
                     android:id="@+id/time"
@@ -217,14 +198,13 @@
                     app:data="@{viewmodel!=null ? viewmodel.timeData : `------`}"
                     app:dataTextSize="13sp"
                     app:labelText="UTC + ?"
-                    app:layout_constraintTop_toBottomOf="@id/cog"
+                    app:layout_constraintTop_toBottomOf="@id/cogsog"
                     app:layout_constraintBottom_toTopOf="@id/shortestDistanceToGate"
                     app:layout_constraintEnd_toStartOf="@+id/location"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintHorizontal_weight="1"
                     app:textColor="-65536"
-                    app:unitsEnabled="false"
-                    android:visibility="gone"/>
+                    app:unitsEnabled="false"/>
 
                 <in.avimarine.waypointracing.ui.NavTextDrawer
                     android:id="@+id/shortestDistanceToGate"
@@ -257,9 +237,9 @@
                     app:labelText="@string/vmg_label"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintStart_toEndOf="@id/shortestDistanceToGate"
-                    app:layout_constraintTop_toTopOf="@id/shortestDistanceToGate"
-                    app:layout_constraintBottom_toBottomOf="@id/shortestDistanceToGate"
+                    app:layout_constraintStart_toEndOf="@id/cogsog"
+                    app:layout_constraintTop_toTopOf="@id/cogsog"
+                    app:layout_constraintBottom_toBottomOf="@id/cogsog"
                     app:textColor="-65536"
                     app:unitsText="kt" />
 
@@ -280,8 +260,9 @@
             android:id="@+id/lastPassTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/boatNameTitle"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
         <ImageView
@@ -296,29 +277,11 @@
             app:srcCompat="@drawable/btn_rnd_red" />
 
         <TextView
-            android:id="@+id/boatNameTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/boatNameTitle" />
-        <TextView
-            android:id="@+id/boatNameTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/lastSend"
-            android:text="Boat: "/>
-
-        <TextView
             android:id="@+id/version"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
             android:text="@{versionViewModel!=null ? versionViewModel.appVersion : `--`}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />

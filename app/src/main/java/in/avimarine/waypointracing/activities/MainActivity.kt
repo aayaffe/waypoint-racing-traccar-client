@@ -253,11 +253,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         prefs.currentRoute = route.toString()
         populateRouteElementSpinner(r)
         setEmptyRouteUI(route.isEmpty())
-        if (route.eventType == EventType.WPTRACING) {
-            setTitle(getString(R.string.title_waypoint_racing), r.eventName)
-        } else {
-            setTitle(getString(R.string.title_treasure_hunting), r.eventName)
-        }
+        setActivityTitle(r)
         if (!route.isEmpty()) {
             Toast.makeText(
                 applicationContext,
@@ -269,13 +265,19 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         prefs.status = true
     }
 
-
-    private fun setTitle(title: String, subTitle: String) {
-        val ab = supportActionBar
-        ab?.title = title
-        ab?.subtitle = subTitle
+    private fun setActivityTitle(r: Route) {
+        if (route.eventType == EventType.WPTRACING) {
+            setTitle(
+                getString(R.string.title_waypoint_racing),
+                r.eventName + " - " + prefs.boatName
+            )
+        } else {
+            setTitle(
+                getString(R.string.title_treasure_hunting),
+                r.eventName + " - " + prefs.boatName
+            )
+        }
     }
-
 
     private fun errorLoadingRoute(s: String) {
         Toast.makeText(this, s, Toast.LENGTH_LONG).show()
@@ -291,6 +293,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             return
         }
         startPositionProvider()
+        setActivityTitle(route)
         prefs.status = true
     }
 
@@ -325,7 +328,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         setGPSInterval(1)
         setMainActivityVisibilityStatus(true)
         updateLastPass()
-        setBoatName()
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // Create new fragment and transaction
             val newFragment = MapFragment()
@@ -345,10 +347,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 transaction.commit()
             }
         }
-    }
-
-    private fun setBoatName() {
-        binding.boatNameTextView.text = prefs.boatName
     }
 
     private fun getNextWpt() {
@@ -421,7 +419,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle("Closing Waypoint Racing")
                     .setMessage("Are you sure you want to stop tracking and exit?")
-                    .setPositiveButton("Yes") { dialog, which ->
+                    .setPositiveButton("Yes") { _, _ ->
                         run {
                             stopTrackingService()
                             prefs.status = false
@@ -629,7 +627,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else {
             binding.lastSend.visibility = View.GONE
         }
-        setBoatName()
+
 //        binding.location.setTextColor(Color.BLACK)
         if (isEmpty) {
             binding.routeElementSpinner.visibility = View.INVISIBLE
@@ -660,8 +658,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (isAvailable) {
             binding.portGate.setTextColor(Color.BLACK)
             binding.stbdGate.setTextColor(Color.BLACK)
-            binding.cog.setTextColor(Color.BLACK)
-            binding.sog.setTextColor(Color.BLACK)
+            binding.cogsog.setTextColor(Color.BLACK)
             binding.location.setTextColor(Color.BLACK)
             binding.time.setTextColor(Color.BLACK)
             binding.shortestDistanceToGate.setTextColor(Color.BLACK)
@@ -669,8 +666,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else {
             binding.portGate.setTextColor(Color.RED)
             binding.stbdGate.setTextColor(Color.RED)
-            binding.cog.setTextColor(Color.RED)
-            binding.sog.setTextColor(Color.RED)
+            binding.cogsog.setTextColor(Color.RED)
             binding.location.setTextColor(Color.RED)
             binding.time.setTextColor(Color.RED)
             binding.shortestDistanceToGate.setTextColor(Color.RED)
@@ -716,7 +712,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else if (key == SettingsFragment.KEY_GATE_PASSES) {
             updateLastPass()
         } else if (key == SettingsFragment.KEY_BOAT_NAME) {
-            setBoatName()
+            setActivityTitle(route)
         }
     }
 

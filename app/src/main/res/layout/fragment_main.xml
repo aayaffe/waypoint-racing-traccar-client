@@ -16,4 +16,16 @@
         mapbox:mapbox_cameraZoom="9.0"
         />
 
+    <TextView
+        android:id="@+id/coordinates_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:gravity="right"
+        app:layout_constraintBottom_toBottomOf="@id/mapView"
+        app:layout_constraintEnd_toEndOf="@id/mapView"
+        android:background="@drawable/rounded_background"
+        android:hint="32 52.55N\n033 53.54E"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -53,7 +53,7 @@
     <string name="settings_wakelock_off_summary">Wake lock off</string>
     <string name="settings_wakelock_on_summary">Wake lock on</string>
     <string name="hidden_alert">The app has been hidden. To open it again please dial 8722227 (TRACCAR).</string>
-    <string name="next_waypoint_gate">Next Waypoint\\Gate</string>
+    <string name="next_waypoint_gate">Goto:</string>
     <string name="request_exception">To continuously collect location data please turn off battery optimization for the app.</string>
     <string name="no_route_loaded">No Route Loaded</string>
     <string name="port_gate">Port Gate</string>
@@ -85,7 +85,7 @@
     <string name="restart_route">Restart Route</string>
     <string name="view_route">View Route</string>
     <string name="load_new_route">Load new route</string>
-    <string name="lastpass_message">Last gate: %1$s at: %2$s</string>
+    <string name="lastpass_message">Last: %1$s at: %2$s</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
     <string name="stepper_type_tab">tab</string>

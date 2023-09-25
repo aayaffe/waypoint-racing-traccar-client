@@ -131,7 +131,8 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         super.onResume()
         sharedPreferences!!.registerOnSharedPreferenceChangeListener(this)
         expertMode(sharedPreferences!!.getBoolean(KEY_EXPERT_MODE, false))
-        setPreferencesEnabled(!sharedPreferences!!.getBoolean(KEY_STATUS, false))
+//        setPreferencesEnabled(!sharedPreferences!!.getBoolean(KEY_STATUS, false))
+        setPreferencesEnabled(true)
         expertPressed = 0
     }
 
@@ -178,7 +179,8 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
                 }
             }
             KEY_STATUS -> {
-                setPreferencesEnabled(!sharedPreferences.getBoolean(KEY_STATUS, false))
+//                setPreferencesEnabled(!sharedPreferences.getBoolean(KEY_STATUS, false))
+                setPreferencesEnabled(true)
                 activity?.let {
                     (requireActivity().application as MainApplication).handleRatingFlow(
                         it

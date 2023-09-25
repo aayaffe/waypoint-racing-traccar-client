@@ -31,6 +31,12 @@ class LocationViewModel(
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
         return getDirString(Direction(location.bearing.toDouble(), location), magnetic, false, location)
     }
+
+    fun getCOGSOGData(): String{
+        val cog = getCOGData()
+        val sog = getSOGData()
+        return "$cog/$sog"
+    }
     fun getCOGColor(): Int{
         if (wpt== null)
             return -65536
@@ -49,7 +55,7 @@ class LocationViewModel(
         }
     }
     fun getSOGData(): String{
-        return getSpeedString(Speed(location.speed.toDouble(), SpeedUnits.MetersPerSecond), SpeedUnits.Knots)
+        return getSpeedString(Speed(location.speed.toDouble(), SpeedUnits.MetersPerSecond), SpeedUnits.Knots, false)
     }
     fun getLocationData(): String {
         return getLatString(location.latitude) + "\n" + getLonString(location.longitude)
@@ -110,6 +116,6 @@ class LocationViewModel(
             return "-----"
         }
         val vmg = getVMG(location, wpt.portWpt, wpt.stbdWpt)
-        return getSpeedString(vmg,SpeedUnits.Knots)
+        return getSpeedString(vmg,SpeedUnits.Knots,false)
     }
 }

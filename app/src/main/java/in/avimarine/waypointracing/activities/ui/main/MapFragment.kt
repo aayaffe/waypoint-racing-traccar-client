@@ -25,10 +25,13 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.scalebar.scalebar
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.androidutils.Utils.Companion.mapRange
+import `in`.avimarine.androidutils.getLatString
+import `in`.avimarine.androidutils.getLonString
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.databinding.FragmentMainBinding
@@ -37,7 +40,8 @@ import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.route.RouteElement
 import `in`.avimarine.waypointracing.utils.RouteParser.Companion.parseRoute
 
-class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener {
+class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener,
+    OnIndicatorPositionChangedListener {
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
     private val mapView get() = binding.mapView
@@ -108,6 +112,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
 
     private fun initLocationComponent() {
         val locationComponentPlugin = mapView.location
+        locationComponentPlugin.addOnIndicatorPositionChangedListener(this)
         locationComponentPlugin.updateSettings {
             this.enabled = true
             this.locationPuck = LocationPuck2D(
@@ -147,6 +152,8 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
 
     override fun onDestroyView() {
         Log.d(TAG, "onDestroyView")
+        val locationComponentPlugin = mapView.location
+        locationComponentPlugin.removeOnIndicatorPositionChangedListener(this)
         mapView.onDestroy()
         _binding = null
         super.onDestroyView()
@@ -255,6 +262,10 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
             putInt(SettingsFragment.KEY_NEXT_WPT, nextWpt)
             commit()
         }
+    }
+
+    override fun onIndicatorPositionChanged(point: Point) {
+        binding.coordinatesTv.text = "${getLatString(point.latitude())}\n${getLonString(point.longitude())}"
     }
 
 }
