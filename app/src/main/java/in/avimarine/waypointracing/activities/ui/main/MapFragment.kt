@@ -12,18 +12,23 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.annotation.AnnotationPlugin
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.OnPointAnnotationLongClickListener
+import com.mapbox.maps.plugin.annotation.generated.OnPolylineAnnotationLongClickListener
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.createPolylineAnnotationManager
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
@@ -38,6 +43,7 @@ import `in`.avimarine.waypointracing.databinding.FragmentMainBinding
 import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.route.RouteElement
+import `in`.avimarine.waypointracing.route.RouteElementType
 import `in`.avimarine.waypointracing.utils.RouteParser.Companion.parseRoute
 
 class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener,
@@ -46,6 +52,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     private val binding get() = _binding!!
     private val mapView get() = binding.mapView
     private var pointAnnotationManager: PointAnnotationManager? = null
+    private var lineAnnotationManager: PolylineAnnotationManager? = null
     private var annotationApi: AnnotationPlugin? = null
     var route: Route = Route.emptyRoute()
     private lateinit var sharedPreferences: SharedPreferences
@@ -79,6 +86,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         createMapIconBitmaps()
         annotationApi = mapView.annotations
         pointAnnotationManager = annotationApi?.createPointAnnotationManager()
+        lineAnnotationManager = annotationApi?.createPolylineAnnotationManager()
         mapView.getMapboxMap().loadStyleUri(
             "mapbox://styles/aayaffe/clmbnvfaa018401pjfbco00px"
         ) {
@@ -120,10 +128,6 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
                     requireContext(),
                     R.drawable.user_puck,
                 ),
-//                shadowImage = AppCompatResources.getDrawable(
-//                    requireContext(),
-//                    R.drawable.mapbox_user_icon_shadow,
-//                ),
                 scaleExpression = interpolate {
                     linear()
                     zoom()
@@ -179,9 +183,13 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     }
 
     private fun addRouteWaypoints(route: Route, nextWpt: Int, adjustZoom: Boolean = true) {
+        if (route.elements.isEmpty()) {
+            return
+        }
         val maxPoints = route.elements.maxOf { it.points }
         val minPoints = route.elements.minOf { it.points }
         pointAnnotationManager?.deleteAll()
+        lineAnnotationManager?.deleteAll()
         val wpt = route.elements.elementAtOrNull(nextWpt)
         route.elements.forEachIndexed { index, re ->
             val selected = re.id == (wpt?.id ?: false)
@@ -189,36 +197,125 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
             jsonObject.getAsJsonObject("properties").apply {
                 addProperty("ordinal", index)
             }
-                val pointAnnotationOptions: PointAnnotationOptions = PointAnnotationOptions()
-                .withPoint(Point.fromLngLat(re.portWpt.longitude, re.portWpt.latitude))
-                .withData(jsonObject)
-                .withIconImage(routeElementToBitmap(re, selected, maxPoints, minPoints))
-            pointAnnotationManager?.create(pointAnnotationOptions)
-        }
-
-        pointAnnotationManager?.addLongClickListener(OnPointAnnotationLongClickListener {
-            setNextWpt(it.getData()?.asJsonObject?.get("properties")?.asJsonObject?.get("ordinal")?.asInt ?: -1)
-            Toast.makeText(
-                requireContext(),
-                "Set next waypoint ${it.getData()?.asJsonObject?.get("properties")?.asJsonObject?.get("name")}",
-                Toast.LENGTH_SHORT
-            ).show()
-            true
-        })
-        if (adjustZoom) {
-            val points = pointAnnotationManager?.annotations?.map { it.point }
-            val padding = EdgeInsets(
-                100.0,
-                100.0,
-                100.0,
-                100.0
-            )
-            if (points != null) {
-                val cameraPosition = mapView.getMapboxMap().cameraForCoordinates(points, padding)
-                mapView.getMapboxMap().setCamera(cameraPosition)
+            when (re.routeElementType) {
+                RouteElementType.WAYPOINT -> {
+                    val pointAnnotationOptions =
+                        pointAnnotationOptions(re, jsonObject, selected, maxPoints, minPoints)
+                    pointAnnotationManager?.create(pointAnnotationOptions)
+                }
+                RouteElementType.GATE, RouteElementType.FINISH, RouteElementType.START -> {
+                    val lineAnnotationOptions = lineAnnotationOptions(re, jsonObject, selected)
+                    lineAnnotationManager?.create(lineAnnotationOptions)
+                    val pointAnnotationOptions =
+                        pointAnnotationOptions(re, jsonObject, selected, maxPoints, minPoints)
+                    pointAnnotationManager?.create(pointAnnotationOptions)
+                }
             }
         }
 
+        pointAnnotationManager?.addLongClickListener(OnPointAnnotationLongClickListener {
+            handleLongClick(it.getData())
+            true
+        })
+        lineAnnotationManager?.addLongClickListener(OnPolylineAnnotationLongClickListener {
+            handleLongClick(it.getData())
+            true
+        })
+        if (adjustZoom) {
+            adjustZoom()
+        }
+
+    }
+
+    private fun handleLongClick(data: JsonElement?) {
+        val ordinal = data?.asJsonObject?.get("properties")?.asJsonObject?.get("ordinal")?.asInt ?: -1
+        setNextWpt(ordinal)
+        val name = data?.asJsonObject?.get("properties")?.asJsonObject?.get("name")
+        Toast.makeText(
+            requireContext(),
+            "Set next waypoint $name",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun pointAnnotationOptions(
+        re: RouteElement,
+        jsonObject: JsonObject,
+        selected: Boolean,
+        maxPoints: Double,
+        minPoints: Double
+    ): List<PointAnnotationOptions> {
+        if (re.routeElementType != RouteElementType.WAYPOINT) {
+            val portWpt = PointAnnotationOptions()
+                .withPoint(Point.fromLngLat(re.portWpt.longitude, re.portWpt.latitude))
+                .withData(jsonObject)
+                .withIconImage(routeElementToBitmap(re, selected, maxPoints, minPoints))
+            val stbWpt = PointAnnotationOptions()
+                .withPoint(Point.fromLngLat(re.stbdWpt.longitude, re.stbdWpt.latitude))
+                .withData(jsonObject)
+                .withIconImage(routeElementToBitmap(re, selected, maxPoints, minPoints))
+            return listOf(portWpt, stbWpt)
+        } else {
+            return listOf(PointAnnotationOptions()
+                .withPoint(Point.fromLngLat(re.portWpt.longitude, re.portWpt.latitude))
+                .withData(jsonObject)
+                .withIconImage(routeElementToBitmap(re, selected, maxPoints, minPoints)))
+        }
+
+    }
+    private fun lineAnnotationOptions(
+        re: RouteElement,
+        jsonObject: JsonObject,
+        selected: Boolean,
+    ): PolylineAnnotationOptions {
+        return PolylineAnnotationOptions()
+            .withLineColor(routeElementToColor(re, selected))
+            .withLineWidth(2.0)
+            .withData(jsonObject)
+            .withPoints(
+                listOf<Point>(
+                    Point.fromLngLat(re.portWpt.longitude, re.portWpt.latitude),
+                    Point.fromLngLat(re.stbdWpt.longitude, re.stbdWpt.latitude)
+                )
+            )
+    }
+
+    private fun routeElementToColor(re: RouteElement, selected: Boolean): String {
+        val gp =
+            activity?.let {
+                GatePassings.getCurrentRouteGatePassings(
+                    it.applicationContext,
+                    route.id
+                )
+            }
+        if (gp != null) {
+            val latestGp = gp.getLatestGatePassForGate(re.id)
+            if (latestGp != null) {
+                if (selected) {
+                    return "#38761d"
+                }
+                return "#8fce00"
+            }
+        }
+        if (selected) {
+            return "#004aff"
+        }
+        return "#458B74"
+    }
+
+    private fun adjustZoom() {
+        val points = pointAnnotationManager?.annotations?.map { it.point }?: emptyList()
+        val linePoints = lineAnnotationManager?.annotations?.flatMap { it.points }?: emptyList()
+        val padding = EdgeInsets(
+            100.0,
+            100.0,
+            100.0,
+            100.0
+        )
+        if ((points + linePoints).isNotEmpty()) {
+            val cameraPosition = mapView.getMapboxMap().cameraForCoordinates(points + linePoints, padding)
+            mapView.getMapboxMap().setCamera(cameraPosition)
+        }
     }
 
     private fun routeElementToBitmap(
