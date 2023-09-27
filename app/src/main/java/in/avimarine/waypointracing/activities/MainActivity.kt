@@ -361,7 +361,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private fun setNextWaypointUI(wpt: RouteElement) {
         if (wpt.routeElementType == RouteElementType.WAYPOINT) {
             if (wpt.proofArea.type == ProofAreaType.QUADRANT) {
-                binding.shortestDistanceToGate.visibility = View.VISIBLE
+                binding.shortestDistanceToGate.visibility = View.INVISIBLE
                 binding.stbdGate.visibility = View.VISIBLE
                 binding.stbdGate.setLabel(getString(R.string.pass_wpt_from))
                 binding.stbdGate.setUnits("")
