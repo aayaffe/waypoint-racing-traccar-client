@@ -11,8 +11,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import `in`.avimarine.androidutils.TAG
-import `in`.avimarine.waypointracing.route.Route
-import `in`.avimarine.waypointracing.route.RouteDetails
 
 class FirestoreDatabase {
 
@@ -67,10 +65,10 @@ class FirestoreDatabase {
                     val newBoat = Boat(n, "","")
                     addBoat(newBoat, uid)
                 }
-            },{
-                val newBoat = Boat(n, "","")
+            }) {
+                val newBoat = Boat(n, "", "")
                 addBoat(newBoat, uid)
-            })
+            }
         }
 
         fun getBoat(uid: String,onSuccess: (DocumentSnapshot?) -> Unit, onFailure: OnFailureListener) {
@@ -78,9 +76,7 @@ class FirestoreDatabase {
             val docRef = db.collection(COLLECTION_BOATS).document(uid)
             docRef.get()
                 .addOnSuccessListener (onSuccess)
-                .addOnFailureListener { exception ->
-                    Log.d(TAG, "get failed with ", exception)
-                }
+                .addOnFailureListener (onFailure)
         }
 
         fun addManualGatePass(gp: GatePassing, onSuccess: (DocumentReference) -> Unit, onFailure: OnFailureListener) {

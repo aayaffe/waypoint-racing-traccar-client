@@ -59,14 +59,14 @@
 
         <Button
             android:id="@+id/login_btn"
-            android:layout_width="100dp"
+            android:layout_width="140dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:onClick="loginButtonClick"
             android:text="@string/login_btn"
             android:textAllCaps="false"
-            android:textSize="14sp"
+            android:textSize="18sp"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/lastPassTextView"
             app:layout_constraintEnd_toEndOf="parent"
@@ -105,7 +105,7 @@
             android:layout_height="0dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="10dp"
-            app:layout_constraintBottom_toTopOf="@+id/start_btn"
+            app:layout_constraintBottom_toTopOf="@+id/login_btn"
             app:layout_constraintTop_toBottomOf="@id/routeElementSpinner">
 
             <androidx.constraintlayout.widget.ConstraintLayout

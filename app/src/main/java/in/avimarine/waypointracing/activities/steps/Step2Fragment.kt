@@ -77,9 +77,9 @@ class Step2Fragment : SetupFragment() {
                     viewBinding.skipper.setText(boat.skipperName)
                 }
             }
-        },{
+        }) {
             Log.e(TAG, "Failed to load boat", it)
-        })
+        }
         return viewBinding.root
     }
 

@@ -83,6 +83,7 @@ class Step1Fragment : SetupFragment() {
         val signInIntent = AuthUI.getInstance()
             .createSignInIntentBuilder()
             .setAvailableProviders(providers)
+            .setIsSmartLockEnabled(false)
             .build()
         signInLauncher.launch(signInIntent)
     }

@@ -205,7 +205,21 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             val user = FirebaseAuth.getInstance().currentUser
             if (user != null) {
                 Log.d(TAG, "Logged in as ${user.displayName}")
-                Auth.loadSettingsFromServer(user.uid, this)
+                Auth.loadSettingsFromServer(user.uid, this) {
+                    Log.w(TAG, "Failed to load settings from server", it)
+                    DialogUtils.createDialog(
+                        this,
+                        R.string.missing_boat_name_title,
+                        R.string.missing_boat_name_message,
+                        { _, _
+                            ->
+                            val intent = Intent(this, SettingsActivity::class.java)
+                            this.startActivity(intent)
+                        },
+                        null,
+                        null
+                    ).show()
+                }
             }
         } else {
             if (response != null) {
@@ -655,7 +669,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun setUiForGPS(isAvailable: Boolean) {
-        if (isAvailable) {
+        if ((isAvailable) && (FirebaseAuth.getInstance().currentUser != null)) {
             binding.portGate.setTextColor(Color.BLACK)
             binding.stbdGate.setTextColor(Color.BLACK)
             binding.cogsog.setTextColor(Color.BLACK)

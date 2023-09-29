@@ -2,13 +2,12 @@ package `in`.avimarine.waypointracing.utils
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.preference.PreferenceManager
 import com.firebase.ui.auth.AuthUI
+import com.google.android.gms.tasks.OnFailureListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.toObject
-import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.database.Boat
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
@@ -33,7 +32,7 @@ class Auth {
             signInLauncher.launch(signInIntent)
         }
 
-        fun loadSettingsFromServer(uid: String, context: Context) {
+        fun loadSettingsFromServer(uid: String, context: Context, failedFunction: OnFailureListener) {
             FirestoreDatabase.getBoat(uid, {
                 if (it != null) {
                     val boat = it.toObject<Boat>()
@@ -44,11 +43,13 @@ class Auth {
                             putString(SettingsFragment.KEY_BOAT_NAME, boat.name)
                             commit()
                         }
+                    } else {
+                        failedFunction.onFailure(Exception("Boat not found"))
                     }
+                } else {
+                    failedFunction.onFailure(Exception("Boat not found"))
                 }
-            }, {
-                Log.w(TAG, "Failed to load boat", it)
-            }
+            }, failedFunction
             )
         }
 

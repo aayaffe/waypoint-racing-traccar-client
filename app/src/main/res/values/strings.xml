@@ -104,4 +104,6 @@
     <string name="route_updated_dialog_message">A newer version of the currently used route is available on the server.\nDownloading the new route will delete all previous waypoint and gate passes.\nDo you want to load new route?</string>
     <string name="menu_map">Map</string>
     <string name="mapbox_access_token">pk.eyJ1IjoiYWF5YWZmZSIsImEiOiJja2MyN3N4ZDMxdmNxMnhvNGg2NWJkeTRmIn0.TEuCkSZ1wyHG95fWz6WGtA</string>
+    <string name="missing_boat_name_title">Missing boat name</string>
+    <string name="missing_boat_name_message">Boat name is not set up.\nPress OK to go to settings screen and set boat name</string>
 </resources>
