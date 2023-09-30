@@ -98,9 +98,18 @@ class TrackingController(private val context: Context) :
             Log.w(TAG, e)
         }
         networkManager.start()
+        route = RouteParser.parseRoute(sharedPreferences)
+        val name = route?.eventName?: ""
+        val lastUpdate = route?.lastUpdate?.time?.toString() ?: ""
+        FirestoreDatabase.addEvent(`in`.avimarine.waypointracing.database.EventType.TRACKING_START, "$name $lastUpdate")
+
     }
 
     fun stop() {
+        route = RouteParser.parseRoute(sharedPreferences)
+        val name = route?.eventName?: ""
+        val lastUpdate = route?.lastUpdate?.time?.toString() ?: ""
+        FirestoreDatabase.addEvent(`in`.avimarine.waypointracing.database.EventType.TRACKING_STOP, "$name $lastUpdate")
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
         networkManager.stop()
         try {

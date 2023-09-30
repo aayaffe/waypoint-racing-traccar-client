@@ -36,6 +36,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import `in`.avimarine.androidutils.TAG
+import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.utils.RouteParser.Companion.parseRoute
 import java.util.*
 
@@ -44,8 +45,7 @@ class TrackingService() : Service() {
 
     private var wakeLock: WakeLock? = null
     private var trackingController: TrackingController? = null
-    private lateinit var sharedPreferences: SharedPreferences
-    private var route: Route = Route.emptyRoute()
+//    private lateinit var sharedPreferences: SharedPreferences
 
     class HideNotificationService : Service() {
         override fun onBind(intent: Intent): IBinder? {
@@ -67,7 +67,7 @@ class TrackingService() : Service() {
     override fun onCreate() {
         startForeground(NOTIFICATION_ID, createNotification(this))
         Log.i(TAG, "service create")
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+//        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
         sendBroadcast(Intent(ACTION_STARTED))
         StatusActivity.addMessage(getString(R.string.status_service_create))
 
@@ -80,10 +80,11 @@ class TrackingService() : Service() {
             trackingController = TrackingController(this)
             trackingController?.start()
         }
-        parseRoute(sharedPreferences)
+//        parseRoute(sharedPreferences)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             ContextCompat.startForegroundService(this, Intent(this, HideNotificationService::class.java))
         }
+
     }
 
     override fun onBind(intent: Intent): IBinder? {

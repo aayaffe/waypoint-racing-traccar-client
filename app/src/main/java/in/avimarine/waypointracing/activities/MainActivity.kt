@@ -574,7 +574,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     fun startButtonClick(view: View) {
         val checked = prefs.status
         prefs.status = checked.not()
-        FirestoreDatabase.addEvent(if (checked) `in`.avimarine.waypointracing.database.EventType.TRACKING_STOP else `in`.avimarine.waypointracing.database.EventType.TRACKING_START)
     }
 
     fun loginButtonClick(view: View) {
