@@ -166,7 +166,15 @@ class RouteLoader {
         }
 
         fun loadRouteFromString(context: Context, json: String, loadRoute: (r: Route?) -> Unit) {
-            loadRoute(Route.fromGeoJson(json))
+            try {
+                loadRoute(Route.fromGeoJson(json))
+            } catch (e: JSONException) {
+                Log.e(TAG, "Error loading json from string", e)
+                loadRoute(null)
+            } catch (e: NullPointerException) {
+                Log.e(TAG, "Error loading json from string", e)
+                loadRoute(null)
+            }
             saveRoute(context, json)
         }
     }
