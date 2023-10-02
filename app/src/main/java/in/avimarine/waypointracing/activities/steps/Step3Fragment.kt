@@ -89,6 +89,7 @@ class Step3Fragment : SetupFragment() {
 
         viewBinding.RoutesRecyclerView.adapter = adapter
         viewBinding.RoutesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        viewBinding.RoutesRecyclerView.itemAnimator = null
     }
 
     private fun selectRoute(json: String){
