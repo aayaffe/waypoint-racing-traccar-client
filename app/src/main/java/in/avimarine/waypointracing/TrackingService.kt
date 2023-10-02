@@ -45,29 +45,12 @@ class TrackingService() : Service() {
 
     private var wakeLock: WakeLock? = null
     private var trackingController: TrackingController? = null
-//    private lateinit var sharedPreferences: SharedPreferences
 
-    class HideNotificationService : Service() {
-        override fun onBind(intent: Intent): IBinder? {
-            return null
-        }
-
-        override fun onCreate() {
-            startForeground(NOTIFICATION_ID, createNotification(this))
-            stopForeground(true)
-        }
-
-        override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-            stopSelfResult(startId)
-            return START_NOT_STICKY
-        }
-    }
 
     @SuppressLint("WakelockTimeout")
     override fun onCreate() {
         startForeground(NOTIFICATION_ID, createNotification(this))
         Log.i(TAG, "service create")
-//        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
         sendBroadcast(Intent(ACTION_STARTED))
         StatusActivity.addMessage(getString(R.string.status_service_create))
 
@@ -80,11 +63,6 @@ class TrackingService() : Service() {
             trackingController = TrackingController(this)
             trackingController?.start()
         }
-//        parseRoute(sharedPreferences)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            ContextCompat.startForegroundService(this, Intent(this, HideNotificationService::class.java))
-        }
-
     }
 
     override fun onBind(intent: Intent): IBinder? {

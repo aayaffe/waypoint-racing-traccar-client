@@ -107,13 +107,6 @@
             android:name=".TrackingService"
             android:exported="false"
             android:foregroundServiceType="location" />
-        <service
-            android:name=".TrackingService$HideNotificationService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-            </intent-filter>
-        </service>
 
         <receiver
             android:name=".AutostartReceiver"
