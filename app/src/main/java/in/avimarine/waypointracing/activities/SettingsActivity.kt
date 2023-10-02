@@ -16,10 +16,10 @@
 package `in`.avimarine.waypointracing.activities;
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-
-import `in`.avimarine.waypointracing.R;
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import `in`.avimarine.waypointracing.R
+
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -27,10 +27,12 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)// showing the back button in action bar
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.fragment, SettingsFragment())
-            .commit()
+        if (savedInstanceState == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment, SettingsFragment())
+                .commit()
+        }
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
