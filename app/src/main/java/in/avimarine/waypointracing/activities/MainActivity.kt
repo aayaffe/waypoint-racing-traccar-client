@@ -45,7 +45,7 @@ import `in`.avimarine.waypointracing.*
 import `in`.avimarine.waypointracing.BuildConfig
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.activities.SetupWizardActivity.Companion.runSetupWizardIfNeeded
-import `in`.avimarine.waypointracing.activities.ui.main.MapFragment
+import `in`.avimarine.waypointracing.activities.fragments.MapFragment
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.ActivityMainBinding
 import `in`.avimarine.waypointracing.route.*

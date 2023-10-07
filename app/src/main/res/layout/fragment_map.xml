@@ -21,11 +21,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
-        android:layout_marginBottom="4dp"
+        android:layout_marginTop="4dp"
         android:gravity="right"
-        app:layout_constraintBottom_toBottomOf="@id/mapView"
+        app:layout_constraintTop_toTopOf="@id/mapView"
         app:layout_constraintEnd_toEndOf="@id/mapView"
         android:background="@drawable/rounded_background"
         android:hint="32 52.55N\n033 53.54E"/>
+
+    <TextView
+        android:id="@+id/navigation_warning__tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="4dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="@id/mapView"
+        app:layout_constraintEnd_toEndOf="@id/mapView"
+        android:background="@drawable/rounded_background"
+        android:text="Not to be used for navigation"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

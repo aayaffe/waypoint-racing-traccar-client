@@ -3,7 +3,7 @@ package `in`.avimarine.waypointracing.activities
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import `in`.avimarine.waypointracing.R
-import `in`.avimarine.waypointracing.activities.ui.main.MapFragment
+import `in`.avimarine.waypointracing.activities.fragments.MapFragment
 
 class MapActivity : AppCompatActivity() {
 

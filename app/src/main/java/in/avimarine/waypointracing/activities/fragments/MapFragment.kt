@@ -1,4 +1,4 @@
-package `in`.avimarine.waypointracing.activities.ui.main
+package `in`.avimarine.waypointracing.activities.fragments
 
 import android.content.SharedPreferences
 import android.graphics.Bitmap
@@ -39,7 +39,7 @@ import `in`.avimarine.androidutils.getLatString
 import `in`.avimarine.androidutils.getLonString
 import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.activities.SettingsFragment
-import `in`.avimarine.waypointracing.databinding.FragmentMainBinding
+import `in`.avimarine.waypointracing.databinding.FragmentMapBinding
 import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.route.RouteElement
@@ -48,7 +48,7 @@ import `in`.avimarine.waypointracing.utils.RouteParser.Companion.parseRoute
 
 class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener,
     OnIndicatorPositionChangedListener {
-    private var _binding: FragmentMainBinding? = null
+    private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
     private val mapView get() = binding.mapView
     private var pointAnnotationManager: PointAnnotationManager? = null
@@ -81,7 +81,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentMainBinding.inflate(inflater, container, false)
+        _binding = FragmentMapBinding.inflate(inflater, container, false)
         val view = binding.root
         createMapIconBitmaps()
         annotationApi = mapView.annotations
@@ -90,7 +90,9 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         mapView.getMapboxMap().loadStyleUri(
             "mapbox://styles/aayaffe/clmbnvfaa018401pjfbco00px"
         ) {
-            mapView.scalebar.updateSettings { isMetricUnits = true }
+            mapView.scalebar.updateSettings {
+                isMetricUnits = true
+            }
             mapView.gestures.rotateEnabled = false
             nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, -1)
             sharedPreferences.getString(SettingsFragment.KEY_ROUTE, null)?.let {
