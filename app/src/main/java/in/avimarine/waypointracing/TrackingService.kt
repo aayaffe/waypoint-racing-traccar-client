@@ -78,6 +78,7 @@ class TrackingService() : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } else {
+            @Suppress("DEPRECATION")
             stopForeground(true)
         }
         Log.i(TAG, "service destroy")
@@ -99,7 +100,7 @@ class TrackingService() : Service() {
         @SuppressLint("UnspecifiedImmutableFlag")
         private fun createNotification(context: Context): Notification {
             val builder = NotificationCompat.Builder(context, MainApplication.PRIMARY_CHANNEL)
-                .setSmallIcon(R.drawable.ic_stat_notify)
+                .setSmallIcon(R.drawable.app_icon)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
             val intent: Intent
