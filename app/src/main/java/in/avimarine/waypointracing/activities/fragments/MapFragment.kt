@@ -122,6 +122,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
 
     private fun initLocationComponent() {
         val locationComponentPlugin = mapView.location
+
         locationComponentPlugin.addOnIndicatorPositionChangedListener(this)
         locationComponentPlugin.updateSettings {
             this.enabled = true

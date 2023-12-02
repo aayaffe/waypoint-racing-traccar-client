@@ -70,7 +70,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private var isFirstSpinnerLoad = true
     private lateinit var binding: ActivityMainBinding
     private val debugMode = BuildConfig.DEBUG
-    private val remoteConfig = RemoteConfig()
 
     // See: https://developer.android.com/training/basics/intents/result
     private val signInLauncher = registerForActivityResult(
@@ -142,7 +141,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         prefs.expertMode = false
         setOnBackPressed()
 
-        Log.d(TAG, "Save all Locations: ${remoteConfig.getBool("save_all_locations")}")
+        Log.d(TAG, "Save all Locations: ${RemoteConfig.getBool("save_all_locations")}")
     }
 
     private fun isRouteUpdated(docs: QuerySnapshot?) {

@@ -9,6 +9,7 @@ import java.util.*
 data class Position(
     val id: Long = 0,
     val deviceId: String,
+    val userId: String = "",
     val time: Date,
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
@@ -19,11 +20,11 @@ data class Position(
     val battery: Double = 0.0,
     val boatName: String = "",
     val charging: Boolean = false,
-
     val mock: Boolean = false,
 ) {
-    constructor(deviceId: String, boatName: String, location: Location, battery: BatteryStatus) : this(
+    constructor(deviceId: String, userId: String, boatName: String, location: Location, battery: BatteryStatus) : this(
         deviceId = deviceId,
+        userId = userId,
         time = Date(location.time.correctRollover()),
         latitude = location.latitude,
         longitude = location.longitude,

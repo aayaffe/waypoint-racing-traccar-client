@@ -128,11 +128,12 @@ class ManualInputFragment : Fragment() {
             viewModel.route.value.id,
             viewModel.route.value.lastUpdate,
             "-444",
+            "",
             viewModel.boatName.value,
             gateId,
             gateName,
             Date(time),
-            Position("-444", viewModel.boatName.value, l, BatteryStatus()),
+            Position("-444", "222", viewModel.boatName.value, l, BatteryStatus()),
             Utils.getInstalledVersion(requireContext().applicationContext)
         )
         FirestoreDatabase.addManualGatePass(gp, { documentReference ->
@@ -148,8 +149,7 @@ class ManualInputFragment : Fragment() {
 
     private fun validateDateTime(time: String, date: String): Long {
         return try{
-            val timestamp = SimpleDateFormat("ddMMyyHHmmss").parse(date+time).time
-            timestamp
+            return SimpleDateFormat("ddMMyyHHmmss", Locale.getDefault()).parse(date+time)?.time?: -1
         } catch (e: Exception){
             Log.w(TAG, "Error validating datetime", e)
             -1
@@ -157,7 +157,7 @@ class ManualInputFragment : Fragment() {
     }
 
     private fun setDate(d: Date) {
-        val format = SimpleDateFormat("ddMMyy")
+        val format = SimpleDateFormat("ddMMyy", Locale.getDefault())
         viewBinding.dateInput.setText(format.format(d))
     }
     private fun setRadioButtons() {

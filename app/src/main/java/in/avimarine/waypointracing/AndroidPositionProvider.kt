@@ -22,6 +22,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
+import com.google.firebase.auth.FirebaseAuth
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import java.util.*
 
@@ -49,14 +50,15 @@ class AndroidPositionProvider(context: Context, listener: PositionListener) :
 
     @Suppress("DEPRECATION", "MissingPermission")
     override fun requestSingleLocation() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         try {
             val location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
             if (location != null) {
-                listener.onPositionUpdate(Position(deviceId, boatName, location, getBatteryStatus(context)), location)
+                listener.onPositionUpdate(Position(deviceId, userId, boatName, location, getBatteryStatus(context)), location)
             } else {
                 locationManager.requestSingleUpdate(provider, object : LocationListener {
                     override fun onLocationChanged(location: Location) {
-                        listener.onPositionUpdate(Position(deviceId, boatName, location, getBatteryStatus(context)), location)
+                        listener.onPositionUpdate(Position(deviceId, userId, boatName, location, getBatteryStatus(context)), location)
                     }
 
                     @Deprecated("Deprecated in Java")
