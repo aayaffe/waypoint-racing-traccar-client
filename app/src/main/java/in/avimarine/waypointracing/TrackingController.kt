@@ -51,6 +51,7 @@ import `in`.avimarine.waypointracing.route.RouteElement
 import `in`.avimarine.waypointracing.utils.RemoteConfig
 import `in`.avimarine.waypointracing.utils.RouteParser
 import java.util.Date
+import java.util.concurrent.atomic.AtomicLong
 
 class TrackingController(private val context: Context) :
     PositionListener, NetworkHandler, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -85,7 +86,7 @@ class TrackingController(private val context: Context) :
     private var isWaiting = false
     private var isWaitingGP = true
 
-    private var lastPositionTime = 0L
+    private var lastPositionTime = AtomicLong(0L)
 
 
 
@@ -150,8 +151,8 @@ class TrackingController(private val context: Context) :
         //Upload position to Firestore
         if (RemoteConfig.getBool("save_all_locations")) {
             val minPositionUploadInterval = RemoteConfig.getLong("min_position_upload_interval") * 1000 //Convert to ms
-            if (position.time.time - lastPositionTime > minPositionUploadInterval) {
-                lastPositionTime = position.time.time
+            if (position.time.time - lastPositionTime.get() > minPositionUploadInterval) {
+                lastPositionTime.set(position.time.time)
                 FirestoreDatabase.addPosition(position, { documentReference ->
                     Log.d(TAG, "Position added with ID: ${documentReference.id}")
                 }, { e ->
