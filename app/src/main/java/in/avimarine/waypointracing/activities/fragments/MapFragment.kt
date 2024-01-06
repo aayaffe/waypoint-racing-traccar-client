@@ -44,6 +44,7 @@ import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.route.RouteElement
 import `in`.avimarine.waypointracing.route.RouteElementType
+import `in`.avimarine.waypointracing.utils.Preferences
 import `in`.avimarine.waypointracing.utils.RouteParser.Companion.parseRoute
 
 class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener,
@@ -56,6 +57,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     private var annotationApi: AnnotationPlugin? = null
     var route: Route = Route.emptyRoute()
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var prefs: Preferences
     private var bp_selected: Bitmap? = null
     private var bp_selected_green: Bitmap? = null
     private var bp_green: Bitmap? = null
@@ -74,6 +76,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        prefs = Preferences(sharedPreferences)
 
     }
 
@@ -94,12 +97,10 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
                 isMetricUnits = true
             }
             mapView.gestures.rotateEnabled = false
-            nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, -1)
-            sharedPreferences.getString(SettingsFragment.KEY_ROUTE, null)?.let {
-                route = parseRoute(sharedPreferences)
-                addRouteWaypoints(route, nextWpt)
-                initLocationComponent()
-            }
+            nextWpt = prefs.nextWpt
+            route = parseRoute(prefs.currentRoute)
+            addRouteWaypoints(route, nextWpt)
+            initLocationComponent()
         }
 
         return view
@@ -167,16 +168,12 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
 
     override fun onSharedPreferenceChanged(sp: SharedPreferences?, key: String?) {
         if (key == SettingsFragment.KEY_ROUTE) {
-            sp?.let {
-                route = parseRoute(it)
-                addRouteWaypoints(route, nextWpt)
-            }
+            route = parseRoute(prefs.currentRoute)
+            addRouteWaypoints(route, nextWpt)
         }
         if (key == SettingsFragment.KEY_NEXT_WPT) {
-            sp?.let {
-                nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, -1)
-                addRouteWaypoints(route, nextWpt)
-            }
+            nextWpt = prefs.nextWpt //sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, -1)
+            addRouteWaypoints(route, nextWpt)
         }
         if (key == SettingsFragment.KEY_GATE_PASSES) {
             addRouteWaypoints(route, nextWpt,false)
@@ -309,10 +306,10 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         val points = pointAnnotationManager?.annotations?.map { it.point }?: emptyList()
         val linePoints = lineAnnotationManager?.annotations?.flatMap { it.points }?: emptyList()
         val padding = EdgeInsets(
-            100.0,
-            100.0,
-            100.0,
-            100.0
+            50.0,
+            50.0,
+            50.0,
+            50.0
         )
         if ((points + linePoints).isNotEmpty()) {
             val cameraPosition = mapView.getMapboxMap().cameraForCoordinates(points + linePoints, padding)
@@ -356,11 +353,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     }
 
     private fun setNextWpt(nextWpt: Int) {
-        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
-        with(sharedPref.edit()) {
-            putInt(SettingsFragment.KEY_NEXT_WPT, nextWpt)
-            commit()
-        }
+        prefs.nextWpt = nextWpt
     }
 
     override fun onIndicatorPositionChanged(point: Point) {

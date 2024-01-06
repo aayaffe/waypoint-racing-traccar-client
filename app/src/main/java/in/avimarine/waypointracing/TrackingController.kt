@@ -47,6 +47,7 @@ import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.route.RouteElement
+import `in`.avimarine.waypointracing.utils.Preferences
 import `in`.avimarine.waypointracing.utils.RouteParser
 import java.util.Date
 
@@ -58,7 +59,9 @@ class TrackingController(private val context: Context) :
     private val handler = Handler(Looper.getMainLooper())
     private val handlerGP = Handler(Looper.getMainLooper())
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-    private var nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, -1)
+
+    private val prefs = Preferences(sharedPreferences)
+    private var nextWpt = prefs.nextWpt
     private val positionProvider = PositionProviderFactory.create(context, this)
     private val databaseHelper = DatabaseHelper(context)
     private val networkManager = NetworkManager(context, this)
@@ -73,22 +76,17 @@ class TrackingController(private val context: Context) :
         context.getString(R.string.settings_url_default_value)
     )!!
 
-    private val urlGates: String = sharedPreferences.getString(
-        SettingsFragment.KEY_URL_GATES,
-        context.getString(R.string.settings_url_gates_default_value)
-    )!!
     private val buffer: Boolean = sharedPreferences.getBoolean(SettingsFragment.KEY_BUFFER, true)
 
     private var isOnline = networkManager.isOnline
     private var isWaiting = false
-    private var isWaitingGP = true
 
 
     fun start() {
         Log.d(TAG, "TrackingController started")
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         firebaseAnalytics = Firebase.analytics
-        nextWpt = sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
+        nextWpt = prefs.nextWpt //sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
         if (isOnline) {
             read()
         }
@@ -98,7 +96,7 @@ class TrackingController(private val context: Context) :
             Log.w(TAG, e)
         }
         networkManager.start()
-        route = RouteParser.parseRoute(sharedPreferences)
+        route = RouteParser.parseRoute(prefs.currentRoute)
         val name = route?.eventName?: ""
         val lastUpdate = route?.lastUpdate?.time?.toString() ?: ""
         FirestoreDatabase.addEvent(`in`.avimarine.waypointracing.database.EventType.TRACKING_START, "$name $lastUpdate")
@@ -106,7 +104,7 @@ class TrackingController(private val context: Context) :
     }
 
     fun stop() {
-        route = RouteParser.parseRoute(sharedPreferences)
+        route = RouteParser.parseRoute(prefs.currentRoute)
         val name = route?.eventName?: ""
         val lastUpdate = route?.lastUpdate?.time?.toString() ?: ""
         FirestoreDatabase.addEvent(`in`.avimarine.waypointracing.database.EventType.TRACKING_STOP, "$name $lastUpdate")
@@ -132,14 +130,10 @@ class TrackingController(private val context: Context) :
     override fun onPositionUpdate(position: Position, location: Location) {
         Log.d(TAG, "onPositionUpdate")
         if (route == null) {
-            route = RouteParser.parseRoute(sharedPreferences)
+            route = RouteParser.parseRoute(prefs.currentRoute)
         }
         val inArea = updateIsInArea(location, nextWpt)
-        if (sharedPreferences.getBoolean(
-                SettingsFragment.KEY_STATUS,
-                false
-            ) && sharedPreferences.getBoolean(SettingsFragment.KEY_TRACKING, false)
-        ) {
+        if (prefs.status && prefs.tracking) {
             sendPosition(position)
         }
         if (inArea && route != null) {
@@ -186,7 +180,7 @@ class TrackingController(private val context: Context) :
 
 
     private fun setNewGPSInterval(location: Location, route: Route?, nextWpt: Int) {
-        val uiVisible = sharedPreferences.getBoolean(SettingsFragment.KEY_IS_UI_VISIBLE, true)
+        val uiVisible = prefs.uiVisible //sharedPreferences.getBoolean(SettingsFragment.KEY_IS_UI_VISIBLE, true)
         if (route != null && !uiVisible) {
             val wpt = route.elements.elementAtOrNull(nextWpt)
             val lastGatePass = GatePassings.getLastGatePass(context, route.id)
@@ -203,12 +197,7 @@ class TrackingController(private val context: Context) :
                         val interval = distance2interval(wpt, location)
                         setGPSInterval(interval)
                     } else {
-                        setGPSInterval(
-                            sharedPreferences.getString(
-                                SettingsFragment.KEY_INITIAL_INTERVAL,
-                                "30"
-                            )!!.toInt()
-                        )
+                        setGPSInterval(prefs.initialGPSInterval.toInt())
                     }
                 }
             }
@@ -233,21 +222,12 @@ class TrackingController(private val context: Context) :
     }
 
     private fun setGPSInterval(i: Int) {
-        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        with(sharedPref.edit()) {
-            putString(SettingsFragment.KEY_INTERVAL, i.toString())
-            commit()
-        }
+        prefs.GPSInterval = i.toString()
         Log.d(TAG, "New interval is $i")
     }
 
     private fun setNextWpt(n: Int) {
-        val sharedPref: SharedPreferences =
-            PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-        with(sharedPref.edit()) {
-            putInt(SettingsFragment.KEY_NEXT_WPT, n)
-            commit()
-        }
+        prefs.nextWpt = n
     }
 
     override fun onPositionError(error: Throwable) {}
@@ -342,10 +322,7 @@ class TrackingController(private val context: Context) :
                     if (buffer) {
                         delete(position)
                     }
-                    with(sharedPreferences.edit()) {
-                        putLong(SettingsFragment.KEY_LAST_SEND, Date().time)
-                        commit()
-                    }
+                    prefs.lastSend = Date().time
                 } else {
                     StatusActivity.addMessage(context.getString(R.string.status_send_fail))
                     if (buffer) {
@@ -376,13 +353,11 @@ class TrackingController(private val context: Context) :
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == SettingsFragment.KEY_NEXT_WPT) {
-            nextWpt = sharedPreferences?.getInt(SettingsFragment.KEY_NEXT_WPT, 0) ?: nextWpt
+            nextWpt = prefs.nextWpt //sharedPreferences?.getInt(SettingsFragment.KEY_NEXT_WPT, 0) ?: nextWpt
             setGPSInterval(1)
         }
         if (key == SettingsFragment.KEY_ROUTE) {
-            sharedPreferences?.let {
-                route = RouteParser.parseRoute(it)
-            }
+            route = RouteParser.parseRoute(prefs.currentRoute)
         }
     }
 

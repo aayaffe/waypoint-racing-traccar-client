@@ -9,19 +9,14 @@ import org.json.JSONException
 
 class RouteParser {
     companion object{
-        fun parseRoute(sp: SharedPreferences): Route {
-            val s = sp.getString(SettingsFragment.KEY_ROUTE, null)
-            return if (s!= null) {
-                try {
-                    Route.fromString(s)
+
+        fun parseRoute(routeJson: String): Route {
+            return try {
+                    Route.fromString(routeJson)
                 } catch (e: JSONException){
                     Log.e(TAG,"Error parsing route", e)
                     Route.emptyRoute()
                 }
-            } else {
-                Log.e(TAG,"Error loading route from sharedpreferences (null)")
-                Route.emptyRoute()
-            }
         }
     }
 
