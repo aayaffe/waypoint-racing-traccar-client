@@ -24,6 +24,7 @@ import android.location.Location
 import android.os.BatteryManager
 import androidx.preference.PreferenceManager
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import `in`.avimarine.androidutils.BatteryStatus
 import `in`.avimarine.androidutils.TAG
 import kotlin.math.abs
@@ -49,6 +50,7 @@ abstract class PositionProvider(
     protected var distance: Double = sharedPreferences.getString(SettingsFragment.KEY_DISTANCE, "0")!!.toInt().toDouble()
     protected var angle: Double = sharedPreferences.getString(SettingsFragment.KEY_ANGLE, "0")!!.toInt().toDouble()
     private var lastLocation: Location? = null
+    private val userId = FirebaseAuth.getInstance().currentUser?.uid?: ""
 
     abstract fun startUpdates()
     abstract fun stopUpdates()
@@ -63,7 +65,7 @@ abstract class PositionProvider(
         ) {
             Log.v(TAG, "location new")
             this.lastLocation = location
-            listener.onPositionUpdate(Position(deviceId, boatName, location, getBatteryStatus(context)), location)
+            listener.onPositionUpdate(Position(deviceId, userId, boatName, location, getBatteryStatus(context)), location)
 
         } else {
             Log.v(TAG, if (location != null) "location ignored" else "location nil")

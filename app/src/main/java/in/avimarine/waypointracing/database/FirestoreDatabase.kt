@@ -11,6 +11,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import `in`.avimarine.androidutils.TAG
+import `in`.avimarine.waypointracing.Position
+import `in`.avimarine.waypointracing.utils.RemoteConfig
 
 class FirestoreDatabase {
 
@@ -18,8 +20,10 @@ class FirestoreDatabase {
         private const val COLLECTION_BOATS = "boats"
         private const val COLLECTION_ROUTES = "routes"
         private const val COLLECTION_REPORTS = "reports"
+        private const val COLLECTION_REPORTS_NEW = "reports_new"
         private const val COLLECTION_EVENTS = "events"
         private const val COLLECTION_GENERAL = "general"
+        private const val COLLECTION_POSITIONS = "positions"
 
 
         fun getRoutesNames(onSuccess: (List<String>) -> Unit, onFailure: OnFailureListener){
@@ -91,13 +95,23 @@ class FirestoreDatabase {
         }
         fun addGatePass(gp: GatePassing, onSuccess: (DocumentReference) -> Unit, onFailure: OnFailureListener) {
             val db = Firebase.firestore
-            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-            db.collection(COLLECTION_REPORTS).document(uid).set(hashMapOf("id" to uid))
-            db.collection(COLLECTION_REPORTS).document(uid).
-            collection(COLLECTION_REPORTS)
-                .add(gp)
-                .addOnSuccessListener (onSuccess)
-                .addOnFailureListener (onFailure)
+
+
+            if (RemoteConfig.getBool("new_reports_firebase_db")){
+                db.collection(COLLECTION_REPORTS_NEW)
+                    .add(gp)
+                    .addOnSuccessListener (onSuccess)
+                    .addOnFailureListener (onFailure)
+            }
+            else {
+                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+                db.collection(COLLECTION_REPORTS).document(uid).set(hashMapOf("id" to uid))
+                db.collection(COLLECTION_REPORTS).document(uid).
+                collection(COLLECTION_REPORTS)
+                    .add(gp)
+                    .addOnSuccessListener (onSuccess)
+                    .addOnFailureListener (onFailure)
+            }
         }
 
         fun getOwnReports(routeId: String, gateId: Int, onSuccess: (QuerySnapshot) -> Unit, onFailure: OnFailureListener) {
@@ -127,6 +141,14 @@ class FirestoreDatabase {
                 .addOnFailureListener { exception ->
                     Log.d(TAG, "get failed with ", exception)
                 }
+        }
+
+        fun addPosition(position: Position, onSuccess: (DocumentReference) -> Unit, onFailure: OnFailureListener) {
+            val db = Firebase.firestore
+            db.collection(COLLECTION_POSITIONS)
+                .add(position)
+                .addOnSuccessListener (onSuccess)
+                .addOnFailureListener (onFailure)
         }
     }
 

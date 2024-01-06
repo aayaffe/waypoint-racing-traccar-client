@@ -26,6 +26,7 @@ import androidx.preference.PreferenceManager
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.androidutils.Utils.Companion.getInstalledVersion
@@ -47,9 +48,10 @@ import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.route.RouteElement
-import `in`.avimarine.waypointracing.utils.Preferences
+import `in`.avimarine.waypointracing.utils.RemoteConfig
 import `in`.avimarine.waypointracing.utils.RouteParser
 import java.util.Date
+import java.util.concurrent.atomic.AtomicLong
 
 class TrackingController(private val context: Context) :
     PositionListener, NetworkHandler, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -80,6 +82,9 @@ class TrackingController(private val context: Context) :
 
     private var isOnline = networkManager.isOnline
     private var isWaiting = false
+
+    private var lastPositionTime = AtomicLong(0L)
+
 
 
     fun start() {
@@ -136,6 +141,18 @@ class TrackingController(private val context: Context) :
         if (prefs.status && prefs.tracking) {
             sendPosition(position)
         }
+        //Upload position to Firestore
+        if (RemoteConfig.getBool("save_all_locations")) {
+            val minPositionUploadInterval = RemoteConfig.getLong("min_position_upload_interval") * 1000 //Convert to ms
+            if (position.time.time - lastPositionTime.get() > minPositionUploadInterval) {
+                lastPositionTime.set(position.time.time)
+                FirestoreDatabase.addPosition(position, { documentReference ->
+                    Log.d(TAG, "Position added with ID: ${documentReference.id}")
+                }, { e ->
+                    Log.e(TAG, "Error adding position", e)
+                })
+            }
+        }
         if (inArea && route != null) {
             if ((GatePassings.getLastGatePass(context, route!!.id)?.gateId
                     ?: "") == route!!.elements[nextWpt].id &&
@@ -145,11 +162,13 @@ class TrackingController(private val context: Context) :
             }
             Log.d(TAG, "inArea ${route!!.elements[nextWpt].name}")
             StatusActivity.addMessage("Passed " + route!!.elements[nextWpt].name)
+            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
             val gp = GatePassing(
                 route!!.eventName,
                 route!!.id,
                 route!!.lastUpdate,
                 deviceId!!,
+                userId,
                 boatName!!,
                 route!!.elements[nextWpt].id,
                 route!!.elements[nextWpt].name,
@@ -180,7 +199,7 @@ class TrackingController(private val context: Context) :
 
 
     private fun setNewGPSInterval(location: Location, route: Route?, nextWpt: Int) {
-        val uiVisible = prefs.uiVisible //sharedPreferences.getBoolean(SettingsFragment.KEY_IS_UI_VISIBLE, true)
+        val uiVisible = sharedPreferences.getBoolean(SettingsFragment.KEY_IS_UI_VISIBLE, true)
         if (route != null && !uiVisible) {
             val wpt = route.elements.elementAtOrNull(nextWpt)
             val lastGatePass = GatePassings.getLastGatePass(context, route.id)

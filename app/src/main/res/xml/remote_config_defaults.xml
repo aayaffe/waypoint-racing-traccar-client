@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<defaults>
+  <entry>
+    <key>save_all_locations</key>
+    <value>false</value>
+  </entry>
+  <entry>
+    <key>min_position_upload_interval</key>
+    <value>300</value>
+  </entry>
+  <entry>
+    <key>new_reports_firebase_db</key>
+    <value>true</value>
+  </entry>
+</defaults>

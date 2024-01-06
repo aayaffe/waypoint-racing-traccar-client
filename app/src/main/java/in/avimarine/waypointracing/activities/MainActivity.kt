@@ -140,6 +140,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
         prefs.expertMode = false
         setOnBackPressed()
+
+        Log.d(TAG, "Save all Locations: ${RemoteConfig.getBool("save_all_locations")}")
     }
 
     private fun isRouteUpdated(docs: QuerySnapshot?) {
