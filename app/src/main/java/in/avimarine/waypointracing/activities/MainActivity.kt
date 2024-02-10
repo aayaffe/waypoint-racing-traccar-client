@@ -568,6 +568,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun resetRoute(resetGatePasses: Boolean = true) {
+        isFirstSpinnerLoad = true
         setNextWpt(route.getNextNonOptionalWpt(-1))
         if (resetGatePasses) {
             GatePassings.reset(this, route)
