@@ -30,7 +30,7 @@ class ProofArea  (
 
     constructor(bearings: ArrayList<Double>) : this(ProofAreaType.QUADRANT, bearings, arrayListOf(),Distance(0.0, DistanceUnits.NauticalMiles))
 
-    constructor(type: ProofAreaType, wpts: ArrayList<Location>):this(type, arrayListOf(), wpts, Distance(0.0, DistanceUnits.NauticalMiles))
+    constructor(type: ProofAreaType, wpts: ArrayList<Location>, dist: Distance):this(type, arrayListOf(), wpts, dist)
 
     fun isInProofArea(portWpt: Location, stbdWpt: Location, loc:Location):Boolean{
         if (type== ProofAreaType.POLYGON){

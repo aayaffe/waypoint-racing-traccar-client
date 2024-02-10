@@ -40,25 +40,43 @@ class Route(
     fun isValidWpt(nextWpt: Int): Boolean {
         return nextWpt<elements.size && nextWpt > -1
     }
+
+    /**
+     * Returns the next non optional waypoint.
+     * If the current waypoint is the last one, it returns the last one.
+     * If the input is -1 the the first non optional waypoint in the route is returned
+     * If no non optional waypoint is found, the last waypoint is returned
+     */
+    fun getNextNonOptionalWpt(currentWpt: Int): Int {
+        var i = currentWpt + 1
+        while (i < elements.size - 1 && !elements[i].mandatory) {
+            i++
+        }
+        if (i > elements.size - 1) {
+            i = elements.size - 1
+        }
+        return i
+    }
+
     companion object {
 
         fun fromString(s: String): Route{
             return Json.decodeFromString(s)
         }
 
-        fun fromGeoJson(geojson: String): Route {
-            val json = JSONObject(convertStandardJSONString(geojson))
+        fun fromGeoJson(geoJson: String): Route {
+            val json = JSONObject(convertStandardJSONString(geoJson))
             val name = json.getJSONObject("routedata").getString("name")
             val organizing = json.getJSONObject("routedata").getString("organizing")
             val id = json.getJSONObject("routedata").getString("id")
             val date = Date(json.getJSONObject("routedata").getLong("lastUpdate"))
-            val features = FeatureCollection.fromJson(geojson)
+            val features = FeatureCollection.fromJson(geoJson)
                 ?: throw JSONException("Unable to parse Route")
             val el: ArrayList<RouteElement> = arrayListOf()
             for (f in features.features()!!) {
                 el.add(parseRouteElement(f))
             }
-            var et: EventType =
+            val et: EventType =
             try{
                 EventType.valueOf(json.getJSONObject("routedata").getString("eventType"))
             } catch (e: Exception){
@@ -71,14 +89,14 @@ class Route(
 
 
         private fun parseRouteElement(f: Feature): RouteElement {
-            return when {
-                f.properties()?.get("routeElementType")?.asString == "GATE" -> {
+            return when (f.properties()?.get("routeElementType")?.asString) {
+                "GATE" -> {
                     Gate.fromGeoJson(f)
                 }
-                f.properties()?.get("routeElementType")?.asString == "FINISH" -> {
+                "FINISH" -> {
                     Finish.fromGeoJson(f)
                 }
-                f.properties()?.get("routeElementType")?.asString == "WAYPOINT" -> {
+                "WAYPOINT" -> {
                     Waypoint.fromGeoJson(f)
                 }
                 else -> {

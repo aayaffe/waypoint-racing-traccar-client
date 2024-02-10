@@ -24,10 +24,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.preference.PreferenceManager
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.analytics.analytics
+import com.google.firebase.analytics.logEvent
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.androidutils.Utils.Companion.getInstalledVersion
 import `in`.avimarine.androidutils.pointToLineDist
@@ -42,12 +42,12 @@ import `in`.avimarine.waypointracing.activities.StatusActivity
 import `in`.avimarine.waypointracing.database.DatabaseHelper
 import `in`.avimarine.waypointracing.database.DatabaseHelper.DatabaseHandler
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
-import `in`.avimarine.waypointracing.database.GatePassesDatabaseHelper
 import `in`.avimarine.waypointracing.route.EventType
 import `in`.avimarine.waypointracing.route.GatePassing
 import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.route.RouteElement
+import `in`.avimarine.waypointracing.utils.Preferences
 import `in`.avimarine.waypointracing.utils.RemoteConfig
 import `in`.avimarine.waypointracing.utils.RouteParser
 import java.util.Date
@@ -63,7 +63,6 @@ class TrackingController(private val context: Context) :
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     private val prefs = Preferences(sharedPreferences)
-    private var nextWpt = prefs.nextWpt
     private val positionProvider = PositionProviderFactory.create(context, this)
     private val databaseHelper = DatabaseHelper(context)
     private val networkManager = NetworkManager(context, this)
@@ -91,7 +90,6 @@ class TrackingController(private val context: Context) :
         Log.d(TAG, "TrackingController started")
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         firebaseAnalytics = Firebase.analytics
-        nextWpt = prefs.nextWpt //sharedPreferences.getInt(SettingsFragment.KEY_NEXT_WPT, 0)
         if (isOnline) {
             read()
         }
@@ -137,7 +135,7 @@ class TrackingController(private val context: Context) :
         if (route == null) {
             route = RouteParser.parseRoute(prefs.currentRoute)
         }
-        val inArea = updateIsInArea(location, nextWpt)
+        val inArea = updateIsInArea(location, prefs.nextWpt)
         if (prefs.status && prefs.tracking) {
             sendPosition(position)
         }
@@ -155,13 +153,15 @@ class TrackingController(private val context: Context) :
         }
         if (inArea && route != null) {
             if ((GatePassings.getLastGatePass(context, route!!.id)?.gateId
-                    ?: "") == route!!.elements[nextWpt].id &&
+                    ?: "") == route!!.elements[prefs.nextWpt].id &&
                 (GatePassings.getLastGatePass(context, route!!.id)?.routeId ?: "") == route!!.id
             ) {
+                // Check if The last recorded gatepass is the same as the current one
+                // then do nothing
                 return
             }
-            Log.d(TAG, "inArea ${route!!.elements[nextWpt].name}")
-            StatusActivity.addMessage("Passed " + route!!.elements[nextWpt].name)
+            Log.d(TAG, "inArea ${route!!.elements[prefs.nextWpt].name}")
+            StatusActivity.addMessage("Passed " + route!!.elements[prefs.nextWpt].name)
             val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
             val gp = GatePassing(
                 route!!.eventName,
@@ -170,15 +170,15 @@ class TrackingController(private val context: Context) :
                 deviceId!!,
                 userId,
                 boatName!!,
-                route!!.elements[nextWpt].id,
-                route!!.elements[nextWpt].name,
+                route!!.elements[prefs.nextWpt].id,
+                route!!.elements[prefs.nextWpt].name,
                 position.time,
                 position,
                 getInstalledVersion(context)
             )
             firebaseAnalytics.logEvent("gate_pass") {
                 param("route", route!!.eventName)
-                param("next_wpt", nextWpt.toString())
+                param("next_wpt", prefs.nextWpt.toString())
             }
             FirestoreDatabase.addGatePass(gp, { documentReference ->
                 Log.d(TAG, "Gatepass added with ID: ${documentReference.id}")
@@ -190,11 +190,10 @@ class TrackingController(private val context: Context) :
             )
             GatePassings.addGatePass(context, gp)
             if (route!!.eventType == EventType.WPTRACING) { //Enable auto waypoint advance for waypoint racing event only
-                nextWpt += 1
-                setNextWpt(nextWpt)
+                prefs.nextWpt = route!!.getNextNonOptionalWpt(prefs.nextWpt)
             }
         }
-        setNewGPSInterval(location, route, nextWpt)
+        setNewGPSInterval(location, route, prefs.nextWpt)
     }
 
 
@@ -243,10 +242,6 @@ class TrackingController(private val context: Context) :
     private fun setGPSInterval(i: Int) {
         prefs.GPSInterval = i.toString()
         Log.d(TAG, "New interval is $i")
-    }
-
-    private fun setNextWpt(n: Int) {
-        prefs.nextWpt = n
     }
 
     override fun onPositionError(error: Throwable) {}
@@ -372,7 +367,6 @@ class TrackingController(private val context: Context) :
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == SettingsFragment.KEY_NEXT_WPT) {
-            nextWpt = prefs.nextWpt //sharedPreferences?.getInt(SettingsFragment.KEY_NEXT_WPT, 0) ?: nextWpt
             setGPSInterval(1)
         }
         if (key == SettingsFragment.KEY_ROUTE) {

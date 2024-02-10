@@ -151,6 +151,4 @@ class FirestoreDatabase {
                 .addOnFailureListener (onFailure)
         }
     }
-
-
 }

@@ -1,6 +1,7 @@
 package `in`.avimarine.waypointracing.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -64,7 +65,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     private lateinit var prefs: Preferences
     private lateinit var alarmManager: AlarmManager
     private lateinit var alarmIntent: PendingIntent
-    private var nextWpt: Int = 0
+//    private var nextWpt: Int = 0
     private var route = Route.emptyRoute()
     val delayedHandler = Handler(Looper.getMainLooper())
     private var isFirstSpinnerLoad = true
@@ -113,7 +114,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         }
 
         binding.time.setLabel(getTimeZoneString())
-        if (route.isValidWpt(nextWpt)) {
+        if (route.isValidWpt(prefs.nextWpt)) {
             getNextWpt()
         }
 
@@ -126,8 +127,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             ) {
                 if (isFirstSpinnerLoad) {
                     isFirstSpinnerLoad = false
-                    if (route.isValidWpt(nextWpt)) {
-                        parent?.setSelection(nextWpt)
+                    if (route.isValidWpt(prefs.nextWpt)) {
+                        parent?.setSelection(prefs.nextWpt)
                     }
                     return
                 }
@@ -243,6 +244,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         super.attachBaseContext(newBase)
     }
 
+    @SuppressLint("MissingSuperCall", "False Positive")
     override fun onNewIntent(i: Intent) {
         super.onNewIntent(i)
         if (RouteLoader.handleIntent(this, i, this::loadRoute)) {
@@ -264,6 +266,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         if (newRoute) {
             //Loading new route, reset last checked version
             prefs.routeUpdatedVersion = 0
+            prefs.nextWpt = route.getNextNonOptionalWpt(-1)
         }
         route = r
         prefs.currentRoute = route.toString()
@@ -366,12 +369,12 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun getNextWpt() {
-        nextWpt = prefs.nextWpt
-        if (nextWpt >= route.elements.size) {
+//        nextWpt = prefs.nextWpt
+        if (prefs.nextWpt >= route.elements.size) {
             setNextWpt(0)
         }
-        binding.routeElementSpinner.setSelection(nextWpt)
-        route.elements.elementAtOrNull(nextWpt)?.let { setNextWaypointUI(it) }
+        binding.routeElementSpinner.setSelection(prefs.nextWpt)
+        route.elements.elementAtOrNull(prefs.nextWpt)?.let { setNextWaypointUI(it) }
     }
 
     private fun setNextWaypointUI(wpt: RouteElement) {
@@ -408,7 +411,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     override fun onPause() {
         super.onPause()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-        setGPSInterval(prefs.initialGPSInterval.toInt())
+        setGPSInterval(5)//prefs.initialGPSInterval.toInt())
         setMainActivityVisibilityStatus(false)
         stopPositionProvider()
     }
@@ -486,6 +489,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                         prefs.status = false
                         resetRoute(false)
                         RouteLoader.loadRouteFromString(this, it, this::loadRoute)
+                        resetRoute(false)
                     }
                 }
             }
@@ -564,7 +568,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun resetRoute(resetGatePasses: Boolean = true) {
-        setNextWpt(0)
+        setNextWpt(route.getNextNonOptionalWpt(-1))
         if (resetGatePasses) {
             GatePassings.reset(this, route)
         }
@@ -583,7 +587,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     fun setNextWpt(n: Int) {
-        nextWpt = n
+//        nextWpt = n
         prefs.nextWpt = n
     }
 
@@ -604,7 +608,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
     }
 
     private fun updateUI(location: Location) {
-        val wpt = route.elements.elementAtOrNull(nextWpt)
+        val wpt = route.elements.elementAtOrNull(prefs.nextWpt)
         binding.viewmodel = LocationViewModel(location, wpt, sharedPreferences)
         setUiForGPS(true)
         if (wpt != null) {
@@ -797,6 +801,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             alarmManager.cancel(alarmIntent)
             Log.d(TAG, "Stopped alarm manager")
         }
+        Log.d(TAG, "Stopping service")
         this.stopService(Intent(this, TrackingService::class.java))
     }
 

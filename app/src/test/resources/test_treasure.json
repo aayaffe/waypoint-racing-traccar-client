@@ -44,6 +44,24 @@
           32.84
         ]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Treasure 3",
+        "routeElementType": "WAYPOINT",
+        "mandatory": false,
+        "id": 2,
+        "proofAreaType" : "CIRCLE",
+        "proofAreaSize" : 1.1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.02,
+          32.1
+        ]
+      }
     }
   ]
 }

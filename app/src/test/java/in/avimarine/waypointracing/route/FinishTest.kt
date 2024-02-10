@@ -2,11 +2,8 @@ package `in`.avimarine.waypointracing.route
 
 import android.os.Build
 import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
 import `in`.avimarine.androidutils.Utils.Companion.convertStandardJSONString
 import `in`.avimarine.androidutils.createLocation
-import org.json.JSONException
-import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,8 +16,8 @@ class FinishTest {
 
     @Test
     fun testParseGate() {
-        val jsonText =this::class.java.classLoader.getResource("test_wptracing.json").readText()
-        val r = Route.fromGeoJson(jsonText)
+        val jsonText = this::class.java.classLoader?.getResource("test_wptracing.json")?.readText()
+        val r = Route.fromGeoJson(jsonText!!)
         val waypoint1 = r.elements[5]
         Assert.assertEquals(ProofAreaType.POLYGON, waypoint1.proofArea.type)
         Assert.assertTrue(waypoint1.isInProofArea(createLocation(31.685, 34.551)))
@@ -28,8 +25,8 @@ class FinishTest {
 
     @Test
     fun testToGeoJson(){
-        val jsonText =this::class.java.classLoader.getResource("test_wptracing.json").readText()
-        val r = Route.fromGeoJson(jsonText)
+        val jsonText = this::class.java.classLoader?.getResource("test_wptracing.json")?.readText()
+        val r = Route.fromGeoJson(jsonText!!)
         val waypoint1 = r.elements[5]
         val geoJson = waypoint1.toGeoJson()
         val feature = Feature.fromJson(convertStandardJSONString(geoJson))
