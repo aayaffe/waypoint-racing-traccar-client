@@ -26,6 +26,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.*
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
@@ -49,7 +50,12 @@ class TrackingService() : Service() {
 
     @SuppressLint("WakelockTimeout")
     override fun onCreate() {
-        startForeground(NOTIFICATION_ID, createNotification(this))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(NOTIFICATION_ID, createNotification(this), FOREGROUND_SERVICE_TYPE_LOCATION)
+        }
+        else {
+            startForeground(NOTIFICATION_ID, createNotification(this))
+        }
         Log.i(TAG, "service create")
         sendBroadcast(Intent(ACTION_STARTED))
         StatusActivity.addMessage(getString(R.string.status_service_create))
