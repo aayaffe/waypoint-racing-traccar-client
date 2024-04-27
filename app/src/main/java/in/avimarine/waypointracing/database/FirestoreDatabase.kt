@@ -117,12 +117,25 @@ class FirestoreDatabase {
         fun getOwnReports(routeId: String, gateId: Int, onSuccess: (QuerySnapshot) -> Unit, onFailure: OnFailureListener) {
             val db = Firebase.firestore
             val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-            val docRef = db.collection(COLLECTION_REPORTS).document(uid).collection(COLLECTION_REPORTS).whereEqualTo("routeId",routeId).whereEqualTo("gateId", gateId)
-            docRef.get()
-                .addOnSuccessListener (onSuccess)
-                .addOnFailureListener { exception ->
-                    Log.d(TAG, "get failed with ", exception)
-                }
+            if (RemoteConfig.getBool("new_reports_firebase_db")) {
+                val docRef =
+                    db.collection(COLLECTION_REPORTS_NEW)
+                        .whereEqualTo("userId", uid).whereEqualTo("routeId", routeId).whereEqualTo("gateId", gateId)
+                docRef.get()
+                    .addOnSuccessListener(onSuccess)
+                    .addOnFailureListener { exception ->
+                        Log.d(TAG, "get failed with ", exception)
+                    }
+            } else {
+                val docRef =
+                    db.collection(COLLECTION_REPORTS).document(uid).collection(COLLECTION_REPORTS)
+                        .whereEqualTo("routeId", routeId).whereEqualTo("gateId", gateId)
+                docRef.get()
+                    .addOnSuccessListener(onSuccess)
+                    .addOnFailureListener { exception ->
+                        Log.d(TAG, "get failed with ", exception)
+                    }
+            }
         }
 
         fun addEvent(e: EventType, extraData: String = "") {
