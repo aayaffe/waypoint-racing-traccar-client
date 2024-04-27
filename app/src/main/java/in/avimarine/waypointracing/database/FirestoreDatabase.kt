@@ -7,9 +7,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.toObject
+import com.google.firebase.firestore.firestore
+import com.google.firebase.Firebase
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.waypointracing.Position
 import `in`.avimarine.waypointracing.utils.RemoteConfig

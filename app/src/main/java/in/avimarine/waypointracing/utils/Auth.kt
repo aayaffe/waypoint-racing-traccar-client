@@ -7,7 +7,7 @@ import androidx.preference.PreferenceManager
 import com.firebase.ui.auth.AuthUI
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.firestore.toObject
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.database.Boat
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
