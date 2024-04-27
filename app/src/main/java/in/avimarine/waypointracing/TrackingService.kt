@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package `in`.avimarine.waypointracing;
+package `in`.avimarine.waypointracing
 
 import `in`.avimarine.waypointracing.activities.MainActivity
-import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.activities.StatusActivity
-import `in`.avimarine.waypointracing.route.Route
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
-import android.content.*
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
 import android.os.Build
@@ -37,37 +36,52 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import `in`.avimarine.androidutils.TAG
-import `in`.avimarine.waypointracing.database.FirestoreDatabase
-import `in`.avimarine.waypointracing.utils.RouteParser.Companion.parseRoute
-import java.util.*
+import `in`.avimarine.waypointracing.utils.Preferences
 
 
-class TrackingService() : Service() {
+class TrackingService : Service() {
 
     private var wakeLock: WakeLock? = null
     private var trackingController: TrackingController? = null
+    private lateinit var prefs: Preferences
 
 
     @SuppressLint("WakelockTimeout")
     override fun onCreate() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(NOTIFICATION_ID, createNotification(this), FOREGROUND_SERVICE_TYPE_LOCATION)
-        }
-        else {
-            startForeground(NOTIFICATION_ID, createNotification(this))
-        }
-        Log.i(TAG, "service create")
-        sendBroadcast(Intent(ACTION_STARTED))
-        StatusActivity.addMessage(getString(R.string.status_service_create))
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SettingsFragment.KEY_WAKELOCK, true)) {
-                val powerManager = getSystemService(POWER_SERVICE) as PowerManager
-                wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, javaClass.name)
-                wakeLock?.acquire()
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        prefs = Preferences(sharedPreferences)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    createNotification(this),
+                    FOREGROUND_SERVICE_TYPE_LOCATION
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, createNotification(this))
             }
-            trackingController = TrackingController(this)
-            trackingController?.start()
+            Log.i(TAG, "service create")
+            sendBroadcast(Intent(ACTION_STARTED).setPackage(packageName))
+            StatusActivity.addMessage(getString(R.string.status_service_create))
+
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                if (prefs.wakeLock) {
+                    val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+                    wakeLock =
+                        powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, javaClass.name)
+                    wakeLock?.acquire()
+                }
+                trackingController = TrackingController(this)
+                trackingController?.start()
+            }
+        } catch (e: RuntimeException) {
+            Log.w(TAG, e)
+            prefs.wakeLock = false
+            stopSelf()
         }
     }
 
@@ -88,7 +102,7 @@ class TrackingService() : Service() {
             stopForeground(true)
         }
         Log.i(TAG, "service destroy")
-        sendBroadcast(Intent(ACTION_STOPPED))
+        sendBroadcast(Intent(ACTION_STOPPED).setPackage(packageName))
         StatusActivity.addMessage(getString(R.string.status_service_destroy))
         if (wakeLock?.isHeld == true) {
             wakeLock?.release()
@@ -98,10 +112,12 @@ class TrackingService() : Service() {
 
     companion object {
 
+        // Explicit package name should be specified when broadcasting START/STOP notifications -
+        // it is required for manifest-declared receiver of the status widget (when running on Android 8+).
+        // Refer to https://developer.android.com/guide/components/broadcasts#manifest-declared-receivers
         const val ACTION_STARTED = "org.traccar.action.SERVICE_STARTED"
         const val ACTION_STOPPED = "org.traccar.action.SERVICE_STOPPED"
         private const val NOTIFICATION_ID = 1
-        const val ROUTE_ACTION = "GET_TRACCAR_ROUTE"
 
         @SuppressLint("UnspecifiedImmutableFlag")
         private fun createNotification(context: Context): Notification {
@@ -128,8 +144,4 @@ class TrackingService() : Service() {
             return builder.build()
         }
     }
-
-
 }
-
-

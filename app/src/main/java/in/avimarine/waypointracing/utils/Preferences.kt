@@ -83,4 +83,9 @@ class Preferences (val sharedPreferences: SharedPreferences){
         get() = sharedPreferences.getLong(SettingsFragment.KEY_LAST_SEND, Long.MAX_VALUE)
         set(value) = sharedPreferences.edit().putLong(SettingsFragment.KEY_LAST_SEND, value).apply()
 
+
+    var wakeLock: Boolean
+        get() = sharedPreferences.getBoolean(SettingsFragment.KEY_WAKELOCK, true)
+        set(value) = sharedPreferences.edit().putBoolean(SettingsFragment.KEY_WAKELOCK, value).apply()
+
 }

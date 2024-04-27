@@ -35,10 +35,7 @@ import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.toObject
-import eu.bolt.screenshotty.ScreenshotActionOrder
-import eu.bolt.screenshotty.ScreenshotManager
-import eu.bolt.screenshotty.ScreenshotManagerBuilder
+import com.google.firebase.firestore.toObject
 import `in`.avimarine.androidutils.*
 import `in`.avimarine.androidutils.LocationPermissions.Companion.PERMISSIONS_REQUEST_LOCATION_UI
 import `in`.avimarine.androidutils.Utils.Companion.getInstalledVersion
@@ -86,10 +83,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         binding.versionViewModel = VersionViewModel(getInstalledVersion(this))
         setContentView(view)
         Auth.launchAuthenticationProcess(signInLauncher)
-        screenshotManager = ScreenshotManagerBuilder(this)
-            .withCustomActionOrder(ScreenshotActionOrder.pixelCopyFirst()) //optional, ScreenshotActionOrder.pixelCopyFirst() by default
-            .withPermissionRequestCode(REQUEST_SCREENSHOT_PERMISSION) //optional, 888 by default
-            .build()
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
         prefs = Preferences(sharedPreferences)
         checkVersion()
@@ -516,7 +509,8 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
             }
 
             R.id.send_screenshot_menu_action -> {
-                takeScreenshot()
+                val bitmap = ScreenShot.takeScreenshot(this)
+                ScreenShot.sendSnapshot(bitmap, BuildConfig.APPLICATION_ID, this)
                 return true
             }
 
@@ -617,8 +611,7 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
         } else {
             binding.location.setTextColor(Color.BLACK)
         }
-        val interval = (prefs.GPSInterval.toLong()
-            ?: 600) * 4000 //After four times interval
+        val interval = (prefs.GPSInterval.toLong()) * 4000 //After four times interval
         delayedHandler.removeCallbacksAndMessages(null)
         delayedHandler.postDelayed({
             setUiForGPS(false)
@@ -831,24 +824,6 @@ class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
                 }
             }
         }
-    }
-
-    private val REQUEST_SCREENSHOT_PERMISSION: Int = 1234
-    private lateinit var screenshotManager: ScreenshotManager
-
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        screenshotManager.onActivityResult(requestCode, resultCode, data)
-    }
-
-    private fun takeScreenshot() {
-        val screenshotResult = screenshotManager.makeScreenshot()
-        screenshotResult.observe(
-            onSuccess = { ScreenShot.processScreenshot(it, BuildConfig.APPLICATION_ID, this) },
-            onError = { /*onMakeScreenshotFailed(it)*/ }
-        )
     }
 
     companion object {

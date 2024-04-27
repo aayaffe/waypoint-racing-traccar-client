@@ -16,11 +16,9 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.IntentCompat
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
-import eu.bolt.screenshotty.ScreenshotActionOrder
-import eu.bolt.screenshotty.ScreenshotManager
-import eu.bolt.screenshotty.ScreenshotManagerBuilder
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.androidutils.timeStampToDateString
 import `in`.avimarine.waypointracing.BuildConfig
@@ -63,10 +61,6 @@ class RouteActivity : AppCompatActivity() {
 
         setDetailsBox(route)
         setPointsDetails(route)
-        screenshotManager = ScreenshotManagerBuilder(this)
-            .withCustomActionOrder(ScreenshotActionOrder.pixelCopyFirst()) //optional, ScreenshotActionOrder.pixelCopyFirst() by default
-            .withPermissionRequestCode(REQUEST_SCREENSHOT_PERMISSION) //optional, 888 by default
-            .build()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -115,7 +109,8 @@ class RouteActivity : AppCompatActivity() {
                 return shareRouteResults()
             }
             R.id.send_screenshot_menu_action -> {
-                takeScreenshot()
+                val bitmap = ScreenShot.takeScreenshot(this)
+                ScreenShot.sendSnapshot(bitmap, BuildConfig.APPLICATION_ID, this)
                 return true
             }
         }
@@ -156,7 +151,7 @@ class RouteActivity : AppCompatActivity() {
     }
 
     private fun parseRouteIntent(i: Intent?){
-        val r : Route? = i?.getParcelableExtra("route")
+        val r = i?.let { IntentCompat.getParcelableExtra(it, "route", Route::class.java) }
         if (r!=null){
             route = r
         }
@@ -168,24 +163,4 @@ class RouteActivity : AppCompatActivity() {
         ab?.title = title
         ab?.subtitle = subTitle
     }
-
-
-    private val REQUEST_SCREENSHOT_PERMISSION: Int = 12344321
-    private lateinit var screenshotManager : ScreenshotManager
-
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        screenshotManager.onActivityResult(requestCode, resultCode, data)
-    }
-
-    private fun takeScreenshot(){
-        val screenshotResult = screenshotManager.makeScreenshot()
-        screenshotResult.observe(
-            onSuccess = { ScreenShot.processScreenshot(it, BuildConfig.APPLICATION_ID, this) },
-            onError = { /*onMakeScreenshotFailed(it)*/ }
-        )
-    }
-
 }
