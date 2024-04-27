@@ -32,8 +32,7 @@ class LoadRouteActivity : AppCompatActivity() {
 
     private fun populateRoutesList(){
         val query: Query = FirebaseFirestore.getInstance()
-            .collection("routes")
-            .limit(50)
+            .collection("routes").whereEqualTo("visibility", "public")
         val options = FirestoreRecyclerOptions.Builder<RouteDetails>()
             .setQuery(query, RouteDetails::class.java).setLifecycleOwner(this)
             .build()

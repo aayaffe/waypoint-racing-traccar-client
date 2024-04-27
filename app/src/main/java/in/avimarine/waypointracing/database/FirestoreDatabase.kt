@@ -36,7 +36,8 @@ class FirestoreDatabase {
             }, onFailure)
         }
         fun getRoutes(onSuccess: (QuerySnapshot) -> Unit, onFailure: OnFailureListener) {
-            Firebase.firestore.collection(COLLECTION_ROUTES).limit(10)
+            Firebase.firestore.collection(COLLECTION_ROUTES).limit(100)
+                .whereEqualTo("visibility", "public")
                 .get()
                 .addOnSuccessListener (onSuccess)
                 .addOnFailureListener (onFailure)
