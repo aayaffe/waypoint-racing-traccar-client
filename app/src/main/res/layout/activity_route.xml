@@ -28,38 +28,15 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/id_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/route_id"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/id_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text=""
-            android:textSize="16sp"
-            app:layout_constraintStart_toEndOf="@id/id_title"
-            app:layout_constraintTop_toTopOf="@id/id_title"
-            app:layout_constraintBottom_toBottomOf="@id/id_title"/>
-
-        <TextView
             android:id="@+id/organizer_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
             android:textStyle="bold"
             android:text="@string/organizer"
             android:textSize="16sp"
-            app:layout_constraintStart_toEndOf="@id/id_value"
-            app:layout_constraintTop_toTopOf="@id/id_value"
-            app:layout_constraintBottom_toBottomOf="@id/id_value"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
             android:id="@+id/organizer_value"

@@ -96,6 +96,8 @@
     <string name="prevent_sleep_btn">Add Exception</string>
     <string name="login_btn">Login\nTo enable tracking</string>
     <string name="boat">Boat:</string>
+    <string name="boat_title">Boat</string>
+    <string name="route_title">Route</string>
     <string name="settings_adaptiveinterval">Adaptive interval</string>
     <string name="permission_rationale">Waypoint Racing collects location data to enable boat tracking, and race course navigation even when the app is closed or not in use</string>
     <string name="share_results">Share results</string>
@@ -106,4 +108,5 @@
     <string name="mapbox_access_token">pk.eyJ1IjoiYWF5YWZmZSIsImEiOiJja2MyN3N4ZDMxdmNxMnhvNGg2NWJkeTRmIn0.TEuCkSZ1wyHG95fWz6WGtA</string>
     <string name="missing_boat_name_title">Missing boat name</string>
     <string name="missing_boat_name_message">Boat name is not set up.\nPress OK to go to settings screen and set boat name</string>
+    <string name="permissions">Permissions</string>
 </resources>

@@ -2,15 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:id="@+id/step_1_login"
-        android:title="Login" />
+        android:title="@string/login" />
 
     <item android:id="@+id/step_2_boat"
-        android:title="Boat" />
+        android:title="@string/boat_title" />
 
     <item android:id="@+id/step_3_route"
-        android:title="Route" />
+        android:title="@string/route_title" />
 
     <item android:id="@+id/step_4_permissions"
-        android:title="Permissions" />
+        android:title="@string/permissions" />
 
 </menu>

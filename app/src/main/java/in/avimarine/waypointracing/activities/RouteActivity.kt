@@ -93,7 +93,6 @@ class RouteActivity : AppCompatActivity() {
     }
 
     private fun setDetailsBox(route: Route) {
-        binding.idValue.text = route.id
         binding.lastupdateValue.text = timeStampToDateString(route.lastUpdate.time)
         binding.organizerValue.text = route.organizing
         binding.boatnameValue.text = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "Undefined")
