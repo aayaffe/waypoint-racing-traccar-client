@@ -109,4 +109,5 @@
     <string name="missing_boat_name_title">Missing boat name</string>
     <string name="missing_boat_name_message">Boat name is not set up.\nPress OK to go to settings screen and set boat name</string>
     <string name="permissions">Permissions</string>
+    <string name="select_route">Select Route</string>
 </resources>

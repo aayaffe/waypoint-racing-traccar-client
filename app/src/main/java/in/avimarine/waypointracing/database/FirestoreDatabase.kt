@@ -10,6 +10,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObject
 import com.google.firebase.firestore.firestore
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.Query
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.waypointracing.Position
 import `in`.avimarine.waypointracing.utils.RemoteConfig
@@ -21,7 +22,7 @@ class FirestoreDatabase {
         private const val COLLECTION_ROUTES = "routes"
         private const val COLLECTION_REPORTS = "reports"
         private const val COLLECTION_REPORTS_NEW = "reports_new"
-        private const val COLLECTION_EVENTS = "events"
+        private const val COLLECTION_LOG = "log"
         private const val COLLECTION_GENERAL = "general"
         private const val COLLECTION_POSITIONS = "positions"
 
@@ -35,9 +36,15 @@ class FirestoreDatabase {
                 onSuccess(names)
             }, onFailure)
         }
+
+        /**
+         * For use in FirebaseUI
+         */
+        fun getRoutesQuery(): Query {
+            return Firebase.firestore.collection(COLLECTION_ROUTES).whereEqualTo("visibility", "public")
+        }
         fun getRoutes(onSuccess: (QuerySnapshot) -> Unit, onFailure: OnFailureListener) {
-            Firebase.firestore.collection(COLLECTION_ROUTES).limit(100)
-                .whereEqualTo("visibility", "public")
+                getRoutesQuery()
                 .get()
                 .addOnSuccessListener (onSuccess)
                 .addOnFailureListener (onFailure)
@@ -143,7 +150,7 @@ class FirestoreDatabase {
             val db = Firebase.firestore
             val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
             val event = Event(uid, e, System.currentTimeMillis(), extraData)
-            db.collection(COLLECTION_EVENTS).document().set(event)
+            db.collection(COLLECTION_LOG).document().set(event)
 
         }
 

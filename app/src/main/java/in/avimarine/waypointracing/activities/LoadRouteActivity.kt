@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter
 import com.firebase.ui.firestore.FirestoreRecyclerOptions
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
 
@@ -27,12 +26,11 @@ class LoadRouteActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
         populateRoutesList()
-        setTitle("Select route", "")
+        setTitle()
     }
 
     private fun populateRoutesList(){
-        val query: Query = FirebaseFirestore.getInstance()
-            .collection("routes").whereEqualTo("visibility", "public")
+        val query: Query = FirestoreDatabase.getRoutesQuery()
         val options = FirestoreRecyclerOptions.Builder<RouteDetails>()
             .setQuery(query, RouteDetails::class.java).setLifecycleOwner(this)
             .build()
@@ -57,10 +55,10 @@ class LoadRouteActivity : AppCompatActivity() {
         binding.RoutesRecyclerView.adapter = adapter
         binding.RoutesRecyclerView.layoutManager = LinearLayoutManager(this)
     }
-    private fun setTitle(title: String, subTitle: String) {
+    private fun setTitle() {
         val ab = supportActionBar
-        ab?.title = title
-        ab?.subtitle = subTitle
+        ab?.title = getString(`in`.avimarine.waypointracing.R.string.select_route)
+        ab?.subtitle = ""
     }
 
     private fun selectRoute(json: String, name: String, lastUpdate: String){
