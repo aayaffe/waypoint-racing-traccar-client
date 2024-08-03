@@ -66,7 +66,7 @@ class TrackingController(private val context: Context) :
     private val positionProvider = PositionProviderFactory.create(context, this)
     private val databaseHelper = DatabaseHelper(context)
     private val networkManager = NetworkManager(context, this)
-    private val deviceId = sharedPreferences.getString(SettingsFragment.KEY_DEVICE, "undefined")
+    //private val deviceId = sharedPreferences.getString(SettingsFragment.KEY_DEVICE, "undefined")
     private val boatName =
         sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "boat_undefined")
     private lateinit var firebaseAnalytics: FirebaseAnalytics
@@ -167,7 +167,7 @@ class TrackingController(private val context: Context) :
                 route!!.eventName,
                 route!!.id,
                 route!!.lastUpdate,
-                deviceId!!,
+                prefs.deviceId,
                 userId,
                 boatName!!,
                 route!!.elements[prefs.nextWpt].id,

@@ -190,10 +190,12 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         }
     }
 
+
+
     private fun initPreferences() {
         PreferenceManager.setDefaultValues(requireActivity(), R.xml.preferences, false)
         if (!sharedPreferences!!.contains(KEY_DEVICE)) {
-            val id = (Random().nextInt(900000) + 100000).toString()
+            val id = getInitialDeviceId()
             sharedPreferences!!.edit().putString(KEY_DEVICE, id).apply()
             (findPreference<Preference>(KEY_DEVICE) as EditTextPreference?)!!.text = id
         }
@@ -253,5 +255,9 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         const val KEY_IS_UI_VISIBLE = "uivisibility"
         const val KEY_ADAPTIVE_INTERVAL = "adaptiveinterval"
         const val KEY_ROUTE_UPDATED_VERSION = "routeupdatedversion" // used to check to what version route updated and that user refused to update
+        fun getInitialDeviceId(): String{
+            val id = (Random().nextInt(900000) + 100000).toString()
+            return id
+        }
     }
 }

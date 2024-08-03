@@ -1,10 +1,24 @@
 package `in`.avimarine.waypointracing.utils
 
 import android.content.SharedPreferences
+import android.util.Log
+import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.route.Route
 
 class Preferences (val sharedPreferences: SharedPreferences){
+
+    var deviceId: String
+        get() {
+            var id: String? = sharedPreferences.getString(SettingsFragment.KEY_DEVICE, null)
+            if (id == null) {
+                id = SettingsFragment.getInitialDeviceId()
+                deviceId = id
+                Log.d(TAG, "New device ID set. is now $id")
+            }
+            return id
+        }
+        set(value) = sharedPreferences.edit().putString(SettingsFragment.KEY_DEVICE, value).apply()
 
     /**
      * The status of race tracking. True if in active tracking, false otherwise
