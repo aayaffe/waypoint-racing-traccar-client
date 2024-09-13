@@ -1,13 +1,5 @@
 package `in`.avimarine.waypointracing.activities
 
-import `in`.avimarine.waypointracing.R
-import `in`.avimarine.waypointracing.databinding.ActivityRouteBinding
-import `in`.avimarine.waypointracing.route.EventType
-import `in`.avimarine.waypointracing.route.GatePassings
-import `in`.avimarine.waypointracing.route.Route
-import `in`.avimarine.waypointracing.ui.RouteElementConcat
-import `in`.avimarine.waypointracing.ui.RouteElementFullAdapter
-import `in`.avimarine.androidutils.ScreenShot
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -19,11 +11,19 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.IntentCompat
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
+import `in`.avimarine.androidutils.ScreenShot
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.androidutils.timeStampToDateString
 import `in`.avimarine.waypointracing.BuildConfig
+import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.databinding.ActivityRouteBinding
+import `in`.avimarine.waypointracing.route.EventType
+import `in`.avimarine.waypointracing.route.GatePassings
+import `in`.avimarine.waypointracing.route.Route
+import `in`.avimarine.waypointracing.ui.RouteElementConcat
+import `in`.avimarine.waypointracing.ui.RouteElementFullAdapter
 
-class RouteActivity : AppCompatActivity() {
+class RouteActivity : AppCompatActivity(),  SharedPreferences.OnSharedPreferenceChangeListener {
 
     private var route = Route.emptyRoute()
     private lateinit var sharedPreferences: SharedPreferences
@@ -161,5 +161,24 @@ class RouteActivity : AppCompatActivity() {
         val ab = supportActionBar
         ab?.title = title
         ab?.subtitle = subTitle
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (sharedPreferences == null) return
+        if (key == SettingsFragment.KEY_GATE_PASSES) {
+            val recyclerView: RecyclerView = findViewById(R.id.route_recycler_view)
+            val routeElementAdapter = recyclerView.adapter as RouteElementFullAdapter
+            routeElementAdapter.submitList(createRecList())
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
     }
 }
