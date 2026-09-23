@@ -17,11 +17,10 @@ package `in`.avimarine.waypointracing.activities;
 
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
 import `in`.avimarine.waypointracing.R
 
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : EdgeToEdgeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

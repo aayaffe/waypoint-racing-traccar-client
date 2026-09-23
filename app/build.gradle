@@ -20,14 +20,14 @@ android {
             }
         }
     }
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         applicationId 'in.avimarine.waypointracing'
         buildConfigField 'boolean', 'HIDDEN_APP', 'false'
         minSdkVersion 23
-        targetSdkVersion 34
-        versionCode 50
+        targetSdkVersion 36
+        versionCode 51
         versionName '3.4.3'
         signingConfig signingConfigs.debug
     }
@@ -48,6 +48,7 @@ android {
     buildFeatures {
         viewBinding true
         dataBinding true
+        buildConfig true
     }
 
     flavorDimensions 'default'
@@ -70,13 +71,17 @@ android {
     }
     kotlinOptions {
         jvmTarget = '17'
-        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+        freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
     }
 
     lint {
         checkReleaseBuilds false
     }
     namespace 'in.avimarine.waypointracing'
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 dependencies {
@@ -109,7 +114,7 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
     implementation 'com.github.acefalobi:android-stepper:0.3.0'
     implementation 'com.github.santalu:maskara:1.0.0'
-    implementation 'com.mapbox.maps:android:10.16.0'
+    implementation 'com.mapbox.maps:android-ndk27:10.19.0'
     testImplementation "org.robolectric:robolectric:4.10.3"
     testImplementation 'androidx.test:core:1.5.0'
     testImplementation 'junit:junit:4.13.2'

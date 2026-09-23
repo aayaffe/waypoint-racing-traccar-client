@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.IntentCompat
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,7 +22,7 @@ import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.ui.RouteElementConcat
 import `in`.avimarine.waypointracing.ui.RouteElementFullAdapter
 
-class RouteActivity : AppCompatActivity(),  SharedPreferences.OnSharedPreferenceChangeListener {
+class RouteActivity : EdgeToEdgeActivity(),  SharedPreferences.OnSharedPreferenceChangeListener {
 
     private var route = Route.emptyRoute()
     private lateinit var sharedPreferences: SharedPreferences

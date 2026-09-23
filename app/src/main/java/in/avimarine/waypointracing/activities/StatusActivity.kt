@@ -15,7 +15,6 @@
  */
 package `in`.avimarine.waypointracing.activities;
 
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.ArrayAdapter
 import android.os.Bundle
 import android.view.Menu
@@ -26,7 +25,7 @@ import java.util.*
 import `in`.avimarine.waypointracing.R
 
 
-class StatusActivity : AppCompatActivity() {
+class StatusActivity : EdgeToEdgeActivity() {
 
     private var adapter: ArrayAdapter<String>? = null
 

@@ -26,7 +26,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.firebase.ui.auth.AuthUI
@@ -54,7 +53,7 @@ import `in`.avimarine.waypointracing.utils.*
 import java.util.*
 
 
-class MainActivity : AppCompatActivity(), PositionProvider.PositionListener,
+class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     SharedPreferences.OnSharedPreferenceChangeListener {
 
     private lateinit var positionProvider: PositionProvider

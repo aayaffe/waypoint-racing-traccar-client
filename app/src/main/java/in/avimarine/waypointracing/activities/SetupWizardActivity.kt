@@ -7,7 +7,7 @@ import `in`.avimarine.waypointracing.activities.steps.StepperViewModel
 import `in`.avimarine.waypointracing.databinding.ActivitySetupWizardBinding
 import android.os.Bundle
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -16,7 +16,7 @@ import com.aceinteract.android.stepper.StepperNavListener
 import com.aceinteract.android.stepper.StepperNavigationView
 import `in`.avimarine.androidutils.TAG
 
-class SetupWizardActivity : AppCompatActivity(), StepperNavListener {
+class SetupWizardActivity : EdgeToEdgeActivity(), StepperNavListener {
 
     private lateinit var binding: ActivitySetupWizardBinding
     lateinit var stepper: StepperNavigationView
@@ -45,6 +45,16 @@ class SetupWizardActivity : AppCompatActivity(), StepperNavListener {
                 R.id.step_4_permissions
             ).build()
         )
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (stepper.currentStep == 0) {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                } else {
+                    findNavController(R.id.frame_stepper).navigateUp()
+                }
+            }
+        })
     }
 
     private fun validateStep(): Boolean {
@@ -67,15 +77,6 @@ class SetupWizardActivity : AppCompatActivity(), StepperNavListener {
         val settings = getSharedPreferences(PREFS_NAME, 0)
         settings.edit().putBoolean("my_first_time", false).apply()
         finish()
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (stepper.currentStep == 0) {
-            super.onBackPressed()
-        } else {
-            findNavController(R.id.frame_stepper).navigateUp()
-        }
     }
 
     companion object{

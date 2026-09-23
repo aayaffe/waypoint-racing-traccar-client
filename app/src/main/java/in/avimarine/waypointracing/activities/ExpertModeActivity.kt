@@ -7,14 +7,13 @@ import `in`.avimarine.waypointracing.route.Route
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import `in`.avimarine.androidutils.TAG
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-class ExpertModeActivity : AppCompatActivity() {
+class ExpertModeActivity : EdgeToEdgeActivity() {
     private lateinit var binding: ActivityExpertModeBinding
     private var route = Route.emptyRoute()
     @OptIn(ExperimentalCoroutinesApi::class)
