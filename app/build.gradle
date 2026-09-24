@@ -28,7 +28,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 36
         versionCode 51
-        versionName '3.4.3'
+        versionName '3.4.4'
         signingConfig signingConfigs.debug
     }
     buildTypes{
