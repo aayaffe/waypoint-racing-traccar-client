@@ -9,9 +9,10 @@ Available to selected tester only:
 
 Waypoint Racing is an application used in waypoint sailing events.
 The application is based on the [Traccar Client for Android](https://github.com/traccar/traccar-client-android).
-The application doubles as a Tracking client used with the Traccar open source server software and
-as a waypoint racing logger that shows the next racing waypoint or gate and logs the passing of those
-gates to a custom logging server.
+The application shows the next racing waypoint or gate and logs passage through those gates.
+Tracking and race information is stored in the application's main Firebase backend.
+
+See the [Privacy Policy](docs/index.md) for information about location tracking, race reports, and data deletion.
 
 
 ## License
