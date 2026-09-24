@@ -93,6 +93,8 @@ lint/tmp/
 # lint/reports/
 private_key.pepk
 app/regular/release/output-metadata.json
+app/regular/release/baselineProfiles/
+app/regular/release/*.dm
 .idea/misc.xml
 keystore.properties
 store/Sending waypoint.mp4
