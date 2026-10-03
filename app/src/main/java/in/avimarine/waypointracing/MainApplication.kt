@@ -23,11 +23,16 @@ import android.app.Notification
 import android.graphics.Color
 import android.os.Build
 import android.app.Activity
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 
 open class MainApplication : MultiDexApplication() {
 
     override fun onCreate() {
         super.onCreate()
+        FirebaseAppCheck.getInstance().installAppCheckProviderFactory(
+            PlayIntegrityAppCheckProviderFactory.getInstance()
+        )
         System.setProperty("http.keepAliveDuration", (30 * 60 * 1000).toString())
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             registerChannel()
