@@ -17,8 +17,8 @@ object EventAssignmentResolver {
                     val membership = event["membership"] as? Map<*, *> ?: return@firstNotNullOfOrNull null
                     val assignments = membership["assignments"] as? List<*> ?: return@firstNotNullOfOrNull null
                     val assignment = assignments.asSequence().mapNotNull { it as? Map<*, *> }.firstOrNull { candidate ->
-                        val from = candidate["from"]?.toString()?.let { runCatching { java.time.Instant.parse(it).toEpochMilli() }.getOrNull() ?: Long.MAX_VALUE }
-                        val to = candidate["to"]?.toString()?.let { runCatching { java.time.Instant.parse(it).toEpochMilli() }.getOrNull() ?: Long.MIN_VALUE }
+                        val from = candidate["from"]?.toString()?.let { runCatching { java.time.Instant.parse(it).toEpochMilli() }.getOrNull() } ?: Long.MAX_VALUE
+                        val to = candidate["to"]?.toString()?.let { runCatching { java.time.Instant.parse(it).toEpochMilli() }.getOrNull() } ?: Long.MIN_VALUE
                         now in from..to
                     } ?: return@firstNotNullOfOrNull null
                     val eventId = event["eventId"]?.toString() ?: return@firstNotNullOfOrNull null
