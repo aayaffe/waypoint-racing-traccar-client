@@ -4,7 +4,7 @@ title: Waypoint Racing Privacy Policy
 
 # Waypoint Racing Privacy Policy
 
-Last updated: September 24, 2026
+Last updated: October 3, 2026
 
 Waypoint Racing is an Android app for waypoint sailing events. It displays routes and the next waypoint or gate, records passage through race marks, and stores tracking information in the app's main Firebase backend. In this policy, "we" means the operator of Waypoint Racing, reachable at the contact address below. This policy explains the data handled by the app and the choices available to you.
 
@@ -19,6 +19,8 @@ Waypoint Racing is an Android app for waypoint sailing events. It displays route
 ## How data is used and shared
 
 The app uses location to show your position, guide you along a route, detect and record waypoint or gate passings, and provide live tracking during an event. It uses account and boat information to associate reports with a participant and make race reports available to the event's organizers or race committee.
+
+**Public race tracking.** During a race, we may publish participating boats' live or recent positions and tracks on a publicly accessible race map or results page. Published information may include the boat name and sail number, race and route, precise location and its time, speed, course, and waypoint or gate passings. People who are not participants or organizers may view this information while it is published and may save or share it. A published track may show where a boat and its crew were during the race. Contact us at the address below if you have a question about a published track or want to request its removal.
 
 The app stores passing reports, boat details, and certain app events in its main Firebase backend for race operations. Tracking information is stored in that backend. A remotely controlled setting governs whether periodic position records are uploaded to Firebase Cloud Firestore while location updates are being received; that setting is off by default in the app. The app also keeps passing history on the device. Google processes data for authentication, storage, analytics, crash reporting, and configuration under its applicable terms and [Firebase privacy information](https://firebase.google.com/support/privacy).
 
