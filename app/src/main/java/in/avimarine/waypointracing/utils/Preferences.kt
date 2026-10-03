@@ -5,6 +5,8 @@ import android.util.Log
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.route.Route
+import `in`.avimarine.waypointracing.event.EventSession
+import java.util.UUID
 
 class Preferences (val sharedPreferences: SharedPreferences){
 
@@ -101,5 +103,33 @@ class Preferences (val sharedPreferences: SharedPreferences){
     var wakeLock: Boolean
         get() = sharedPreferences.getBoolean(SettingsFragment.KEY_WAKELOCK, true)
         set(value) = sharedPreferences.edit().putBoolean(SettingsFragment.KEY_WAKELOCK, value).apply()
+
+    var eventSession: EventSession
+        get() = EventSession(
+            eventId = sharedPreferences.getString(SettingsFragment.KEY_EVENT_ID, "") ?: "",
+            boatId = sharedPreferences.getString(SettingsFragment.KEY_EVENT_BOAT_ID, "") ?: "",
+            routeId = sharedPreferences.getString(SettingsFragment.KEY_EVENT_ROUTE_ID, "") ?: "",
+            routeVersion = sharedPreferences.getString(SettingsFragment.KEY_EVENT_ROUTE_VERSION, "") ?: "",
+            sessionId = sharedPreferences.getString(SettingsFragment.KEY_EVENT_SESSION_ID, "") ?: "",
+        )
+        set(value) = sharedPreferences.edit()
+            .putString(SettingsFragment.KEY_EVENT_ID, value.eventId)
+            .putString(SettingsFragment.KEY_EVENT_BOAT_ID, value.boatId)
+            .putString(SettingsFragment.KEY_EVENT_ROUTE_ID, value.routeId)
+            .putString(SettingsFragment.KEY_EVENT_ROUTE_VERSION, value.routeVersion)
+            .putString(SettingsFragment.KEY_EVENT_SESSION_ID, value.sessionId)
+            .apply()
+
+    var eventLocationUploadConsent: Boolean
+        get() = sharedPreferences.getBoolean(SettingsFragment.KEY_EVENT_LOCATION_UPLOAD_CONSENT, false)
+        set(value) = sharedPreferences.edit().putBoolean(SettingsFragment.KEY_EVENT_LOCATION_UPLOAD_CONSENT, value).apply()
+
+    fun clearEventSession() {
+        eventSession = EventSession()
+    }
+
+    fun setEventSession(eventId: String, boatId: String, routeId: String, routeVersion: String) {
+        eventSession = EventSession(eventId, boatId, routeId, routeVersion, UUID.randomUUID().toString())
+    }
 
 }

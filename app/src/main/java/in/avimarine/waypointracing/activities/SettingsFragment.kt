@@ -255,6 +255,12 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         const val KEY_IS_UI_VISIBLE = "uivisibility"
         const val KEY_ADAPTIVE_INTERVAL = "adaptiveinterval"
         const val KEY_ROUTE_UPDATED_VERSION = "routeupdatedversion" // used to check to what version route updated and that user refused to update
+        const val KEY_EVENT_ID = "event_id"
+        const val KEY_EVENT_BOAT_ID = "event_boat_id"
+        const val KEY_EVENT_ROUTE_ID = "event_route_id"
+        const val KEY_EVENT_ROUTE_VERSION = "event_route_version"
+        const val KEY_EVENT_SESSION_ID = "event_session_id"
+        const val KEY_EVENT_LOCATION_UPLOAD_CONSENT = "event_location_upload_consent"
         fun getInitialDeviceId(): String{
             val id = (Random().nextInt(900000) + 100000).toString()
             return id

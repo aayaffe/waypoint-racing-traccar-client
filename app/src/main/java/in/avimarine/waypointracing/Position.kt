@@ -21,6 +21,11 @@ data class Position(
     val boatName: String = "",
     val charging: Boolean = false,
     val mock: Boolean = false,
+    val eventId: String = "",
+    val boatId: String = "",
+    val routeId: String = "",
+    val sessionId: String = "",
+    val sourceEventId: String = "",
 ) {
     constructor(deviceId: String, userId: String, boatName: String, location: Location, battery: BatteryStatus) : this(
         deviceId = deviceId,

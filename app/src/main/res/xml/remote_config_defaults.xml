@@ -12,4 +12,8 @@
     <key>new_reports_firebase_db</key>
     <value>true</value>
   </entry>
+  <entry>
+    <key>event_scoped_location_uploads</key>
+    <value>false</value>
+  </entry>
 </defaults>

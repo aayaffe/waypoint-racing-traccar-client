@@ -26,12 +26,16 @@ data class GatePassing(
     val accuracy: Double = 0.0,
     val battery: Double = 0.0,
     val mock: Boolean = false,
-    val appVersion: Long = -1
+    val appVersion: Long = -1,
+    val eventId: String = "",
+    val boatId: String = "",
+    val sessionId: String = "",
+    val sourceEventId: String = "",
 ) {
 
 
 
-    constructor(eventName: String, routeId: String, routeLastUpdate: Date, deviceId: String, userId: String, boatName: String, gateId: Int, gateName: String, time: Date, position: Position, appVersion: Long) : this(
+    constructor(eventName: String, routeId: String, routeLastUpdate: Date, deviceId: String, userId: String, boatName: String, gateId: Int, gateName: String, time: Date, position: Position, appVersion: Long, eventId: String = "", boatId: String = "", sessionId: String = "", sourceEventId: String = "") : this(
         eventName = eventName,
         routeId = routeId,
         routeLastUpdate = routeLastUpdate,
@@ -48,6 +52,10 @@ data class GatePassing(
         accuracy = position.accuracy,
         battery = position.battery,
         mock = position.mock,
-        appVersion = appVersion
+        appVersion = appVersion,
+        eventId = eventId,
+        boatId = boatId,
+        sessionId = sessionId,
+        sourceEventId = sourceEventId,
     )
 }
