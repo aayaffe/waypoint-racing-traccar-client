@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/aayaffe/waypoint-racing-shared",
+  "release": "v1.0.0-contracts",
+  "contracts": [
+    "contracts/v1/legacy.schema.json",
+    "contracts/v1/race-event.schema.json"
+  ],
+  "notes": "Android converts Firebase Timestamp values at its Firestore boundary. New event-aware writes must conform to the pinned legacy and race-event contracts."
+}
