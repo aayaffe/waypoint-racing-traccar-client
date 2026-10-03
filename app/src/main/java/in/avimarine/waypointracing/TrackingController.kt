@@ -181,6 +181,7 @@ class TrackingController(private val context: Context) :
                 getInstalledVersion(context),
                 prefs.eventSession.eventId,
                 prefs.eventSession.boatId,
+                prefs.eventSession.routeVersion,
                 prefs.eventSession.sessionId,
                 prefs.eventSession.newSourceEventId(),
             )

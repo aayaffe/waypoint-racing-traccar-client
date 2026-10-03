@@ -18,6 +18,7 @@ data class EventSession(
         eventId = eventId,
         boatId = boatId,
         routeId = routeId,
+        routeVersion = routeVersion,
         sessionId = sessionId,
         sourceEventId = newSourceEventId(),
     ) else position

@@ -24,6 +24,7 @@ data class Position(
     val eventId: String = "",
     val boatId: String = "",
     val routeId: String = "",
+    val routeVersion: String = "",
     val sessionId: String = "",
     val sourceEventId: String = "",
 ) {
