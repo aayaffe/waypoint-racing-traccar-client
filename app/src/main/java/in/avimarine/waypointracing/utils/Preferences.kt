@@ -112,49 +112,20 @@ class Preferences (val sharedPreferences: SharedPreferences){
             routeVersion = sharedPreferences.getString(SettingsFragment.KEY_EVENT_ROUTE_VERSION, "") ?: "",
             sessionId = sharedPreferences.getString(SettingsFragment.KEY_EVENT_SESSION_ID, "") ?: "",
         )
-        set(value) {
-            val previous = eventSession
-            val assignmentChanged = previous.eventId != value.eventId ||
-                previous.boatId != value.boatId ||
-                previous.routeId != value.routeId
-            sharedPreferences.edit()
-                .putString(SettingsFragment.KEY_EVENT_ID, value.eventId)
-                .putString(SettingsFragment.KEY_EVENT_BOAT_ID, value.boatId)
-                .putString(SettingsFragment.KEY_EVENT_ROUTE_ID, value.routeId)
-                .putString(SettingsFragment.KEY_EVENT_ROUTE_VERSION, value.routeVersion)
-                .putString(SettingsFragment.KEY_EVENT_SESSION_ID, value.sessionId)
-                .apply()
-            if (assignmentChanged) {
-                eventLocationUploadConsent = false
-            }
-        }
-
-    var eventLocationUploadConsent: Boolean
-        get() = sharedPreferences.getBoolean(SettingsFragment.KEY_EVENT_LOCATION_UPLOAD_CONSENT, false)
-        set(value) = sharedPreferences.edit().putBoolean(SettingsFragment.KEY_EVENT_LOCATION_UPLOAD_CONSENT, value).apply()
-
-    var eventAssignmentLookupPending: Boolean
-        get() = sharedPreferences.getBoolean(SettingsFragment.KEY_EVENT_ASSIGNMENT_LOOKUP_PENDING, false)
-        set(value) = sharedPreferences.edit().putBoolean(SettingsFragment.KEY_EVENT_ASSIGNMENT_LOOKUP_PENDING, value).apply()
+        set(value) = sharedPreferences.edit()
+            .putString(SettingsFragment.KEY_EVENT_ID, value.eventId)
+            .putString(SettingsFragment.KEY_EVENT_BOAT_ID, value.boatId)
+            .putString(SettingsFragment.KEY_EVENT_ROUTE_ID, value.routeId)
+            .putString(SettingsFragment.KEY_EVENT_ROUTE_VERSION, value.routeVersion)
+            .putString(SettingsFragment.KEY_EVENT_SESSION_ID, value.sessionId)
+            .apply()
 
     fun clearEventSession() {
         eventSession = EventSession()
-        eventAssignmentLookupPending = false
-    }
-
-    fun beginEventAssignmentLookup() {
-        eventSession = EventSession()
-        eventAssignmentLookupPending = true
-    }
-
-    fun failEventAssignmentLookup() {
-        eventSession = EventSession()
-        eventAssignmentLookupPending = true
     }
 
     fun setEventSession(eventId: String, boatId: String, routeId: String, routeVersion: String) {
         eventSession = EventSession(eventId, boatId, routeId, routeVersion, UUID.randomUUID().toString())
-        eventAssignmentLookupPending = false
     }
 
 }

@@ -140,14 +140,9 @@ class TrackingController(private val context: Context) :
         if (prefs.status && prefs.tracking) {
             sendPosition(position)
         }
-        // Preserve the legacy upload path when no event is configured. Event-aware
-        // uploads additionally require the event flag and the participant's consent.
-        if (prefs.eventSession.shouldUploadPosition(
-                saveAllLocations = RemoteConfig.getBool("save_all_locations"),
-                eventUploadsEnabled = RemoteConfig.getBool("event_scoped_location_uploads"),
-                hasEventUploadConsent = prefs.eventLocationUploadConsent,
-                assignmentLookupPending = prefs.eventAssignmentLookupPending,
-            )) {
+        // Position uploads are a redundant record for missed gate-passing reports.
+        // An event session only adds metadata; it never suppresses this fallback.
+        if (RemoteConfig.getBool("save_all_locations")) {
             val minPositionUploadInterval = RemoteConfig.getLong("min_position_upload_interval") * 1000 //Convert to ms
             if (scopedPosition.time.time - lastPositionTime.get() > minPositionUploadInterval) {
                 lastPositionTime.set(scopedPosition.time.time)

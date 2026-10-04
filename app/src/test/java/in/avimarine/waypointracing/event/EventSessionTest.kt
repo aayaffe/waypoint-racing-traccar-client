@@ -41,14 +41,4 @@ class EventSessionTest {
         assertEquals(position, unassigned)
     }
 
-    @Test
-    fun legacyUploadsDoNotDependOnEventSetup() {
-        val assigned = EventSession("event-1", "boat-1", "route-1", "version-1", "session-1")
-
-        assertTrue(EventSession().shouldUploadPosition(true, false, false, false))
-        assertFalse(assigned.shouldUploadPosition(true, true, false, false))
-        assertTrue(assigned.shouldUploadPosition(true, true, true, false))
-        assertFalse(EventSession().shouldUploadPosition(false, true, true, false))
-        assertFalse(EventSession().shouldUploadPosition(true, true, true, true))
-    }
 }

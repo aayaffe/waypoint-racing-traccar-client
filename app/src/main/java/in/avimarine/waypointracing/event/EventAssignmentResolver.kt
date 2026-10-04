@@ -36,21 +36,13 @@ object EventAssignmentResolver {
         // A route change must never continue publishing under a previous route's
         // event assignment while the asynchronous lookup is pending or fails.
         val requestGeneration = lookupGeneration.incrementAndGet()
-        preferences.beginEventAssignmentLookup()
+        preferences.clearEventSession()
         fun isCurrentRequest() = lookupGeneration.get() == requestGeneration
         fun noAssignment() {
             if (!isCurrentRequest()) return
             preferences.clearEventSession()
             onComplete(null)
         }
-        fun lookupFailed() {
-            if (!isCurrentRequest()) return
-            // Do not silently fall back to unscoped uploads for an event-enabled
-            // route when assignment lookup cannot establish consent scope.
-            preferences.failEventAssignmentLookup()
-            onComplete(null)
-        }
-
         FirebaseFunctions.getInstance().getHttpsCallable("getMyEventsCallable").call()
             .addOnSuccessListener { result ->
                 if (!isCurrentRequest()) return@addOnSuccessListener
@@ -73,10 +65,9 @@ object EventAssignmentResolver {
                 if (!isCurrentRequest()) return@addOnSuccessListener
                 if (match == null) noAssignment() else {
                     preferences.eventSession = match
-                    preferences.eventAssignmentLookupPending = false
                     onComplete(match)
                 }
             }
-            .addOnFailureListener { lookupFailed() }
+            .addOnFailureListener { noAssignment() }
     }
 }

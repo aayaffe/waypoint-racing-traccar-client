@@ -12,14 +12,6 @@ data class EventSession(
 ) {
     val isAssigned: Boolean get() = eventId.isNotBlank() && boatId.isNotBlank() && routeId.isNotBlank()
 
-    fun shouldUploadPosition(
-        saveAllLocations: Boolean,
-        eventUploadsEnabled: Boolean,
-        hasEventUploadConsent: Boolean,
-        assignmentLookupPending: Boolean,
-    ): Boolean = saveAllLocations && !assignmentLookupPending &&
-        (!isAssigned || (eventUploadsEnabled && hasEventUploadConsent))
-
     fun newSourceEventId(): String = UUID.randomUUID().toString()
 
     fun attach(position: Position): Position = if (isAssigned) position.copy(
