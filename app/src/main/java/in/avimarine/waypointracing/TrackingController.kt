@@ -251,7 +251,10 @@ class TrackingController(private val context: Context) :
         Log.d(TAG, "New interval is $i")
     }
 
-    override fun onPositionError(error: Throwable) {}
+    override fun onPositionError(error: Throwable) {
+        Log.w(TAG, "Location provider error", error)
+        StatusActivity.addMessage("Location provider error: ${error.message ?: error.javaClass.simpleName}")
+    }
     override fun onNetworkUpdate(isOnline: Boolean) {
         val message =
             if (isOnline) R.string.status_network_online else R.string.status_network_offline

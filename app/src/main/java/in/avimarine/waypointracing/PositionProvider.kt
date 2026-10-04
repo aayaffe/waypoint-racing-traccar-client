@@ -16,12 +16,14 @@
 package `in`.avimarine.waypointracing
 
 import `in`.avimarine.waypointracing.activities.SettingsFragment
+import `in`.avimarine.waypointracing.utils.Preferences
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.location.Location
 import android.os.BatteryManager
+import android.os.SystemClock
 import androidx.preference.PreferenceManager
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
@@ -41,22 +43,45 @@ abstract class PositionProvider(
     }
 
     protected var sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-    init{
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-    }
-    protected var deviceId = sharedPreferences.getString(SettingsFragment.KEY_DEVICE, "undefined")!!
-    protected var boatName = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "boat_undefined")!!
+    protected val deviceId: String get() = Preferences(sharedPreferences).deviceId
+    protected val boatName: String get() = sharedPreferences.getString(SettingsFragment.KEY_BOAT_NAME, "boat_undefined")!!
     protected var interval = sharedPreferences.getString(SettingsFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
     protected var distance: Double = sharedPreferences.getString(SettingsFragment.KEY_DISTANCE, "0")!!.toInt().toDouble()
     protected var angle: Double = sharedPreferences.getString(SettingsFragment.KEY_ANGLE, "0")!!.toInt().toDouble()
     private var lastLocation: Location? = null
-    private val userId = FirebaseAuth.getInstance().currentUser?.uid?: ""
+    private val userId: String get() = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+    private var updatesActive = false
+    var lastRawFixElapsedMs: Long = 0L
+        private set
+    var lastAcceptedFixElapsedMs: Long = 0L
+        private set
+
+    protected fun markUpdatesStarted() {
+        if (!updatesActive) {
+            updatesActive = true
+            sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+        }
+    }
+
+    protected fun markUpdatesStopped() {
+        if (updatesActive) {
+            updatesActive = false
+            sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+        }
+    }
+
+    protected val isUpdatesActive: Boolean get() = updatesActive
+
+    protected fun resetLocationFilter() {
+        lastLocation = null
+    }
 
     abstract fun startUpdates()
     abstract fun stopUpdates()
     abstract fun requestSingleLocation()
 
     protected fun processLocation(location: Location?) {
+        if (location != null) lastRawFixElapsedMs = SystemClock.elapsedRealtime()
         val lastLocation = this.lastLocation
         if (location != null &&
                 (lastLocation == null || location.time - lastLocation!!.time >= 0.5 * interval || distance > 0
@@ -65,6 +90,7 @@ abstract class PositionProvider(
         ) {
             Log.v(TAG, "location new")
             this.lastLocation = location
+            lastAcceptedFixElapsedMs = SystemClock.elapsedRealtime()
             listener.onPositionUpdate(Position(deviceId, userId, boatName, location, getBatteryStatus(context)), location)
 
         } else {
@@ -87,9 +113,14 @@ abstract class PositionProvider(
     }
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == SettingsFragment.KEY_INTERVAL) {
-            interval = sharedPreferences?.getString(SettingsFragment.KEY_INTERVAL, "600")!!.toLong() * 1000
-            stopUpdates()
-            startUpdates()
+            val newInterval = sharedPreferences?.getString(SettingsFragment.KEY_INTERVAL, "600")?.toLongOrNull()?.times(1000)
+            if (newInterval != null && newInterval > 0 && newInterval != interval) {
+                interval = newInterval
+                if (isUpdatesActive) {
+                    stopUpdates()
+                    startUpdates()
+                }
+            }
         }
     }
     companion object {

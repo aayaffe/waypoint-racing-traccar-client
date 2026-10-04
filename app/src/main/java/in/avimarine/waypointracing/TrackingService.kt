@@ -70,17 +70,26 @@ class TrackingService : Service() {
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
                 if (prefs.wakeLock) {
-                    val powerManager = getSystemService(POWER_SERVICE) as PowerManager
-                    wakeLock =
-                        powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, javaClass.name)
-                    wakeLock?.acquire()
+                    try {
+                        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+                        wakeLock =
+                            powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, javaClass.name)
+                        wakeLock?.acquire()
+                    } catch (e: RuntimeException) {
+                        Log.w(TAG, "Unable to acquire tracking wake lock", e)
+                        prefs.wakeLock = false
+                    }
                 }
                 trackingController = TrackingController(this)
                 trackingController?.start()
+            } else {
+                Log.w(TAG, "Tracking stopped: precise location permission is missing")
+                StatusActivity.addMessage("Tracking stopped: precise location permission is missing")
+                stopSelf()
             }
         } catch (e: RuntimeException) {
             Log.w(TAG, e)
-            prefs.wakeLock = false
+            StatusActivity.addMessage("Tracking could not start: ${e.message ?: e.javaClass.simpleName}")
             stopSelf()
         }
     }
