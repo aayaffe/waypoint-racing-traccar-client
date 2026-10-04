@@ -16,6 +16,7 @@
 package `in`.avimarine.waypointracing
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Location
 import android.os.Handler
@@ -131,6 +132,7 @@ class TrackingController(private val context: Context) :
     }
 
     override fun onPositionUpdate(position: Position, location: Location) {
+        if (!prefs.status) return
         Log.d(TAG, "onPositionUpdate")
         if (route == null) {
             route = RouteParser.parseRoute(prefs.currentRoute)
@@ -376,6 +378,9 @@ class TrackingController(private val context: Context) :
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key == SettingsFragment.KEY_STATUS && !prefs.status) {
+            context.stopService(Intent(context, TrackingService::class.java))
+        }
         if (key == SettingsFragment.KEY_NEXT_WPT) {
             setGPSInterval(1)
         }

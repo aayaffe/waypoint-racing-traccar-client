@@ -45,17 +45,18 @@ open class MainApplication : MultiDexApplication() {
     @TargetApi(Build.VERSION_CODES.O)
     private fun registerChannel() {
         val channel = NotificationChannel(
-            PRIMARY_CHANNEL, getString(R.string.channel_default), NotificationManager.IMPORTANCE_LOW
+            PRIMARY_CHANNEL, getString(R.string.channel_tracking), NotificationManager.IMPORTANCE_DEFAULT
         )
         channel.lightColor = Color.GREEN
-        channel.lockscreenVisibility = Notification.VISIBILITY_SECRET
+        channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
     }
 
     open fun handleRatingFlow(activity: Activity) {}
 
     companion object {
-        const val PRIMARY_CHANNEL = "default"
+        // A new ID is required because Android does not raise an existing channel's importance.
+        const val PRIMARY_CHANNEL = "tracking_active_v2"
     }
 
 }

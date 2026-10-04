@@ -280,7 +280,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             ).show()
         }
         createAlarmIntent()
-        prefs.status = true
     }
 
     private fun setActivityTitle(r: Route) {
@@ -312,7 +311,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         }
         startPositionProvider()
         setActivityTitle(route)
-        prefs.status = true
     }
 
     private fun startPositionProvider() {
@@ -580,6 +578,11 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     fun startButtonClick(view: View) {
         val checked = prefs.status
+        if (!checked && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), PERMISSIONS_REQUEST_NOTIFICATIONS)
+        }
         prefs.status = checked.not()
     }
 
@@ -655,7 +658,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             binding.stbdGate.visibility = View.GONE
             binding.shortestDistanceToGate.visibility = View.GONE
             binding.vmg.visibility = View.GONE
-            binding.startBtn.visibility = View.INVISIBLE
+            binding.startBtn.visibility = View.GONE
 
         } else {
             binding.routeElementSpinner.visibility = View.VISIBLE
@@ -664,11 +667,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             binding.stbdGate.visibility = View.VISIBLE
             binding.shortestDistanceToGate.visibility = View.VISIBLE
             binding.vmg.visibility = View.VISIBLE
-            if (FirebaseAuth.getInstance().currentUser == null) {
-//                binding.startBtn.visibility = View.INVISIBLE
-            } else {
-//                binding.startBtn.visibility = View.VISIBLE
-            }
         }
         setUiForLogin(FirebaseAuth.getInstance().currentUser)
     }
@@ -697,13 +695,12 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private fun setUiForLogin(user: FirebaseUser?) {
         if (user == null) {
             prefs.status = false
-//            binding.startBtn.visibility = View.INVISIBLE
             binding.loginBtn.visibility = View.VISIBLE
         } else {
-//            binding.startBtn.visibility = View.VISIBLE
             binding.loginBtn.visibility = View.GONE
-            prefs.status = true
         }
+        binding.startBtn.visibility = if (user != null && !route.isEmpty()) View.VISIBLE else View.GONE
+        setButton(prefs.status)
         invalidateOptionsMenu()
     }
 
@@ -811,7 +808,11 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSIONS_REQUEST_LOCATION || requestCode == LocationPermissions.PERMISSIONS_REQUEST_LOCATION_UI) {
+        if (requestCode == PERMISSIONS_REQUEST_NOTIFICATIONS) {
+            if (grantResults.firstOrNull() != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, R.string.tracking_notification_permission_denied, Toast.LENGTH_LONG).show()
+            }
+        } else if (requestCode == PERMISSIONS_REQUEST_LOCATION || requestCode == LocationPermissions.PERMISSIONS_REQUEST_LOCATION_UI) {
             var granted = true
             for (result in grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {
@@ -834,6 +835,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     companion object {
         private const val PERMISSIONS_REQUEST_LOCATION = 2
+        private const val PERMISSIONS_REQUEST_NOTIFICATIONS = 3
         private const val ALARM_MANAGER_INTERVAL = 15000
     }
 

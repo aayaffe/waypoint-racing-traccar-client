@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_tracking">Active race tracking</string>
+    <string name="tracking_notification_text">Sharing your location. Stop tracking when the race ends.</string>
+    <string name="tracking_notification_stop">Stop tracking</string>
+    <string name="tracking_stopped_from_notification">Tracking stopped from notification</string>
+    <string name="tracking_notification_permission_denied">Tracking started, but its notification may be hidden. You can stop it from the app.</string>
+</resources>

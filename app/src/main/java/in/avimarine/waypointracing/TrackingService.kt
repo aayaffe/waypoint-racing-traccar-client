@@ -50,6 +50,10 @@ class TrackingService : Service() {
     override fun onCreate() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         prefs = Preferences(sharedPreferences)
+        if (!prefs.status) {
+            stopSelf()
+            return
+        }
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 startForeground(
@@ -100,6 +104,10 @@ class TrackingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         WakefulBroadcastReceiver.completeWakefulIntent(intent)
+        if (!prefs.status) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
         return START_STICKY
     }
 
@@ -132,8 +140,12 @@ class TrackingService : Service() {
         private fun createNotification(context: Context): Notification {
             val builder = NotificationCompat.Builder(context, MainApplication.PRIMARY_CHANNEL)
                 .setSmallIcon(R.drawable.app_icon)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setContentText(context.getString(R.string.tracking_notification_text))
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
             val intent: Intent
             if (!BuildConfig.HIDDEN_APP) {
                 intent = Intent(context, MainActivity::class.java)
@@ -145,11 +157,18 @@ class TrackingService : Service() {
                 intent = Intent(Settings.ACTION_SETTINGS)
             }
             val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             } else {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
             builder.setContentIntent(PendingIntent.getActivity(context, 0, intent, flags))
+            val stopIntent = Intent(context, StopTrackingReceiver::class.java)
+                .setAction(StopTrackingReceiver.ACTION_STOP_TRACKING)
+            builder.addAction(
+                R.drawable.ic_baseline_x_24,
+                context.getString(R.string.tracking_notification_stop),
+                PendingIntent.getBroadcast(context, 1, stopIntent, flags)
+            )
             return builder.build()
         }
     }
