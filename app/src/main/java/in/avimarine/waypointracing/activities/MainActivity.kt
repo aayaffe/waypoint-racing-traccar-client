@@ -45,6 +45,7 @@ import `in`.avimarine.waypointracing.activities.SetupWizardActivity.Companion.ru
 import `in`.avimarine.waypointracing.activities.fragments.MapFragment
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import `in`.avimarine.waypointracing.databinding.ActivityMainBinding
+import `in`.avimarine.waypointracing.event.EventAssignmentResolver
 import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.LocationViewModel
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
@@ -262,6 +263,12 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         }
         route = r
         prefs.currentRoute = route.toString()
+        if (FirebaseAuth.getInstance().currentUser != null &&
+            RemoteConfig.getBool("event_scoped_location_uploads")) {
+            EventAssignmentResolver.refreshForRoute(route, prefs)
+        } else {
+            prefs.clearEventSession()
+        }
         populateRouteElementSpinner(r)
         setEmptyRouteUI(route.isEmpty())
         setActivityTitle(r)

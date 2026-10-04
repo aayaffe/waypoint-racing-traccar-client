@@ -135,16 +135,18 @@ class TrackingController(private val context: Context) :
         if (route == null) {
             route = RouteParser.parseRoute(prefs.currentRoute)
         }
+        val scopedPosition = prefs.eventSession.attach(position)
         val inArea = updateIsInArea(location, prefs.nextWpt)
         if (prefs.status && prefs.tracking) {
             sendPosition(position)
         }
-        //Upload position to Firestore
+        // Position uploads are a redundant record for missed gate-passing reports.
+        // An event session only adds metadata; it never suppresses this fallback.
         if (RemoteConfig.getBool("save_all_locations")) {
             val minPositionUploadInterval = RemoteConfig.getLong("min_position_upload_interval") * 1000 //Convert to ms
-            if (position.time.time - lastPositionTime.get() > minPositionUploadInterval) {
-                lastPositionTime.set(position.time.time)
-                FirestoreDatabase.addPosition(position, { documentReference ->
+            if (scopedPosition.time.time - lastPositionTime.get() > minPositionUploadInterval) {
+                lastPositionTime.set(scopedPosition.time.time)
+                FirestoreDatabase.addPosition(scopedPosition, { documentReference ->
                     Log.d(TAG, "Position added with ID: ${documentReference.id}")
                 }, { e ->
                     Log.e(TAG, "Error adding position", e)
@@ -172,9 +174,14 @@ class TrackingController(private val context: Context) :
                 boatName!!,
                 route!!.elements[prefs.nextWpt].id,
                 route!!.elements[prefs.nextWpt].name,
-                position.time,
-                position,
-                getInstalledVersion(context)
+                scopedPosition.time,
+                scopedPosition,
+                getInstalledVersion(context),
+                prefs.eventSession.eventId,
+                prefs.eventSession.boatId,
+                prefs.eventSession.routeVersion,
+                prefs.eventSession.sessionId,
+                prefs.eventSession.newSourceEventId(),
             )
             firebaseAnalytics.logEvent("gate_pass") {
                 param("route", route!!.eventName)
