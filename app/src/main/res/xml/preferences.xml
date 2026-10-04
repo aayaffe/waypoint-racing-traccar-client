@@ -108,4 +108,10 @@
         android:key="adaptiveinterval"
         android:title="@string/settings_adaptiveinterval" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="event_location_upload_consent"
+        android:summary="@string/settings_event_location_upload_consent_summary"
+        android:title="@string/settings_event_location_upload_consent_title" />
+
 </PreferenceScreen>

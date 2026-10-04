@@ -263,7 +263,8 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         }
         route = r
         prefs.currentRoute = route.toString()
-        if (FirebaseAuth.getInstance().currentUser != null) {
+        if (FirebaseAuth.getInstance().currentUser != null &&
+            RemoteConfig.getBool("event_scoped_location_uploads")) {
             EventAssignmentResolver.refreshForRoute(route, prefs)
         } else {
             prefs.clearEventSession()

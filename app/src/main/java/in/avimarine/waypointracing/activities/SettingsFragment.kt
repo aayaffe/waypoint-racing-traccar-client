@@ -261,6 +261,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         const val KEY_EVENT_ROUTE_VERSION = "event_route_version"
         const val KEY_EVENT_SESSION_ID = "event_session_id"
         const val KEY_EVENT_LOCATION_UPLOAD_CONSENT = "event_location_upload_consent"
+        const val KEY_EVENT_ASSIGNMENT_LOOKUP_PENDING = "event_assignment_lookup_pending"
         fun getInitialDeviceId(): String{
             val id = (Random().nextInt(900000) + 100000).toString()
             return id

@@ -140,11 +140,14 @@ class TrackingController(private val context: Context) :
         if (prefs.status && prefs.tracking) {
             sendPosition(position)
         }
-        //Upload position to Firestore
-        if (RemoteConfig.getBool("save_all_locations") &&
-            RemoteConfig.getBool("event_scoped_location_uploads") &&
-            prefs.eventLocationUploadConsent &&
-            prefs.eventSession.isAssigned) {
+        // Preserve the legacy upload path when no event is configured. Event-aware
+        // uploads additionally require the event flag and the participant's consent.
+        if (prefs.eventSession.shouldUploadPosition(
+                saveAllLocations = RemoteConfig.getBool("save_all_locations"),
+                eventUploadsEnabled = RemoteConfig.getBool("event_scoped_location_uploads"),
+                hasEventUploadConsent = prefs.eventLocationUploadConsent,
+                assignmentLookupPending = prefs.eventAssignmentLookupPending,
+            )) {
             val minPositionUploadInterval = RemoteConfig.getLong("min_position_upload_interval") * 1000 //Convert to ms
             if (scopedPosition.time.time - lastPositionTime.get() > minPositionUploadInterval) {
                 lastPositionTime.set(scopedPosition.time.time)

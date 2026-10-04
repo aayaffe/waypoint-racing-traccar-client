@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_event_location_upload_consent_title">Share event location</string>
+    <string name="settings_event_location_upload_consent_summary">Allow location uploads for an assigned racing event while tracking is active</string>
+</resources>

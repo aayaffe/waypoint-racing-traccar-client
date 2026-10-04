@@ -10,6 +10,13 @@ import java.util.Date
 
 class EventSessionTest {
     @Test
+    fun parsesBackendUtcTimestampsWithoutJavaTime() {
+        assertEquals(1767441600000L, EventAssignmentResolver.parseServerTimestamp("2026-01-03T12:00:00.000Z"))
+        assertEquals(1767441600000L, EventAssignmentResolver.parseServerTimestamp("2026-01-03T12:00:00Z"))
+        assertEquals(null, EventAssignmentResolver.parseServerTimestamp("not-a-timestamp"))
+    }
+
+    @Test
     fun attachesStableSessionContextAndUniqueSourceIds() {
         val session = EventSession("event-1", "boat-1", "route-1", "version-1", "session-1")
         val position = Position(deviceId = "device", userId = "user", time = Date(0))
@@ -32,5 +39,16 @@ class EventSessionTest {
 
         assertFalse(EventSession().isAssigned)
         assertEquals(position, unassigned)
+    }
+
+    @Test
+    fun legacyUploadsDoNotDependOnEventSetup() {
+        val assigned = EventSession("event-1", "boat-1", "route-1", "version-1", "session-1")
+
+        assertTrue(EventSession().shouldUploadPosition(true, false, false, false))
+        assertFalse(assigned.shouldUploadPosition(true, true, false, false))
+        assertTrue(assigned.shouldUploadPosition(true, true, true, false))
+        assertFalse(EventSession().shouldUploadPosition(false, true, true, false))
+        assertFalse(EventSession().shouldUploadPosition(true, true, true, true))
     }
 }
