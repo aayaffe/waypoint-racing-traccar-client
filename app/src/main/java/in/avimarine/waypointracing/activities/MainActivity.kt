@@ -36,7 +36,6 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObject
 import `in`.avimarine.androidutils.*
-import `in`.avimarine.androidutils.LocationPermissions.Companion.PERMISSIONS_REQUEST_LOCATION_UI
 import `in`.avimarine.androidutils.Utils.Companion.getInstalledVersion
 import `in`.avimarine.waypointracing.*
 import `in`.avimarine.waypointracing.BuildConfig
@@ -68,6 +67,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private var isFirstSpinnerLoad = true
     private lateinit var binding: ActivityMainBinding
     private val debugMode = BuildConfig.DEBUG
+    private var activityStarted = false
 
     // See: https://developer.android.com/training/basics/intents/result
     private val signInLauncher = registerForActivityResult(
@@ -100,11 +100,8 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         setEmptyRouteUI(route.isEmpty())
         runSetupWizardIfNeeded(this)
 
-        setButton(prefs.status)
+        setCloseButton()
         alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (prefs.status) {
-            startTrackingService(checkPermission = true, initialPermission = false)
-        }
 
         binding.time.setLabel(getTimeZoneString())
         if (route.isValidWpt(prefs.nextWpt)) {
@@ -225,6 +222,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             }
         }
         setUiForLogin(FirebaseAuth.getInstance().currentUser)
+        ensureTrackingRunning()
     }
 
     /**
@@ -280,6 +278,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             ).show()
         }
         createAlarmIntent()
+        ensureTrackingRunning()
     }
 
     private fun setActivityTitle(r: Route) {
@@ -303,14 +302,10 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     override fun onStart() {
         super.onStart()
-        val PREFS_NAME = "MyPrefsFile"
-        val settings = getSharedPreferences(PREFS_NAME, 0)
-        if (settings.getBoolean("my_first_time", true)) {
-            settings.edit().putBoolean("my_first_time", false).apply()
-            return
-        }
-        startPositionProvider()
+        activityStarted = true
         setActivityTitle(route)
+        ensureTrackingRunning()
+        startPositionProvider()
     }
 
     private fun startPositionProvider() {
@@ -320,12 +315,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
                     createPositionProvider()
                 }
                 positionProvider.startUpdates()
-            } else {
-                LocationPermissions.askForLocationPermission(
-                    this,
-                    PERMISSIONS_REQUEST_LOCATION_UI,
-                    getString(R.string.permission_rationale)
-                )
             }
         } catch (e: SecurityException) {
             Log.w(TAG, e)
@@ -424,6 +413,8 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     }
 
     override fun onStop() {
+        activityStarted = false
+        // The foreground service continues recording while the activity is in the background.
         stopPositionProvider()
         super.onStop()
     }
@@ -431,19 +422,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private fun setOnBackPressed(){
         val callback = object : OnBackPressedCallback(true /* enabled by default */) {
             override fun handleOnBackPressed() {
-                AlertDialog.Builder(this@MainActivity)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setTitle("Closing Waypoint Racing")
-                    .setMessage("Are you sure you want to stop tracking and exit?")
-                    .setPositiveButton("Yes") { _, _ ->
-                        run {
-                            stopTrackingService()
-                            prefs.status = false
-                            finish()
-                        }
-                    }
-                    .setNegativeButton("No", null)
-                    .show()
+                confirmCloseApp()
             }
         }
         onBackPressedDispatcher.addCallback(this, callback)
@@ -577,13 +556,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     }
 
     fun startButtonClick(view: View) {
-        val checked = prefs.status
-        if (!checked && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), PERMISSIONS_REQUEST_NOTIFICATIONS)
-        }
-        prefs.status = checked.not()
+        confirmCloseApp()
     }
 
     fun loginButtonClick(view: View) {
@@ -700,17 +673,15 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             binding.loginBtn.visibility = View.GONE
         }
         binding.startBtn.visibility = if (user != null && !route.isEmpty()) View.VISIBLE else View.GONE
-        setButton(prefs.status)
+        setCloseButton()
         invalidateOptionsMenu()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (sharedPreferences == null) return
         if (key == SettingsFragment.KEY_STATUS) {
-            setButton(prefs.status)
-            if (prefs.status) {
-                startTrackingService(true, false)
-            } else {
+            setCloseButton()
+            if (!prefs.status) {
                 stopTrackingService()
             }
         } else if (key == SettingsFragment.KEY_NEXT_WPT) {
@@ -743,14 +714,49 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         }
     }
 
-    private fun setButton(isRunning: Boolean) {
-        if (isRunning) {
-            binding.startBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_rect_red)
-            binding.startBtn.text = getString(R.string.settings_status_on)
-        } else {
-            binding.startBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_rnd_grn)
-            binding.startBtn.text = getString(R.string.settings_status_off)
+    private fun setCloseButton() {
+        binding.startBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_rect_red)
+        binding.startBtn.text = getString(R.string.close_app_stop_tracking)
+    }
+
+    private fun confirmCloseApp() {
+        AlertDialog.Builder(this)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle(R.string.close_app_title)
+            .setMessage(R.string.close_app_message)
+            .setPositiveButton(R.string.close_app_confirm) { _, _ -> closeApp() }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun closeApp() {
+        prefs.status = false
+        stopTrackingService()
+        finishAndRemoveTask()
+    }
+
+    private fun ensureTrackingRunning() {
+        if (FirebaseAuth.getInstance().currentUser == null || route.isEmpty()) {
+            prefs.status = false
+            if (activityStarted) stopTrackingService()
+            return
         }
+        prefs.status = true
+        if (activityStarted) {
+            startTrackingService(checkPermission = true, initialPermission = false)
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                requestNotificationPermissionIfNeeded()
+            }
+        }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED ||
+            sharedPreferences.getBoolean(KEY_NOTIFICATION_PERMISSION_ASKED, false)
+        ) return
+        sharedPreferences.edit().putBoolean(KEY_NOTIFICATION_PERMISSION_ASKED, true).apply()
+        requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), PERMISSIONS_REQUEST_NOTIFICATIONS)
     }
 
     private fun startTrackingService(checkPermission: Boolean, initialPermission: Boolean) {
@@ -812,7 +818,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             if (grantResults.firstOrNull() != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, R.string.tracking_notification_permission_denied, Toast.LENGTH_LONG).show()
             }
-        } else if (requestCode == PERMISSIONS_REQUEST_LOCATION || requestCode == LocationPermissions.PERMISSIONS_REQUEST_LOCATION_UI) {
+        } else if (requestCode == PERMISSIONS_REQUEST_LOCATION) {
             var granted = true
             for (result in grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {
@@ -821,14 +827,13 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
                 }
             }
             Log.d(TAG, "Permissions granted: $granted")
-            if (requestCode == PERMISSIONS_REQUEST_LOCATION) {
-                startTrackingService(false, granted)
+            if (granted) {
+                startTrackingService(false, true)
+                startPositionProvider()
+                requestNotificationPermissionIfNeeded()
             } else {
-                if (granted) {
-                    Log.d(TAG, "Started Updates after permission granted")
-                    createPositionProvider()
-                    positionProvider.startUpdates()
-                }
+                prefs.status = false
+                Toast.makeText(this, R.string.location_permission_required, Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -836,6 +841,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     companion object {
         private const val PERMISSIONS_REQUEST_LOCATION = 2
         private const val PERMISSIONS_REQUEST_NOTIFICATIONS = 3
+        private const val KEY_NOTIFICATION_PERMISSION_ASKED = "notification_permission_asked"
         private const val ALARM_MANAGER_INTERVAL = 15000
     }
 
