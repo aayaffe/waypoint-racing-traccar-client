@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -16,6 +17,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -27,6 +29,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -68,6 +71,9 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private lateinit var binding: ActivityMainBinding
     private val debugMode = BuildConfig.DEBUG
     private var activityStarted = false
+    private var activityResumed = false
+    private var notificationPermissionRequestInFlight = false
+    private var notificationWarningShown = false
 
     // See: https://developer.android.com/training/basics/intents/result
     private val signInLauncher = registerForActivityResult(
@@ -323,12 +329,16 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     override fun onResume() {
         super.onResume()
+        activityResumed = true
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         if (route.isEmpty()) {
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
         }
         startPositionProvider()
+        if (prefs.status && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            requestNotificationPermissionIfNeeded()
+        }
         getNextWpt()
         setGPSInterval(1)
         setMainActivityVisibilityStatus(true)
@@ -395,6 +405,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     }
 
     override fun onPause() {
+        activityResumed = false
         super.onPause()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
         setGPSInterval(5)//prefs.initialGPSInterval.toInt())
@@ -672,7 +683,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         } else {
             binding.loginBtn.visibility = View.GONE
         }
-        binding.startBtn.visibility = if (user != null && !route.isEmpty()) View.VISIBLE else View.GONE
+        binding.startBtn.visibility = if (user != null) View.VISIBLE else View.GONE
         setCloseButton()
         invalidateOptionsMenu()
     }
@@ -736,7 +747,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     }
 
     private fun ensureTrackingRunning() {
-        if (FirebaseAuth.getInstance().currentUser == null || route.isEmpty()) {
+        if (FirebaseAuth.getInstance().currentUser == null) {
             prefs.status = false
             if (activityStarted) stopTrackingService()
             return
@@ -744,19 +755,53 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         prefs.status = true
         if (activityStarted) {
             startTrackingService(checkPermission = true, initialPermission = false)
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (activityResumed && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 requestNotificationPermissionIfNeeded()
             }
         }
     }
 
     private fun requestNotificationPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED ||
-            sharedPreferences.getBoolean(KEY_NOTIFICATION_PERMISSION_ASKED, false)
-        ) return
-        sharedPreferences.edit().putBoolean(KEY_NOTIFICATION_PERMISSION_ASKED, true).apply()
-        requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), PERMISSIONS_REQUEST_NOTIFICATIONS)
+        if (notificationPermissionRequestInFlight || notificationWarningShown) return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionRequestInFlight = true
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), PERMISSIONS_REQUEST_NOTIFICATIONS)
+        } else if (!notificationsVisible()) {
+            showNotificationSettingsDialog()
+        }
+    }
+
+    private fun notificationsVisible(): Boolean {
+        if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            if (manager.getNotificationChannel(MainApplication.PRIMARY_CHANNEL)?.importance == NotificationManager.IMPORTANCE_NONE) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun showNotificationSettingsDialog() {
+        if (notificationWarningShown || isFinishing) return
+        notificationWarningShown = true
+        AlertDialog.Builder(this)
+            .setTitle(R.string.tracking_notification_hidden_title)
+            .setMessage(R.string.tracking_notification_hidden_message)
+            .setPositiveButton(R.string.tracking_notification_settings) { _, _ ->
+                val settingsIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                } else {
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        .setData(android.net.Uri.parse("package:$packageName"))
+                }
+                startActivity(settingsIntent)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun startTrackingService(checkPermission: Boolean, initialPermission: Boolean) {
@@ -815,8 +860,9 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSIONS_REQUEST_NOTIFICATIONS) {
-            if (grantResults.firstOrNull() != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, R.string.tracking_notification_permission_denied, Toast.LENGTH_LONG).show()
+            notificationPermissionRequestInFlight = false
+            if (grantResults.firstOrNull() != PackageManager.PERMISSION_GRANTED || !notificationsVisible()) {
+                showNotificationSettingsDialog()
             }
         } else if (requestCode == PERMISSIONS_REQUEST_LOCATION) {
             var granted = true
@@ -830,7 +876,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             if (granted) {
                 startTrackingService(false, true)
                 startPositionProvider()
-                requestNotificationPermissionIfNeeded()
+                if (activityResumed) requestNotificationPermissionIfNeeded()
             } else {
                 prefs.status = false
                 Toast.makeText(this, R.string.location_permission_required, Toast.LENGTH_LONG).show()
@@ -841,7 +887,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     companion object {
         private const val PERMISSIONS_REQUEST_LOCATION = 2
         private const val PERMISSIONS_REQUEST_NOTIFICATIONS = 3
-        private const val KEY_NOTIFICATION_PERMISSION_ASKED = "notification_permission_asked"
         private const val ALARM_MANAGER_INTERVAL = 15000
     }
 
