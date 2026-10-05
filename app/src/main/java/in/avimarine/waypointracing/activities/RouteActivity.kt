@@ -165,15 +165,21 @@ class RouteActivity : EdgeToEdgeActivity(),  SharedPreferences.OnSharedPreferenc
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (sharedPreferences == null) return
         if (key == SettingsFragment.KEY_GATE_PASSES) {
-            val recyclerView: RecyclerView = findViewById(R.id.route_recycler_view)
-            val routeElementAdapter = recyclerView.adapter as RouteElementFullAdapter
-            routeElementAdapter.submitList(createRecList())
+            refreshResults()
         }
+    }
+
+    private fun refreshResults() {
+        val recyclerView: RecyclerView = findViewById(R.id.route_recycler_view)
+        val routeElementAdapter = recyclerView.adapter as? RouteElementFullAdapter ?: return
+        routeElementAdapter.submitList(createRecList())
+        setPointsDetails(route)
     }
 
     override fun onResume() {
         super.onResume()
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+        refreshResults()
     }
 
     override fun onPause() {
