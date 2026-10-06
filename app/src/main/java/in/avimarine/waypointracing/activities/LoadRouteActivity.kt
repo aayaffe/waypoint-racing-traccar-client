@@ -53,6 +53,7 @@ class LoadRouteActivity : EdgeToEdgeActivity() {
 
         binding.RoutesRecyclerView.adapter = adapter
         binding.RoutesRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.RoutesRecyclerView.itemAnimator = null
     }
     private fun setTitle() {
         val ab = supportActionBar

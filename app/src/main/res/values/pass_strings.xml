@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_gate_passes">Gate passes</string>
+    <string name="gate_pass_notification_title">Gate passed!</string>
+    <string name="finish_pass_notification_title">Finish line crossed!</string>
+    <string name="gate_pass_card_message">Pass recorded. Keep racing.</string>
+    <string name="finish_pass_card_message">Finish pass recorded.</string>
+    <string name="view_results">View results</string>
+    <string name="dismiss_pass_celebration">Dismiss pass celebration</string>
+</resources>

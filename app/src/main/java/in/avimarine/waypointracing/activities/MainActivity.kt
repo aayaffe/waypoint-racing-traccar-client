@@ -9,6 +9,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
@@ -74,6 +75,9 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private var activityResumed = false
     private var notificationPermissionRequestInFlight = false
     private var notificationWarningShown = false
+    private var lastShownPassToken: String? = null
+    private var celebrationRoute: Route? = null
+    private val hidePassCelebration = Runnable { dismissPassCelebration() }
 
     // See: https://developer.android.com/training/basics/intents/result
     private val signInLauncher = registerForActivityResult(
@@ -88,6 +92,12 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         val view = binding.root
         binding.versionViewModel = VersionViewModel(getInstalledVersion(this))
         setContentView(view)
+        binding.passCelebrationDismiss.setOnClickListener { dismissPassCelebration() }
+        binding.passCelebrationAction.setOnClickListener {
+            val selectedRoute = celebrationRoute ?: route
+            dismissPassCelebration()
+            startActivity(Intent(this, RouteActivity::class.java).putExtra("route", selectedRoute))
+        }
         Auth.launchAuthenticationProcess(signInLauncher)
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
         prefs = Preferences(sharedPreferences)
@@ -330,6 +340,9 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     override fun onResume() {
         super.onResume()
         activityResumed = true
+        lastShownPassToken = GatePassings.getLastGatePass(this, route.id)?.let {
+            "${it.routeId}:${it.gateId}:${it.time.time}"
+        }
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         if (route.isEmpty()) {
             val r = RouteLoader.loadRouteFromFile(this)
@@ -406,6 +419,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     override fun onPause() {
         activityResumed = false
+        dismissPassCelebration()
         super.onPause()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
         setGPSInterval(5)//prefs.initialGPSInterval.toInt())
@@ -709,9 +723,57 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             }
         } else if (key == SettingsFragment.KEY_GATE_PASSES) {
             updateLastPass()
+            val pass = GatePassings.getLastGatePass(this, route.id)
+            val token = pass?.let { "${it.routeId}:${it.gateId}:${it.time.time}" }
+            if (pass != null && token != lastShownPassToken) {
+                lastShownPassToken = token
+                val isFinish = route.elements.any {
+                    it.id == pass.gateId && it.routeElementType == RouteElementType.FINISH
+                }
+                runOnUiThread {
+                    if (activityResumed) showPassCelebration(pass, isFinish)
+                }
+            }
         } else if (key == SettingsFragment.KEY_BOAT_NAME) {
             setActivityTitle(route)
         }
+    }
+
+    private fun showPassCelebration(pass: GatePassing, isFinish: Boolean) {
+        celebrationRoute = route
+        val accent = ContextCompat.getColor(
+            this, if (isFinish) R.color.pass_finish_accent else R.color.pass_gate_accent
+        )
+        binding.passCelebrationCard.strokeColor = accent
+        binding.passCelebrationIcon.setImageResource(
+            if (isFinish) R.drawable.ic_finish_celebration else R.drawable.ic_gate_celebration
+        )
+        binding.passCelebrationTitle.setText(
+            if (isFinish) R.string.finish_pass_notification_title else R.string.gate_pass_notification_title
+        )
+        binding.passCelebrationName.text = pass.gateName
+        binding.passCelebrationMessage.setText(
+            if (isFinish) R.string.finish_pass_card_message else R.string.gate_pass_card_message
+        )
+        binding.passCelebrationAction.setText(
+            if (isFinish) R.string.view_results else R.string.view_route
+        )
+        binding.passCelebrationAction.backgroundTintList = ColorStateList.valueOf(accent)
+
+        binding.passCelebrationCard.removeCallbacks(hidePassCelebration)
+        binding.passCelebrationCard.animate().cancel()
+        binding.passCelebrationCard.alpha = 0f
+        binding.passCelebrationCard.translationY = -12 * resources.displayMetrics.density
+        binding.passCelebrationCard.visibility = View.VISIBLE
+        binding.passCelebrationCard.animate().alpha(1f).translationY(0f).setDuration(220).start()
+        binding.passCelebrationCard.postDelayed(hidePassCelebration, 6000)
+    }
+
+    private fun dismissPassCelebration() {
+        celebrationRoute = null
+        binding.passCelebrationCard.removeCallbacks(hidePassCelebration)
+        binding.passCelebrationCard.animate().cancel()
+        binding.passCelebrationCard.visibility = View.GONE
     }
 
     private fun updateLastPass() {

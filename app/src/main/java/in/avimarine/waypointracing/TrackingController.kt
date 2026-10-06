@@ -198,6 +198,12 @@ class TrackingController(private val context: Context) :
             }
             )
             GatePassings.addGatePass(context, gp)
+            try {
+                GatePassNotifier.show(context, route!!, gp, route!!.elements[prefs.nextWpt].routeElementType)
+            } catch (e: RuntimeException) {
+                // A notification failure must never interrupt position processing or waypoint advance.
+                Log.w(TAG, "Unable to show gate pass notification", e)
+            }
             if (route!!.eventType == EventType.WPTRACING) { //Enable auto waypoint advance for waypoint racing event only
                 prefs.nextWpt = route!!.getNextNonOptionalWpt(prefs.nextWpt)
             }

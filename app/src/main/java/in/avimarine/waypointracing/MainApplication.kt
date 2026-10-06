@@ -50,6 +50,11 @@ open class MainApplication : MultiDexApplication() {
         channel.lightColor = Color.GREEN
         channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
+        val passChannel = NotificationChannel(
+            PASS_CHANNEL, getString(R.string.channel_gate_passes), NotificationManager.IMPORTANCE_DEFAULT
+        )
+        passChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+        (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(passChannel)
     }
 
     open fun handleRatingFlow(activity: Activity) {}
@@ -57,6 +62,8 @@ open class MainApplication : MultiDexApplication() {
     companion object {
         // A new ID is required because Android does not raise an existing channel's importance.
         const val PRIMARY_CHANNEL = "tracking_active_v2"
+        // Keep the celebration card visible instead of covering it with a heads-up alert.
+        const val PASS_CHANNEL = "gate_passes_v2"
     }
 
 }
