@@ -21,6 +21,7 @@ import android.content.SharedPreferences
 import android.location.Location
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import android.widget.Toast
 import androidx.preference.PreferenceManager
@@ -123,6 +124,21 @@ class TrackingController(private val context: Context) :
         handlerGP.removeCallbacksAndMessages(null)
     }
 
+    fun onScreenOff() {
+        if (TrackingPowerPolicy.blocksScreenOffGps(context)) {
+            Log.w(TAG, "Battery Saver disables GPS while the screen is off")
+            StatusActivity.addMessage("Battery Saver disables GPS while the screen is off")
+            return
+        }
+        val screenOffAt = SystemClock.elapsedRealtime()
+        handler.postDelayed({
+            if (prefs.status && positionProvider.lastRawFixElapsedMs < screenOffAt) {
+                Log.w(TAG, "No GPS fix since screen off; requesting a fresh location")
+                positionProvider.requestFreshLocation()
+            }
+        }, SCREEN_OFF_FIX_CHECK_MS)
+    }
+
     private fun sendPosition(position: Position) {
         if (buffer) {
             write(position)
@@ -132,7 +148,7 @@ class TrackingController(private val context: Context) :
     }
 
     override fun onPositionUpdate(position: Position, location: Location) {
-        if (!prefs.status) return
+        if (!canTrackNow()) return
         Log.d(TAG, "onPositionUpdate")
         if (route == null) {
             route = RouteParser.parseRoute(prefs.currentRoute)
@@ -308,6 +324,7 @@ class TrackingController(private val context: Context) :
     }
 
     private fun read() {
+        if (!canTrackNow()) return
         log("read", null)
         databaseHelper.selectPositionAsync(object : DatabaseHandler<Position?> {
             override fun onComplete(success: Boolean, result: Position?) {
@@ -346,6 +363,7 @@ class TrackingController(private val context: Context) :
     }
 
     private fun send(position: Position) {
+        if (!canTrackNow()) return
         log("send", position)
         val request = formatRequest(url, position)
         sendRequestAsync(request, object : RequestHandler {
@@ -374,6 +392,14 @@ class TrackingController(private val context: Context) :
         }, RETRY_DELAY.toLong())
     }
 
+    private fun canTrackNow(): Boolean {
+        if (!prefs.status) return false
+        if (TrackingService.canTrackNow(context)) return true
+        prefs.status = false
+        context.stopService(Intent(context, TrackingService::class.java))
+        return false
+    }
+
     private fun updateIsInArea(location: Location, nextWpt: Int): Boolean {
         val l = location
         val wpt = route?.elements?.elementAtOrNull(nextWpt)
@@ -396,6 +422,7 @@ class TrackingController(private val context: Context) :
     }
 
     companion object {
+        private const val SCREEN_OFF_FIX_CHECK_MS = 15_000L
         private const val RETRY_DELAY = 30 * 1000
         private const val MAX_INTERVAL = 60
     }

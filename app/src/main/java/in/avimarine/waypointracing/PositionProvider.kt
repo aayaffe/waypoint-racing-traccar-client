@@ -79,6 +79,7 @@ abstract class PositionProvider(
     abstract fun startUpdates()
     abstract fun stopUpdates()
     abstract fun requestSingleLocation()
+    open fun requestFreshLocation() = Unit
 
     protected fun processLocation(location: Location?) {
         if (location != null) lastRawFixElapsedMs = SystemClock.elapsedRealtime()

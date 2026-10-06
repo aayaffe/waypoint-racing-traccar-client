@@ -23,12 +23,16 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
+import androidx.core.location.LocationManagerCompat
+import androidx.core.os.CancellationSignal
 import com.google.firebase.auth.FirebaseAuth
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import java.util.*
+import java.util.concurrent.Executor
 
 class AndroidPositionProvider(context: Context, listener: PositionListener) :
     PositionProvider(context, listener), LocationListener {
@@ -39,9 +43,15 @@ class AndroidPositionProvider(context: Context, listener: PositionListener) :
     private val recoveryHandler = Handler(Looper.getMainLooper())
     private var updatesRequested = false
     private var lastRequestElapsedMs = 0L
+    private var freshFixSignal: CancellationSignal? = null
     private val recoveryCheck = object : Runnable {
         override fun run() {
             if (!updatesRequested) return
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!powerManager.isInteractive && TrackingPowerPolicy.blocksScreenOffGps(context)) {
+                recoveryHandler.postDelayed(this, RECOVERY_CHECK_INTERVAL_MS)
+                return
+            }
             val now = SystemClock.elapsedRealtime()
             val providerEnabled = try {
                 locationManager.isProviderEnabled(provider)
@@ -87,11 +97,48 @@ class AndroidPositionProvider(context: Context, listener: PositionListener) :
     override fun stopUpdates() {
         updatesRequested = false
         recoveryHandler.removeCallbacks(recoveryCheck)
+        freshFixSignal?.cancel()
+        freshFixSignal = null
         if (!isUpdatesActive) return
         markUpdatesStopped()
         try {
             locationManager.removeUpdates(this)
         } catch (e: RuntimeException) {
+            listener.onPositionError(e)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun requestFreshLocation() {
+        if (!updatesRequested || freshFixSignal != null) return
+        val signal = CancellationSignal()
+        freshFixSignal = signal
+        try {
+            LocationManagerCompat.getCurrentLocation(
+                locationManager,
+                provider,
+                signal,
+                Executor { runnable -> recoveryHandler.post(runnable) },
+            ) { location ->
+                if (freshFixSignal !== signal) return@getCurrentLocation
+                freshFixSignal = null
+                if (updatesRequested && location != null) {
+                    Log.d(TAG, "Fresh location request succeeded after screen off")
+                    processLocation(location)
+                } else if (updatesRequested) {
+                    Log.w(TAG, "Fresh location request returned no fix after screen off")
+                }
+            }
+            recoveryHandler.postDelayed({
+                if (freshFixSignal === signal) {
+                    freshFixSignal = null
+                    signal.cancel()
+                    Log.w(TAG, "Fresh location request timed out after screen off")
+                }
+            }, FRESH_FIX_TIMEOUT_MS)
+        } catch (e: RuntimeException) {
+            freshFixSignal = null
+            signal.cancel()
             listener.onPositionError(e)
         }
     }
@@ -158,6 +205,7 @@ class AndroidPositionProvider(context: Context, listener: PositionListener) :
 
     companion object {
         private const val RECOVERY_CHECK_INTERVAL_MS = 30_000L
+        private const val FRESH_FIX_TIMEOUT_MS = 30_000L
     }
 
 }

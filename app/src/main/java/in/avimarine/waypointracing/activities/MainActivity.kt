@@ -5,7 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
-import android.app.NotificationManager
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -30,7 +30,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -92,6 +91,8 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         val view = binding.root
         binding.versionViewModel = VersionViewModel(getInstalledVersion(this))
         setContentView(view)
+        binding.notificationPermissionButton.setOnClickListener { openNotificationSettings() }
+        binding.batterySaverButton.setOnClickListener { openBatterySaverSettings() }
         binding.passCelebrationDismiss.setOnClickListener { dismissPassCelebration() }
         binding.passCelebrationAction.setOnClickListener {
             val selectedRoute = celebrationRoute ?: route
@@ -340,6 +341,8 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     override fun onResume() {
         super.onResume()
         activityResumed = true
+        updateNotificationPermissionBanner()
+        updateBatterySaverBanner()
         lastShownPassToken = GatePassings.getLastGatePass(this, route.id)?.let {
             "${it.routeId}:${it.gateId}:${it.time.time}"
         }
@@ -349,7 +352,8 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             loadRoute(r)
         }
         startPositionProvider()
-        if (prefs.status && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (FirebaseAuth.getInstance().currentUser != null &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             requestNotificationPermissionIfNeeded()
         }
         getNextWpt()
@@ -807,6 +811,8 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     }
 
     private fun ensureTrackingRunning() {
+        updateNotificationPermissionBanner()
+        updateBatterySaverBanner()
         if (FirebaseAuth.getInstance().currentUser == null) {
             prefs.status = false
             if (activityStarted) stopTrackingService()
@@ -834,14 +840,42 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     }
 
     private fun notificationsVisible(): Boolean {
-        if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) return false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            if (manager.getNotificationChannel(MainApplication.PRIMARY_CHANNEL)?.importance == NotificationManager.IMPORTANCE_NONE) {
-                return false
-            }
+        return TrackingService.canShowTrackingNotification(this)
+    }
+
+    private fun updateNotificationPermissionBanner() {
+        val hidden = !notificationsVisible()
+        if (!hidden) notificationWarningShown = false
+        binding.notificationPermissionBanner.visibility =
+            if (FirebaseAuth.getInstance().currentUser != null && hidden) View.VISIBLE else View.GONE
+    }
+
+    private fun openNotificationSettings() {
+        val settingsIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        } else {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                .setData(android.net.Uri.parse("package:$packageName"))
         }
-        return true
+        startActivity(settingsIntent)
+    }
+
+    private fun updateBatterySaverBanner() {
+        binding.batterySaverBanner.visibility =
+            if (FirebaseAuth.getInstance().currentUser != null && TrackingPowerPolicy.blocksScreenOffGps(this)) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+    }
+
+    private fun openBatterySaverSettings() {
+        try {
+            startActivity(Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS))
+        } catch (e: ActivityNotFoundException) {
+            startActivity(Intent(Settings.ACTION_SETTINGS))
+        }
     }
 
     private fun showNotificationSettingsDialog() {
@@ -850,16 +884,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         AlertDialog.Builder(this)
             .setTitle(R.string.tracking_notification_hidden_title)
             .setMessage(R.string.tracking_notification_hidden_message)
-            .setPositiveButton(R.string.tracking_notification_settings) { _, _ ->
-                val settingsIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                        .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-                } else {
-                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        .setData(android.net.Uri.parse("package:$packageName"))
-                }
-                startActivity(settingsIntent)
-            }
+            .setPositiveButton(R.string.tracking_notification_settings) { _, _ -> openNotificationSettings() }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
@@ -921,7 +946,10 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSIONS_REQUEST_NOTIFICATIONS) {
             notificationPermissionRequestInFlight = false
-            if (grantResults.firstOrNull() != PackageManager.PERMISSION_GRANTED || !notificationsVisible()) {
+            updateNotificationPermissionBanner()
+            if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED && notificationsVisible()) {
+                ensureTrackingRunning()
+            } else {
                 showNotificationSettingsDialog()
             }
         } else if (requestCode == PERMISSIONS_REQUEST_LOCATION) {

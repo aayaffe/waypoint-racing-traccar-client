@@ -20,10 +20,13 @@ import `in`.avimarine.waypointracing.activities.StatusActivity
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
 import android.os.Build
@@ -33,6 +36,7 @@ import android.os.PowerManager.WakeLock
 import android.provider.Settings
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import `in`.avimarine.androidutils.TAG
@@ -44,6 +48,12 @@ class TrackingService : Service() {
     private var wakeLock: WakeLock? = null
     private var trackingController: TrackingController? = null
     private lateinit var prefs: Preferences
+    private var screenOffReceiverRegistered = false
+    private val screenOffReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == Intent.ACTION_SCREEN_OFF) trackingController?.onScreenOff()
+        }
+    }
 
 
     @SuppressLint("WakelockTimeout")
@@ -54,16 +64,13 @@ class TrackingService : Service() {
             stopSelf()
             return
         }
+        if (!MainApplication.isAppVisible && !canShowTrackingNotification(this)) {
+            stopTrackingDueToError()
+            return
+        }
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(
-                    NOTIFICATION_ID,
-                    createNotification(this),
-                    FOREGROUND_SERVICE_TYPE_LOCATION
-                )
-            } else {
-                startForeground(NOTIFICATION_ID, createNotification(this))
-            }
+            showTrackingNotification()
+            activeService = this
             Log.i(TAG, "service create")
             sendBroadcast(Intent(ACTION_STARTED).setPackage(packageName))
             StatusActivity.addMessage(getString(R.string.status_service_create))
@@ -84,17 +91,26 @@ class TrackingService : Service() {
                         prefs.wakeLock = false
                     }
                 }
+                Log.i(TAG, "Tracking wake lock held: ${wakeLock?.isHeld == true}")
+                val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+                Log.i(TAG, "Battery optimization ignored: ${powerManager.isIgnoringBatteryOptimizations(packageName)}")
                 trackingController = TrackingController(this)
                 trackingController?.start()
+                try {
+                    registerReceiver(screenOffReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
+                    screenOffReceiverRegistered = true
+                } catch (e: RuntimeException) {
+                    Log.w(TAG, "Unable to register screen-off recovery receiver", e)
+                }
             } else {
                 Log.w(TAG, "Tracking stopped: precise location permission is missing")
                 StatusActivity.addMessage("Tracking stopped: precise location permission is missing")
-                stopSelf()
+                stopTrackingDueToError()
             }
         } catch (e: RuntimeException) {
             Log.w(TAG, e)
             StatusActivity.addMessage("Tracking could not start: ${e.message ?: e.javaClass.simpleName}")
-            stopSelf()
+            stopTrackingDueToError()
         }
     }
 
@@ -108,10 +124,41 @@ class TrackingService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
+        if (canShowTrackingNotification(this)) {
+            try {
+                showTrackingNotification()
+            } catch (e: RuntimeException) {
+                Log.w(TAG, "Unable to restore tracking notification", e)
+                stopTrackingDueToError()
+                return START_NOT_STICKY
+            }
+        }
+        if (!canTrackNow(this)) {
+            stopTrackingDueToError()
+            return START_NOT_STICKY
+        }
         return START_STICKY
     }
 
+    private fun stopTrackingDueToError() {
+        prefs.status = false
+        stopSelf()
+    }
+
+    private fun showTrackingNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(NOTIFICATION_ID, createNotification(this), FOREGROUND_SERVICE_TYPE_LOCATION)
+        } else {
+            startForeground(NOTIFICATION_ID, createNotification(this))
+        }
+    }
+
     override fun onDestroy() {
+        if (screenOffReceiverRegistered) {
+            unregisterReceiver(screenOffReceiver)
+            screenOffReceiverRegistered = false
+        }
+        if (activeService === this) activeService = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } else {
@@ -135,17 +182,53 @@ class TrackingService : Service() {
         const val ACTION_STARTED = "org.traccar.action.SERVICE_STARTED"
         const val ACTION_STOPPED = "org.traccar.action.SERVICE_STOPPED"
         private const val NOTIFICATION_ID = 1
+        @Volatile
+        private var activeService: TrackingService? = null
+
+        // null means no service is running, false means it could not show the notification.
+        fun refreshNotificationIfRunning(): Boolean? {
+            val service = activeService ?: return null
+            if (!service.prefs.status || !canShowTrackingNotification(service)) return false
+            return try {
+                service.showTrackingNotification()
+                isTrackingNotificationVisible(service)
+            } catch (e: RuntimeException) {
+                Log.w(TAG, "Unable to restore tracking notification", e)
+                false
+            }
+        }
+
+        fun canShowTrackingNotification(context: Context): Boolean {
+            if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return false
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val manager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                val channel = manager.getNotificationChannel(MainApplication.PRIMARY_CHANNEL)
+                return channel != null && channel.importance != NotificationManager.IMPORTANCE_NONE
+            }
+            return true
+        }
+
+        fun isTrackingNotificationVisible(context: Context): Boolean {
+            if (!canShowTrackingNotification(context)) return false
+            val manager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            return manager.activeNotifications.any { it.id == NOTIFICATION_ID }
+        }
+
+        fun canTrackNow(context: Context): Boolean =
+            MainApplication.isAppVisible || isTrackingNotificationVisible(context)
 
         @SuppressLint("UnspecifiedImmutableFlag")
         private fun createNotification(context: Context): Notification {
             val builder = NotificationCompat.Builder(context, MainApplication.PRIMARY_CHANNEL)
                 .setSmallIcon(R.drawable.app_icon)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setContentText(context.getString(R.string.tracking_notification_text))
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
+                .setSilent(true)
+                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             val intent: Intent
             if (!BuildConfig.HIDDEN_APP) {
                 intent = Intent(context, MainActivity::class.java)
@@ -162,6 +245,9 @@ class TrackingService : Service() {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
             builder.setContentIntent(PendingIntent.getActivity(context, 0, intent, flags))
+            val dismissIntent = Intent(context, StopTrackingReceiver::class.java)
+                .setAction(StopTrackingReceiver.ACTION_NOTIFICATION_DISMISSED)
+            builder.setDeleteIntent(PendingIntent.getBroadcast(context, 2, dismissIntent, flags))
             val stopIntent = Intent(context, StopTrackingReceiver::class.java)
                 .setAction(StopTrackingReceiver.ACTION_STOP_TRACKING)
             builder.addAction(

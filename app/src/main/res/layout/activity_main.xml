@@ -40,6 +40,78 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/map_fragment_view">
 
+        <LinearLayout
+            android:id="@+id/notificationPermissionBanner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="#FFF4D6"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tracking_notification_hidden_title"
+                android:textColor="#1F1F1F"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/tracking_notification_hidden_message"
+                android:textColor="#1F1F1F" />
+
+            <Button
+                android:id="@+id/notificationPermissionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="4dp"
+                android:text="@string/tracking_notification_settings" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/batterySaverBanner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="#FDE8E7"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/notificationPermissionBanner">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tracking_battery_saver_title"
+                android:textColor="#1F1F1F"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/tracking_battery_saver_message"
+                android:textColor="#1F1F1F" />
+
+            <Button
+                android:id="@+id/batterySaverButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="4dp"
+                android:text="@string/tracking_battery_saver_settings" />
+        </LinearLayout>
+
 
         <Button
             android:id="@+id/start_btn"
@@ -97,7 +169,7 @@
             android:text="@string/next_waypoint_gate"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/batterySaverBanner" />
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/nav_scroll_view"
