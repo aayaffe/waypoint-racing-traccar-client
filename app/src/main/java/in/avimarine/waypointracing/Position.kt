@@ -1,7 +1,6 @@
 package `in`.avimarine.waypointracing
 
 import android.location.Location
-import android.location.LocationManager
 import android.os.Build
 import `in`.avimarine.androidutils.BatteryStatus
 import java.util.*
@@ -37,7 +36,7 @@ data class Position(
         altitude = location.altitude,
         speed = location.speed * 1.943844, // convert m/sec to knots
         course = location.bearing.toDouble(),
-        accuracy = if (location.provider != null && location.provider != LocationManager.GPS_PROVIDER) {
+        accuracy = if (location.hasAccuracy()) {
             location.accuracy.toDouble()
         } else {
             0.0
