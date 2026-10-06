@@ -117,7 +117,7 @@
             android:id="@+id/start_btn"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginBottom="10dp"
             android:background="@drawable/btn_rnd_grn"
             android:onClick="startButtonClick"
             android:text="@string/settings_status_off"
@@ -126,7 +126,6 @@
             app:layout_constraintBottom_toTopOf="@id/lastPassTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/nav_scroll_view"
             android:visibility="gone"/>
 
         <Button
@@ -142,8 +141,15 @@
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/lastPassTextView"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/nav_scroll_view" />
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/navigationButtonTop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierAllowsGoneWidgets="false"
+            app:barrierDirection="top"
+            app:constraint_referenced_ids="start_btn,login_btn" />
 
         <Spinner
             android:id="@+id/routeElementSpinner"
@@ -175,21 +181,21 @@
             android:id="@+id/nav_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="2dp"
             android:layout_marginBottom="10dp"
-            app:layout_constraintBottom_toTopOf="@+id/login_btn"
+            app:layout_constraintBottom_toTopOf="@id/navigationButtonTop"
             app:layout_constraintTop_toBottomOf="@id/routeElementSpinner">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content">
 
                 <in.avimarine.waypointracing.ui.NavTextDrawer
                     android:id="@+id/portGate"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="70dp"
                     android:layout_marginStart="4dp"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="2dp"
                     android:layout_marginBottom="1dp"
                     android:layout_marginEnd="1dp"
                     app:autoTextSize="true"
@@ -207,7 +213,7 @@
                 <in.avimarine.waypointracing.ui.NavTextDrawer
                     android:id="@+id/stbdGate"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="70dp"
                     android:layout_marginStart="1dp"
                     android:layout_marginEnd="4dp"
                     app:autoTextSize="true"
@@ -225,7 +231,7 @@
                 <in.avimarine.waypointracing.ui.NavTextDrawer
                     android:id="@+id/cogsog"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="70dp"
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="1dp"
                     app:autoTextSize="true"
@@ -244,7 +250,7 @@
                 <in.avimarine.waypointracing.ui.NavTextDrawer
                     android:id="@+id/location"
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="70dp"
                     android:layout_marginStart="1dp"
                     android:layout_marginEnd="4dp"
                     app:autoTextSize="true"
@@ -262,7 +268,7 @@
                 <in.avimarine.waypointracing.ui.NavTextDrawer
                     android:id="@+id/time"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="70dp"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="1dp"
                     android:layout_marginEnd="1dp"
@@ -281,7 +287,7 @@
                 <in.avimarine.waypointracing.ui.NavTextDrawer
                     android:id="@+id/shortestDistanceToGate"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="70dp"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="1dp"
                     android:layout_marginEnd="1dp"
@@ -300,7 +306,7 @@
                 <in.avimarine.waypointracing.ui.NavTextDrawer
                     android:id="@+id/vmg"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="70dp"
                     android:layout_marginStart="1dp"
                     android:layout_marginEnd="4dp"
                     app:autoTextSize="true"
