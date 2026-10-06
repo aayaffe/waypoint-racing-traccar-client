@@ -755,9 +755,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         binding.passCelebrationMessage.setText(
             if (isFinish) R.string.finish_pass_card_message else R.string.gate_pass_card_message
         )
-        binding.passCelebrationAction.setText(
-            if (isFinish) R.string.view_results else R.string.view_route
-        )
+        binding.passCelebrationAction.setText(R.string.view_route)
         binding.passCelebrationAction.backgroundTintList = ColorStateList.valueOf(accent)
 
         binding.passCelebrationCard.removeCallbacks(hidePassCelebration)
@@ -766,7 +764,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         binding.passCelebrationCard.translationY = -12 * resources.displayMetrics.density
         binding.passCelebrationCard.visibility = View.VISIBLE
         binding.passCelebrationCard.animate().alpha(1f).translationY(0f).setDuration(220).start()
-        binding.passCelebrationCard.postDelayed(hidePassCelebration, 6000)
+        binding.passCelebrationCard.postDelayed(hidePassCelebration, 10000)
     }
 
     private fun dismissPassCelebration() {
