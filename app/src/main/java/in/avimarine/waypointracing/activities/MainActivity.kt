@@ -6,8 +6,10 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.content.pm.PackageManager
@@ -18,6 +20,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import android.view.Menu
@@ -72,6 +75,14 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private val debugMode = BuildConfig.DEBUG
     private var activityStarted = false
     private var activityResumed = false
+    private var batterySaverReceiverRegistered = false
+    private val batterySaverReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == PowerManager.ACTION_POWER_SAVE_MODE_CHANGED) {
+                updateBatterySaverBanner()
+            }
+        }
+    }
     private var notificationPermissionRequestInFlight = false
     private var notificationWarningShown = false
     private var lastShownPassToken: String? = null
@@ -341,6 +352,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     override fun onResume() {
         super.onResume()
         activityResumed = true
+        registerBatterySaverReceiver()
         updateNotificationPermissionBanner()
         updateBatterySaverBanner()
         lastShownPassToken = GatePassings.getLastGatePass(this, route.id)?.let {
@@ -423,6 +435,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     override fun onPause() {
         activityResumed = false
+        unregisterBatterySaverReceiver()
         dismissPassCelebration()
         super.onPause()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
@@ -868,6 +881,24 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             } else {
                 View.GONE
             }
+    }
+
+    private fun registerBatterySaverReceiver() {
+        if (batterySaverReceiverRegistered) return
+        val filter = IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(batterySaverReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("DEPRECATION")
+            registerReceiver(batterySaverReceiver, filter)
+        }
+        batterySaverReceiverRegistered = true
+    }
+
+    private fun unregisterBatterySaverReceiver() {
+        if (!batterySaverReceiverRegistered) return
+        unregisterReceiver(batterySaverReceiver)
+        batterySaverReceiverRegistered = false
     }
 
     private fun openBatterySaverSettings() {
