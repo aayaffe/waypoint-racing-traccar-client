@@ -9,7 +9,9 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
+import `in`.avimarine.waypointracing.R
 import `in`.avimarine.waypointracing.route.RouteElement
+import `in`.avimarine.waypointracing.route.RouteElementType
 
 
 class RouteElementAdapter(context: Context,
@@ -21,13 +23,13 @@ class RouteElementAdapter(context: Context,
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = createViewFromResource(convertView, parent, layoutResource)
-        return bindData(getItem(position), view)
+        return bindData(getItem(position), view, showFinishFlag = true)
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = createViewFromResource(convertView, parent, android.R.layout.simple_spinner_dropdown_item)
 
-        return bindData(getItem(position), view)
+        return bindData(getItem(position), view, showFinishFlag = true)
     }
 
     private fun createViewFromResource(convertView: View?, parent: ViewGroup, layoutResource: Int): TextView {
@@ -47,12 +49,29 @@ class RouteElementAdapter(context: Context,
         }
     }
 
-    private fun bindData(value: RouteElement, view: TextView): TextView {
+    private fun bindData(
+        value: RouteElement,
+        view: TextView,
+        showFinishFlag: Boolean = false
+    ): TextView {
         var points_str = ""
         if (value.points>0){
             points_str = " (" + value.points.toInt() + " points)"
         }
         view.text = value.name + points_str
+        view.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            if (showFinishFlag && value.routeElementType == RouteElementType.FINISH) {
+                R.drawable.ic_finish_flag
+            } else {
+                0
+            },
+            0,
+            0,
+            0
+        )
+        if (showFinishFlag && value.routeElementType == RouteElementType.FINISH) {
+            view.compoundDrawablePadding = (4 * view.resources.displayMetrics.density).toInt()
+        }
         return view
     }
 }

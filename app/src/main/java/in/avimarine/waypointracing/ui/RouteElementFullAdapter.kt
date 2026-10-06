@@ -18,6 +18,7 @@ import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.androidutils.getLatString
 import `in`.avimarine.androidutils.getLonString
 import `in`.avimarine.androidutils.timeStampToDateString
+import `in`.avimarine.waypointracing.route.RouteElementType
 
 class RouteElementFullAdapter() :
     ListAdapter<RouteElementConcat, RouteElementFullAdapter.RouteElementConcatViewHolder>(RouteElementConcatDiffCallback) {
@@ -30,7 +31,6 @@ class RouteElementFullAdapter() :
         private val passedImageView: ImageView = itemView.findViewById(R.id.passed_image)
         private val gpLocTextView: TextView = itemView.findViewById(R.id.gp_location)
         private val locStatusImageView: ImageView = itemView.findViewById(R.id.loc_status_image)
-        private val typeImageView: ImageView = itemView.findViewById(R.id.route_element_type_image)
 
         private var currentRec: RouteElementConcat? = null
 
@@ -39,6 +39,17 @@ class RouteElementFullAdapter() :
         fun bind(rec: RouteElementConcat) {
             currentRec = rec
             nameTextView.text = rec.re.name
+            val isFinish = rec.re.routeElementType == RouteElementType.FINISH
+            nameTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                if (isFinish) R.drawable.ic_finish_flag else 0,
+                0,
+                0,
+                0
+            )
+            if (isFinish) {
+                nameTextView.compoundDrawablePadding =
+                    (4 * nameTextView.resources.displayMetrics.density).toInt()
+            }
             if (rec.gp != null) {
                 passedImageView.setImageResource(R.drawable.ic_checkmark)
                 passedImageView.setOnClickListener {

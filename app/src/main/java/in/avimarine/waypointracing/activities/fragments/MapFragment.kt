@@ -64,6 +64,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     private var bp_gold: Bitmap? = null
     private var bp_silver: Bitmap? = null
     private var bp_bronze: Bitmap? = null
+    private var bp_finish: Bitmap? = null
     private var nextWpt = -1
 
 
@@ -118,6 +119,8 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         bp_silver = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_silver_wpt)
             ?.toBitmap()
         bp_bronze = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_bronze_wpt)
+            ?.toBitmap()
+        bp_finish = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_finish_flag)
             ?.toBitmap()
     }
 
@@ -324,6 +327,10 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         maxPoints: Double,
         minPoints: Double
     ): Bitmap {
+        if (routeElement.routeElementType == RouteElementType.FINISH) {
+            return bp_finish!!
+        }
+
         val gp =
             activity?.let {
                 GatePassings.getCurrentRouteGatePassings(
