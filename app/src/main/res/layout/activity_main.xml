@@ -114,21 +114,6 @@
 
 
         <Button
-            android:id="@+id/start_btn"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/btn_rnd_grn"
-            android:onClick="startButtonClick"
-            android:text="@string/settings_status_off"
-            android:textAllCaps="false"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toTopOf="@id/lastPassTextView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:visibility="gone"/>
-
-        <Button
             android:id="@+id/login_btn"
             android:layout_width="140dp"
             android:layout_height="wrap_content"
@@ -142,14 +127,6 @@
             app:layout_constraintBottom_toTopOf="@id/lastPassTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
-
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/navigationButtonTop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierAllowsGoneWidgets="false"
-            app:barrierDirection="top"
-            app:constraint_referenced_ids="start_btn,login_btn" />
 
         <Spinner
             android:id="@+id/routeElementSpinner"
@@ -183,7 +160,7 @@
             android:layout_height="0dp"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="10dp"
-            app:layout_constraintBottom_toTopOf="@id/navigationButtonTop"
+            app:layout_constraintBottom_toTopOf="@id/login_btn"
             app:layout_constraintTop_toBottomOf="@id/routeElementSpinner">
 
             <androidx.constraintlayout.widget.ConstraintLayout

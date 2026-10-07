@@ -10,7 +10,6 @@
     <string name="tracking_battery_saver_title">Battery Saver pauses GPS with the screen off</string>
     <string name="tracking_battery_saver_message">This phone disables GPS when Battery Saver is on and the screen is off. Turn Battery Saver off for continuous background tracking. Unrestricted app battery use and Wake lock do not override this setting.</string>
     <string name="tracking_battery_saver_settings">Battery Saver settings</string>
-    <string name="close_app_stop_tracking">Close app\nStop tracking</string>
     <string name="close_app_title">Close Waypoint Racing?</string>
     <string name="close_app_message">Closing the app stops recording your location.</string>
     <string name="close_app_confirm">Close app</string>

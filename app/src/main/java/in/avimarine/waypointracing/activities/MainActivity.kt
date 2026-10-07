@@ -128,7 +128,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         setEmptyRouteUI(route.isEmpty())
         runSetupWizardIfNeeded(this)
 
-        setCloseButton()
         alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         binding.time.setLabel(getTimeZoneString())
@@ -597,10 +596,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         FirestoreDatabase.addEvent(`in`.avimarine.waypointracing.database.EventType.RESET_ROUTE)
     }
 
-    fun startButtonClick(view: View) {
-        confirmCloseApp()
-    }
-
     fun loginButtonClick(view: View) {
         login()
     }
@@ -673,8 +668,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             binding.stbdGate.visibility = View.GONE
             binding.shortestDistanceToGate.visibility = View.GONE
             binding.vmg.visibility = View.GONE
-            binding.startBtn.visibility = View.GONE
-
         } else {
             binding.routeElementSpinner.visibility = View.VISIBLE
             binding.nextWptHeader.text = getString(R.string.next_waypoint_gate)
@@ -714,15 +707,12 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         } else {
             binding.loginBtn.visibility = View.GONE
         }
-        binding.startBtn.visibility = if (user != null) View.VISIBLE else View.GONE
-        setCloseButton()
         invalidateOptionsMenu()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (sharedPreferences == null) return
         if (key == SettingsFragment.KEY_STATUS) {
-            setCloseButton()
             if (!prefs.status) {
                 stopTrackingService()
             }
@@ -800,11 +790,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
                 timeStampToDateString(gp.time.time)
             )
         }
-    }
-
-    private fun setCloseButton() {
-        binding.startBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_rect_red)
-        binding.startBtn.text = getString(R.string.close_app_stop_tracking)
     }
 
     private fun confirmCloseApp() {
