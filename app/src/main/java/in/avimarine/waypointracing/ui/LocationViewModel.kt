@@ -29,7 +29,7 @@ class LocationViewModel(
 
     fun getCOGData(): String{
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
-        return getDirString(Direction(location.bearing.toDouble(), location), magnetic, false, location)
+        return formatDirection(Direction(location.bearing.toDouble(), location), magnetic)
     }
 
     fun getCOGSOGData(): String{
@@ -73,11 +73,9 @@ class LocationViewModel(
             return "-----"
         }
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
-        return getDirString(
+        return formatDirection(
             getDirection(location, wpt.portWpt),
             magnetic,
-            false,
-            location
         ) + "/" + getDistString(getDistance(location, wpt.portWpt))
     }
 
@@ -96,12 +94,15 @@ class LocationViewModel(
             }
         }
         val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
-        return getDirString(
+        return formatDirection(
             getDirection(location, wpt.stbdWpt),
             magnetic,
-            false,
-            location
         ) + "/" + getDistString(getDistance(location, wpt.stbdWpt))
+    }
+
+    private fun formatDirection(direction: Direction, magnetic: Boolean): String {
+        val formatted = getDirString(direction, magnetic, false, location)
+        return if (formatted.startsWith("360")) "000" + formatted.substring(3) else formatted
     }
 
     fun getShortestDistanceToGateData(): String {
