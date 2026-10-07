@@ -15,11 +15,16 @@
  */
 package `in`.avimarine.waypointracing.activities;
 
+import android.content.ClipData
+import android.content.Intent
 import android.widget.ArrayAdapter
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ListView
+import android.widget.Toast
+import androidx.core.content.FileProvider
+import java.io.File
 import java.text.DateFormat
 import java.util.*
 import `in`.avimarine.waypointracing.R
@@ -60,8 +65,33 @@ class StatusActivity : EdgeToEdgeActivity() {
                 clearMessages()
                 return true
             }
+            R.id.share -> {
+                shareMessages()
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun shareMessages() {
+        if (messages.isEmpty()) return
+        try {
+            val directory = File(cacheDir, "status").apply { mkdirs() }
+            val file = File(directory, "status-log.txt")
+            file.writeText(messages.joinToString("\n", postfix = "\n"), Charsets.UTF_8)
+            val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                clipData = ClipData.newUri(contentResolver, "Status log", uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(intent, getString(R.string.menu_share_status)))
+        } catch (error: RuntimeException) {
+            Toast.makeText(this, R.string.status_share_failed, Toast.LENGTH_LONG).show()
+        } catch (error: java.io.IOException) {
+            Toast.makeText(this, R.string.status_share_failed, Toast.LENGTH_LONG).show()
+        }
     }
 
     companion object {

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_share_status">Share status log</string>
+    <string name="status_share_failed">Could not share the status log</string>
+    <string name="widget_tracking_on">Tracking on</string>
+    <string name="widget_tracking_off">Tracking off</string>
+    <string name="widget_label">Tracking status</string>
+</resources>
