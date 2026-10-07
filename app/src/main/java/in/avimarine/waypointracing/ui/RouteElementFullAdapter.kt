@@ -1,6 +1,7 @@
 package `in`.avimarine.waypointracing.ui
 
 import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.PassUploadStatus
 import `in`.avimarine.waypointracing.database.FirestoreDatabase
 import android.os.Build
 import android.util.Log
@@ -19,6 +20,7 @@ import `in`.avimarine.androidutils.getLatString
 import `in`.avimarine.androidutils.getLonString
 import `in`.avimarine.androidutils.timeStampToDateString
 import `in`.avimarine.waypointracing.route.RouteElementType
+import `in`.avimarine.waypointracing.route.GatePassReportMatcher
 
 class RouteElementFullAdapter() :
     ListAdapter<RouteElementConcat, RouteElementFullAdapter.RouteElementConcatViewHolder>(RouteElementConcatDiffCallback) {
@@ -33,6 +35,19 @@ class RouteElementFullAdapter() :
         private val locStatusImageView: ImageView = itemView.findViewById(R.id.loc_status_image)
 
         private var currentRec: RouteElementConcat? = null
+
+        private fun setPassStatus(uploaded: Boolean) {
+            passedImageView.setImageResource(
+                if (uploaded) R.drawable.ic_doublecheckmark else R.drawable.ic_checkmark
+            )
+            passedImageView.setOnClickListener {
+                Toast.makeText(
+                    passedImageView.context,
+                    if (uploaded) R.string.pass_uploaded_checked else R.string.pass_saved_checked,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
 
         /* Bind Route Element particulars. */
         @RequiresApi(Build.VERSION_CODES.O)
@@ -51,23 +66,21 @@ class RouteElementFullAdapter() :
                     (4 * nameTextView.resources.displayMetrics.density).toInt()
             }
             if (rec.gp != null) {
-                passedImageView.setImageResource(R.drawable.ic_checkmark)
-                passedImageView.setOnClickListener {
-                    Toast.makeText(
-                        passedImageView.context,
-                        "Passed gate\\waypoint",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-                FirestoreDatabase.getOwnReports(rec.gp.routeId, rec.gp.gateId, {
-                    if (!it.isEmpty) {
-                        passedImageView.setImageResource(R.drawable.ic_doublecheckmark)
-                        passedImageView.setOnClickListener {
-                            Toast.makeText(
-                                passedImageView.context,
-                                "Report uploaded successfully",
-                                Toast.LENGTH_LONG
-                            ).show()
+                val pass = rec.gp
+                setPassStatus(PassUploadStatus.get(itemView.context, pass) == PassUploadStatus.State.UPLOADED)
+                FirestoreDatabase.getOwnReports(pass.routeId, pass.gateId, { snapshot ->
+                    val uploaded = !snapshot.metadata.isFromCache && snapshot.documents.any { doc ->
+                        !doc.metadata.hasPendingWrites() && GatePassReportMatcher.matches(
+                            pass,
+                            doc.getString("sourceEventId"),
+                            doc.getTimestamp("time")?.toDate()?.time,
+                            doc.getString("deviceId"),
+                        )
+                    }
+                    if (uploaded && currentRec?.gp == pass) {
+                        setPassStatus(true)
+                        if (PassUploadStatus.get(itemView.context, pass) != PassUploadStatus.State.UPLOADED) {
+                            PassUploadStatus.set(itemView.context, pass, PassUploadStatus.State.UPLOADED)
                         }
                     }
                 }, {
@@ -85,6 +98,7 @@ class RouteElementFullAdapter() :
                 }
             } else {
                 passedImageView.setImageResource(R.drawable.ic_baseline_x_24)
+                passedImageView.setOnClickListener(null)
                 gatePassTextView.text = ""
                 gpLocTextView.text = ""
                 locStatusImageView.visibility=View.INVISIBLE

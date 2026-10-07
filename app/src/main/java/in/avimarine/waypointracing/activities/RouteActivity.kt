@@ -15,6 +15,7 @@ import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.androidutils.timeStampToDateString
 import `in`.avimarine.waypointracing.BuildConfig
 import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.PassUploadStatus
 import `in`.avimarine.waypointracing.databinding.ActivityRouteBinding
 import `in`.avimarine.waypointracing.route.EventType
 import `in`.avimarine.waypointracing.route.GatePassings
@@ -165,7 +166,15 @@ class RouteActivity : EdgeToEdgeActivity(),  SharedPreferences.OnSharedPreferenc
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (sharedPreferences == null) return
         if (key == SettingsFragment.KEY_GATE_PASSES) {
-            refreshResults()
+            runOnUiThread { refreshResults() }
+        } else if (PassUploadStatus.isStatusKey(key)) {
+            runOnUiThread {
+                val adapter = findViewById<RecyclerView>(R.id.route_recycler_view).adapter as? RouteElementFullAdapter
+                val index = adapter?.currentList?.indexOfFirst { rec ->
+                    rec.gp?.let { PassUploadStatus.key(it) } == key
+                } ?: -1
+                if (index >= 0) adapter?.notifyItemChanged(index)
+            }
         }
     }
 
