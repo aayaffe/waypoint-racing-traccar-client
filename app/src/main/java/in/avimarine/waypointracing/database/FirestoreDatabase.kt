@@ -11,6 +11,7 @@ import com.google.firebase.firestore.toObject
 import com.google.firebase.firestore.firestore
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.Source
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.waypointracing.Position
 import `in`.avimarine.waypointracing.utils.RemoteConfig
@@ -129,20 +130,16 @@ class FirestoreDatabase {
                 val docRef =
                     db.collection(COLLECTION_REPORTS_NEW)
                         .whereEqualTo("userId", uid).whereEqualTo("routeId", routeId).whereEqualTo("gateId", gateId)
-                docRef.get()
+                docRef.get(Source.SERVER)
                     .addOnSuccessListener(onSuccess)
-                    .addOnFailureListener { exception ->
-                        Log.d(TAG, "get failed with ", exception)
-                    }
+                    .addOnFailureListener(onFailure)
             } else {
                 val docRef =
                     db.collection(COLLECTION_REPORTS).document(uid).collection(COLLECTION_REPORTS)
                         .whereEqualTo("routeId", routeId).whereEqualTo("gateId", gateId)
-                docRef.get()
+                docRef.get(Source.SERVER)
                     .addOnSuccessListener(onSuccess)
-                    .addOnFailureListener { exception ->
-                        Log.d(TAG, "get failed with ", exception)
-                    }
+                    .addOnFailureListener(onFailure)
             }
         }
 

@@ -205,21 +205,30 @@ class TrackingController(private val context: Context) :
                 param("route", route!!.eventName)
                 param("next_wpt", prefs.nextWpt.toString())
             }
+            val passedRoute = route!!
+            val passedType = passedRoute.elements[prefs.nextWpt].routeElementType
+            PassUploadStatus.set(context, gp, PassUploadStatus.State.PENDING)
+            GatePassings.addGatePass(context, gp)
+            fun notifyPass(status: PassUploadStatus.State) {
+                try {
+                    GatePassNotifier.show(context, passedRoute, gp, passedType, status)
+                } catch (e: RuntimeException) {
+                    // A notification failure must never interrupt position processing or waypoint advance.
+                    Log.w(TAG, "Unable to show gate pass notification", e)
+                }
+            }
+            notifyPass(PassUploadStatus.State.PENDING)
             FirestoreDatabase.addGatePass(gp, { documentReference ->
                 Log.d(TAG, "Gatepass added with ID: ${documentReference.id}")
-                Toast.makeText(context, "Uploaded successfully", Toast.LENGTH_LONG).show()
+                PassUploadStatus.set(context, gp, PassUploadStatus.State.UPLOADED)
+                notifyPass(PassUploadStatus.State.UPLOADED)
+                Toast.makeText(context, R.string.pass_upload_success, Toast.LENGTH_LONG).show()
             }, { e ->
                 Log.e(TAG, "Error adding gatepass", e)
-                Toast.makeText(context, "--FAILED-- to upload", Toast.LENGTH_LONG).show()
-            }
-            )
-            GatePassings.addGatePass(context, gp)
-            try {
-                GatePassNotifier.show(context, route!!, gp, route!!.elements[prefs.nextWpt].routeElementType)
-            } catch (e: RuntimeException) {
-                // A notification failure must never interrupt position processing or waypoint advance.
-                Log.w(TAG, "Unable to show gate pass notification", e)
-            }
+                PassUploadStatus.set(context, gp, PassUploadStatus.State.FAILED)
+                notifyPass(PassUploadStatus.State.FAILED)
+                Toast.makeText(context, R.string.pass_upload_failure, Toast.LENGTH_LONG).show()
+            })
             if (route!!.eventType == EventType.WPTRACING) { //Enable auto waypoint advance for waypoint racing event only
                 prefs.nextWpt = route!!.getNextNonOptionalWpt(prefs.nextWpt)
             }

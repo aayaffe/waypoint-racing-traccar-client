@@ -33,6 +33,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -87,6 +88,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private var notificationWarningShown = false
     private var lastShownPassToken: String? = null
     private var celebrationRoute: Route? = null
+    private var celebrationPass: GatePassing? = null
     private val hidePassCelebration = Runnable { dismissPassCelebration() }
 
     // See: https://developer.android.com/training/basics/intents/result
@@ -128,7 +130,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         setEmptyRouteUI(route.isEmpty())
         runSetupWizardIfNeeded(this)
 
-        setCloseButton()
         alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         binding.time.setLabel(getTimeZoneString())
@@ -355,10 +356,9 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         registerBatterySaverReceiver()
         updateNotificationPermissionBanner()
         updateBatterySaverBanner()
-        lastShownPassToken = GatePassings.getLastGatePass(this, route.id)?.let {
-            "${it.routeId}:${it.gateId}:${it.time.time}"
-        }
+        lastShownPassToken = GatePassings.getLastGatePass(this, route.id)?.let(PassUploadStatus::token)
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+        celebrationPass?.let(::updatePassCelebrationStatus)
         if (route.isEmpty()) {
             val r = RouteLoader.loadRouteFromFile(this)
             loadRoute(r)
@@ -597,10 +597,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         FirestoreDatabase.addEvent(`in`.avimarine.waypointracing.database.EventType.RESET_ROUTE)
     }
 
-    fun startButtonClick(view: View) {
-        confirmCloseApp()
-    }
-
     fun loginButtonClick(view: View) {
         login()
     }
@@ -673,8 +669,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             binding.stbdGate.visibility = View.GONE
             binding.shortestDistanceToGate.visibility = View.GONE
             binding.vmg.visibility = View.GONE
-            binding.startBtn.visibility = View.GONE
-
         } else {
             binding.routeElementSpinner.visibility = View.VISIBLE
             binding.nextWptHeader.text = getString(R.string.next_waypoint_gate)
@@ -714,15 +708,12 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         } else {
             binding.loginBtn.visibility = View.GONE
         }
-        binding.startBtn.visibility = if (user != null) View.VISIBLE else View.GONE
-        setCloseButton()
         invalidateOptionsMenu()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (sharedPreferences == null) return
         if (key == SettingsFragment.KEY_STATUS) {
-            setCloseButton()
             if (!prefs.status) {
                 stopTrackingService()
             }
@@ -741,7 +732,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         } else if (key == SettingsFragment.KEY_GATE_PASSES) {
             updateLastPass()
             val pass = GatePassings.getLastGatePass(this, route.id)
-            val token = pass?.let { "${it.routeId}:${it.gateId}:${it.time.time}" }
+            val token = pass?.let(PassUploadStatus::token)
             if (pass != null && token != lastShownPassToken) {
                 lastShownPassToken = token
                 val isFinish = route.elements.any {
@@ -751,6 +742,14 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
                     if (activityResumed) showPassCelebration(pass, isFinish)
                 }
             }
+        } else if (celebrationPass?.let { key == PassUploadStatus.key(it) } == true) {
+            celebrationPass?.let { pass ->
+                runOnUiThread {
+                    if (celebrationPass == pass && binding.passCelebrationCard.isVisible) {
+                        updatePassCelebrationStatus(pass)
+                    }
+                }
+            }
         } else if (key == SettingsFragment.KEY_BOAT_NAME) {
             setActivityTitle(route)
         }
@@ -758,6 +757,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     private fun showPassCelebration(pass: GatePassing, isFinish: Boolean) {
         celebrationRoute = route
+        celebrationPass = pass
         val accent = ContextCompat.getColor(
             this, if (isFinish) R.color.pass_finish_accent else R.color.pass_gate_accent
         )
@@ -769,9 +769,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             if (isFinish) R.string.finish_pass_notification_title else R.string.gate_pass_notification_title
         )
         binding.passCelebrationName.text = pass.gateName
-        binding.passCelebrationMessage.setText(
-            if (isFinish) R.string.finish_pass_card_message else R.string.gate_pass_card_message
-        )
+        updatePassCelebrationStatus(pass)
         binding.passCelebrationAction.setText(R.string.view_route)
         binding.passCelebrationAction.backgroundTintList = ColorStateList.valueOf(accent)
 
@@ -786,9 +784,18 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     private fun dismissPassCelebration() {
         celebrationRoute = null
+        celebrationPass = null
         binding.passCelebrationCard.removeCallbacks(hidePassCelebration)
         binding.passCelebrationCard.animate().cancel()
         binding.passCelebrationCard.visibility = View.GONE
+    }
+
+    private fun updatePassCelebrationStatus(pass: GatePassing) {
+        binding.passCelebrationUploaded.setText(when (PassUploadStatus.get(this, pass)) {
+            PassUploadStatus.State.PENDING -> R.string.pass_upload_pending
+            PassUploadStatus.State.UPLOADED -> R.string.pass_uploaded_checked
+            PassUploadStatus.State.FAILED -> R.string.pass_upload_failed_status
+        })
     }
 
     private fun updateLastPass() {
@@ -800,11 +807,6 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
                 timeStampToDateString(gp.time.time)
             )
         }
-    }
-
-    private fun setCloseButton() {
-        binding.startBtn.background = ContextCompat.getDrawable(this, R.drawable.btn_rect_red)
-        binding.startBtn.text = getString(R.string.close_app_stop_tracking)
     }
 
     private fun confirmCloseApp() {

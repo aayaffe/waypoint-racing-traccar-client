@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="channel_gate_passes">Gate passes</string>
-    <string name="gate_pass_notification_title">Gate passed!</string>
-    <string name="finish_pass_notification_title">Finish line crossed!</string>
-    <string name="gate_pass_card_message">Pass recorded. Keep racing.</string>
-    <string name="finish_pass_card_message">Finish pass recorded.</string>
-    <string name="dismiss_pass_celebration">Dismiss pass celebration</string>
+    <string name="channel_gate_passes" translatable="false">Gate passes</string>
+    <string name="gate_pass_notification_title" translatable="false">Gate passed!</string>
+    <string name="finish_pass_notification_title" translatable="false">Finish line crossed!</string>
+    <string name="pass_saved_checked" translatable="false">☑ Saved on device</string>
+    <string name="pass_upload_pending" translatable="false">☐ Upload pending</string>
+    <string name="pass_uploaded_checked" translatable="false">☑ Uploaded to server</string>
+    <string name="pass_upload_failed_status" translatable="false">☐ Upload failed</string>
+    <string name="pass_notification_message" translatable="false">%1$s\n%2$s  %3$s</string>
+    <string name="pass_upload_success" translatable="false">Pass recorded and uploaded successfully.</string>
+    <string name="pass_upload_failure" translatable="false">Pass saved on this device, but upload failed.</string>
+    <string name="dismiss_pass_celebration" translatable="false">Dismiss pass celebration</string>
 </resources>

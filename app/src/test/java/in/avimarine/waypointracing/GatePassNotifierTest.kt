@@ -39,7 +39,8 @@ class GatePassNotifierTest {
             time = Date(time),
         )
 
-        GatePassNotifier.show(context, route, pass(gate.id, gate.name, 1000), gate.routeElementType)
+        val gatePass = pass(gate.id, gate.name, 1000)
+        GatePassNotifier.show(context, route, gatePass, gate.routeElementType)
         GatePassNotifier.show(context, route, pass(finish.id, finish.name, 2000), finish.routeElementType)
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -52,7 +53,22 @@ class GatePassNotifierTest {
         val titles = alerts.map { it.extras.getString("android.title") }
         assertTrue(titles.contains(context.getString(R.string.gate_pass_notification_title)))
         assertTrue(titles.contains(context.getString(R.string.finish_pass_notification_title)))
+        assertTrue(alerts.all { it.extras.getString("android.text")?.contains("☐ Upload pending") == true })
         assertTrue(alerts.all { it.contentIntent != null })
+
+        GatePassNotifier.show(context, route, gatePass, gate.routeElementType, PassUploadStatus.State.UPLOADED)
+        val updatedAlerts = manager.activeNotifications.map { it.notification }
+        assertEquals(2, updatedAlerts.size)
+        assertTrue(updatedAlerts.any {
+            it.extras.getString("android.text")?.contains("☑ Uploaded to server") == true
+        })
+
+        val gateAlert = manager.activeNotifications.first {
+            it.notification.extras.getString("android.title") == context.getString(R.string.gate_pass_notification_title)
+        }
+        manager.cancel(gateAlert.tag, gateAlert.id)
+        GatePassNotifier.show(context, route, gatePass, gate.routeElementType, PassUploadStatus.State.FAILED)
+        assertEquals(1, manager.activeNotifications.size)
 
         alerts.first().contentIntent.send()
         val opened = Shadows.shadowOf(context as Application).nextStartedActivity
