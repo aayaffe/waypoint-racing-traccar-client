@@ -25,6 +25,7 @@ android {
     defaultConfig {
         applicationId 'in.avimarine.waypointracing'
         buildConfigField 'boolean', 'HIDDEN_APP', 'false'
+        resValue 'string', 'mapbox_access_token', project.findProperty('MAPBOX_ACCESS_TOKEN') ?: System.getenv('MAPBOX_ACCESS_TOKEN') ?: ''
         minSdkVersion 23
         targetSdkVersion 36
         versionCode 51

@@ -272,13 +272,31 @@
                     app:data="@{viewmodel!=null ? viewmodel.shortestDistanceToGateData : `------`}"
                     app:dataTextSize="16sp"
                     app:labelText="@string/distance_to_gate"
-                    app:layout_constraintEnd_toStartOf="@+id/vmg"
+                    app:layout_constraintEnd_toStartOf="@+id/eta"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/time"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:textColor="-65536"
                     app:unitsText="NM" />
+
+                <in.avimarine.waypointracing.ui.NavTextDrawer
+                    android:id="@+id/eta"
+                    android:layout_width="0dp"
+                    android:layout_height="70dp"
+                    android:layout_marginStart="1dp"
+                    android:layout_marginEnd="4dp"
+                    app:autoTextSize="true"
+                    app:data="@{viewmodel!=null ? viewmodel.ETAData : `------`}"
+                    app:dataTextSize="16sp"
+                    app:labelText="@string/eta_label"
+                    app:layout_constraintBottom_toBottomOf="@id/shortestDistanceToGate"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toEndOf="@id/shortestDistanceToGate"
+                    app:layout_constraintTop_toTopOf="@id/shortestDistanceToGate"
+                    app:textColor="-65536"
+                    app:unitsEnabled="false" />
 
                 <in.avimarine.waypointracing.ui.NavTextDrawer
                     android:id="@+id/vmg"

@@ -14,6 +14,10 @@ import `in`.avimarine.androidutils.*
 import `in`.avimarine.androidutils.geo.Direction
 import `in`.avimarine.androidutils.geo.Speed
 import `in`.avimarine.androidutils.units.SpeedUnits
+import `in`.avimarine.androidutils.units.DistanceUnits
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class LocationViewModel(
     val location: Location,
@@ -118,5 +122,23 @@ class LocationViewModel(
         }
         val vmg = getVMG(location, wpt.portWpt, wpt.stbdWpt)
         return getSpeedString(vmg,SpeedUnits.Knots,false)
+    }
+
+    fun getETAData(): String {
+        if (wpt == null) return "-----"
+
+        val distance = if (wpt.routeElementType == RouteElementType.WAYPOINT) {
+            getDistance(location, wpt.portWpt)
+        } else {
+            pointToLineDist(location, wpt.portWpt, wpt.stbdWpt)
+        }
+        val vmg = getVMG(location, wpt.portWpt, wpt.stbdWpt)
+        val arrival = EtaCalculator.arrivalTimeMillis(
+            distance.getValue(DistanceUnits.NauticalMiles),
+            vmg.getValue(SpeedUnits.Knots),
+            location.time
+        ) ?: return "-----"
+
+        return SimpleDateFormat("EEE HH:mm", Locale.getDefault()).format(Date(arrival))
     }
 }

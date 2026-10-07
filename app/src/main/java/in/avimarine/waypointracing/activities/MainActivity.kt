@@ -669,6 +669,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             binding.stbdGate.visibility = View.GONE
             binding.shortestDistanceToGate.visibility = View.GONE
             binding.vmg.visibility = View.GONE
+            binding.eta.visibility = View.GONE
         } else {
             binding.routeElementSpinner.visibility = View.VISIBLE
             binding.nextWptHeader.text = getString(R.string.next_waypoint_gate)
@@ -676,6 +677,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             binding.stbdGate.visibility = View.VISIBLE
             binding.shortestDistanceToGate.visibility = View.VISIBLE
             binding.vmg.visibility = View.VISIBLE
+            binding.eta.visibility = View.VISIBLE
         }
         setUiForLogin(FirebaseAuth.getInstance().currentUser)
     }
@@ -689,6 +691,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             binding.time.setTextColor(Color.BLACK)
             binding.shortestDistanceToGate.setTextColor(Color.BLACK)
             binding.vmg.setTextColor(Color.BLACK)
+            binding.eta.setTextColor(Color.BLACK)
         } else {
             binding.portGate.setTextColor(Color.RED)
             binding.stbdGate.setTextColor(Color.RED)
@@ -697,6 +700,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             binding.time.setTextColor(Color.RED)
             binding.shortestDistanceToGate.setTextColor(Color.RED)
             binding.vmg.setTextColor(Color.RED)
+            binding.eta.setTextColor(Color.RED)
             binding.location.setLabel("Accuracy - Unknown")
         }
     }
