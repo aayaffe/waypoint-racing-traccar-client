@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string-array name="settings_motion_averaging_values" translatable="false">
+        <item>0</item>
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+    </string-array>
+
+    <string-array name="settings_motion_averaging_names">
+        <item>@string/settings_motion_averaging_off</item>
+        <item>@string/settings_motion_averaging_10</item>
+        <item>@string/settings_motion_averaging_20</item>
+        <item>@string/settings_motion_averaging_30</item>
+    </string-array>
+
 
 
     <string-array name="settings_accuracy_values" translatable="false">

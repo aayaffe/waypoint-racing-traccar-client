@@ -51,6 +51,14 @@
         app:isPreferenceVisible="true"/>
 
     <ListPreference
+        android:defaultValue="10"
+        android:entries="@array/settings_motion_averaging_names"
+        android:entryValues="@array/settings_motion_averaging_values"
+        android:key="motion_averaging"
+        android:title="@string/settings_motion_averaging_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ListPreference
         android:defaultValue="high"
         android:entries="@array/settings_accuracy_names"
         android:entryValues="@array/settings_accuracy_values"

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_motion_averaging_title">Speed and course averaging</string>
+    <string name="settings_motion_averaging_off">Off</string>
+    <string name="settings_motion_averaging_10">10 seconds</string>
+    <string name="settings_motion_averaging_20">20 seconds</string>
+    <string name="settings_motion_averaging_30">30 seconds</string>
+</resources>

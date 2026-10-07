@@ -49,6 +49,8 @@ abstract class PositionProvider(
     protected var distance: Double = sharedPreferences.getString(SettingsFragment.KEY_DISTANCE, "0")!!.toInt().toDouble()
     protected var angle: Double = sharedPreferences.getString(SettingsFragment.KEY_ANGLE, "0")!!.toInt().toDouble()
     private var lastLocation: Location? = null
+    private val motionAverager = MotionAverager()
+    private var averagingWindowMs = -1L
     private val userId: String get() = FirebaseAuth.getInstance().currentUser?.uid ?: ""
     private var updatesActive = false
     var lastRawFixElapsedMs: Long = 0L
@@ -74,6 +76,29 @@ abstract class PositionProvider(
 
     protected fun resetLocationFilter() {
         lastLocation = null
+        motionAverager.clear()
+    }
+
+    protected fun emitPosition(location: Location) {
+        val selectedWindowMs = sharedPreferences.getString(SettingsFragment.KEY_MOTION_AVERAGING, "10")
+            ?.toLongOrNull()?.takeIf { it in listOf(0L, 10L, 20L, 30L) }?.times(1000) ?: 10_000L
+        if (selectedWindowMs != averagingWindowMs) {
+            motionAverager.clear()
+            averagingWindowMs = selectedWindowMs
+        }
+        val (speed, course) = motionAverager.add(
+            location.time,
+            location.speed.takeIf { location.hasSpeed() }?.toDouble(),
+            location.bearing.takeIf { location.hasBearing() }?.toDouble(),
+            averagingWindowMs,
+        )
+        val averagedLocation = Location(location)
+        if (speed != null) averagedLocation.speed = speed.toFloat()
+        if (course != null) averagedLocation.bearing = course.toFloat()
+        listener.onPositionUpdate(
+            Position(deviceId, userId, boatName, averagedLocation, getBatteryStatus(context)),
+            averagedLocation,
+        )
     }
 
     abstract fun startUpdates()
@@ -92,7 +117,7 @@ abstract class PositionProvider(
             Log.v(TAG, "location new")
             this.lastLocation = location
             lastAcceptedFixElapsedMs = SystemClock.elapsedRealtime()
-            listener.onPositionUpdate(Position(deviceId, userId, boatName, location, getBatteryStatus(context)), location)
+            emitPosition(location)
 
         } else {
             Log.v(TAG, if (location != null) "location ignored" else "location nil")

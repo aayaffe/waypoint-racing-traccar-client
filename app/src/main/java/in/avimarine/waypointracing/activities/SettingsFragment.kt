@@ -252,6 +252,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         const val KEY_GATE_PASSES = "gatepasses"
         const val KEY_TRACKING = "trackingenabled"
         const val KEY_MAGNETIC = "magnetic"
+        const val KEY_MOTION_AVERAGING = "motion_averaging"
         const val KEY_IS_UI_VISIBLE = "uivisibility"
         const val KEY_ADAPTIVE_INTERVAL = "adaptiveinterval"
         const val KEY_ROUTE_UPDATED_VERSION = "routeupdatedversion" // used to check to what version route updated and that user refused to update
