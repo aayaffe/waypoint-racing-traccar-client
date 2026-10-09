@@ -14,6 +14,41 @@ Tracking and race information is stored in the application's main Firebase backe
 
 See the [Privacy Policy](docs/index.md) for information about location tracking, race reports, and data deletion.
 
+## Build and install
+
+### Configure Mapbox for local development
+
+The app needs a Mapbox **public** access token (one that starts with `pk.`) to display its map. Create a token with the public `STYLES:TILES`, `STYLES:READ`, and `FONTS:READ` scopes. Do not use a secret `sk.` token in the app.
+
+The token configuration is deliberately local and is not committed to Git:
+
+1. Copy [app/developer-config.xml.template](app/developer-config.xml.template) to `app/src/main/res/values/developer-config.xml`.
+2. Replace `YOUR_PUBLIC_MAPBOX_ACCESS_TOKEN` in the copied file with your `pk.` token.
+
+In PowerShell:
+
+```powershell
+Copy-Item app\developer-config.xml.template app\src\main\res\values\developer-config.xml
+```
+
+The template is stored in `app/`, not `app/src/main/res/values/`, because Android treats every file in the resources directory as a build input. The real `developer-config.xml` belongs in `app/src/main/res/values/`, where the Mapbox Android SDK finds the `mapbox_access_token` resource. That file is ignored by Git, so it remains local to each developer machine.
+
+### Build and install a debug APK
+
+Connect an Android device with USB debugging enabled, then run:
+
+```powershell
+.\gradlew.bat installRegularDebug
+```
+
+This builds the `regularDebug` variant and installs it on the connected device. To create the APK without installing it, run:
+
+```powershell
+.\gradlew.bat assembleRegularDebug
+```
+
+You can also open the project in Android Studio, create `developer-config.xml` as above, select the `regularDebug` build variant, and press **Run**.
+
 
 ## License
 

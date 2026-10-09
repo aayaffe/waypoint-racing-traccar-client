@@ -1,4 +1,5 @@
 AviMarineAndroidUtils/
+app/src/main/res/values/developer-config.xml
 .DS_Store
 google-services.json
 serverurls.xml
