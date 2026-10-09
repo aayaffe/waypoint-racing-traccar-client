@@ -2,7 +2,10 @@
 <resources>
     <string name="channel_tracking">Active race tracking</string>
     <string name="tracking_notification_text">Sharing your location while the app is open or in the background.</string>
-    <string name="tracking_notification_stop">Close app &amp; stop tracking</string>
+    <string name="tracking_notification_title">Waypoint Racing · Tracking active</string>
+    <string name="tracking_notification_race">%1$s · %2$s</string>
+    <string name="tracking_notification_health">GPS active · Sync status in app</string>
+    <string name="tracking_notification_stop">STOP TRACKING</string>
     <string name="tracking_stopped_from_notification">App closed and tracking stopped from notification</string>
     <string name="tracking_notification_hidden_title">Background tracking needs notifications</string>
     <string name="tracking_notification_hidden_message">Background tracking will stop when you leave the app until notification permission is granted and Active race tracking notifications are enabled. Tracking can continue while the app is open.</string>

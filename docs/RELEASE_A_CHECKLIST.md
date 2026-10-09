@@ -24,4 +24,86 @@ Progress is measured by the twelve independently verifiable Release A work items
 - [x] Added the detected pass event time and latitude/longitude to the existing non-blocking pass banner.
 - [ ] Connect the formatter-backed presentation state to the instrument-first Race Deck layout.
 
-**Overall Release A progress: 5%**
+**Overall Release A progress: 53%**
+
+## Complete delivery plan
+
+### Foundations and compatibility
+
+- [x] Create the dedicated Release A branch.
+- [x] Add pure, unit-tested formatting for Race Deck time and pass details.
+- [ ] Create a complete `RaceDeckUiState` mapper with no pass-detection logic in the UI layer.
+- [ ] Define UI actions separately from the race, route, and tracking services.
+- [ ] Preserve legacy routes, selected-target pass eligibility, persisted events, and Firebase write shapes.
+- [ ] Add regression fixtures proving legacy pass and upload parity before and after the UI update.
+
+### Design system and accessibility
+
+- [x] Add Release A sunlight palette resources.
+- [ ] Apply sunlight as the default and retain an equivalent dark palette for dusk/night use.
+- [ ] Apply 4dp spacing, panel, divider, radius, and touch-target tokens consistently.
+- [ ] Apply dominant bearing/distance typography and tabular-friendly values.
+- [ ] Ensure each critical status uses text/icon/shape as well as color.
+- [ ] Ensure primary controls are at least 56dp and have accessibility labels.
+- [~] Respect user font scaling; TalkBack order and 1.3× device verification remain.
+
+### Race Deck
+
+- [x] Add the Race Deck header structure: course, boat, seconds clock, and health row.
+- [x] Bind the header to a one-second ticker and production course/boat state.
+- [x] Build active target card hierarchy: name, bearing, distance, and type label.
+- [x] Render marks with mark bearing/distance only, never detector-sector details.
+- [x] Render gates/finishes with nearest finite-line bearing/distance plus both endpoint values.
+- [x] Build fixed COG/SOG/VMG and TTG/ETA/TIME instruments.
+- [x] Keep current position permanently visible in degree/minute form.
+- [x] Add labelled `TARGETS`, `MAP`, and `MORE` actions.
+- [x] Keep compact-portrait map height at 25–35% below navigation data.
+
+### Operational health and device readiness
+
+- [~] Display GPS, Tracking, Sync, and Device states; device currently reflects notifications and Battery Saver while battery-mode detection follows.
+- [x] Add persistent Tracking Off warning without changing service lifetime.
+- [~] Add immediate GPS-loss state and quiet recovery; configured delayed alert and silence action remain.
+- [ ] Display Sync offline/pending visually only.
+- [ ] Detect notification-disabled state and link to Android notification settings.
+- [x] Detect optimized/restricted app battery modes, prioritizing restricted mode as critical.
+- [ ] Detect Battery Saver and allow session-only dismissal.
+- [x] Consolidate multiple device issues into one Race Deck banner.
+- [~] Add a severity-ordered Device Setup review panel with direct setting actions; expand it into the full visual panel in the next UI pass.
+- [ ] Re-evaluate readiness at launch, settings return, tracking start/resume, and inexpensive active checks.
+- [ ] Add a non-blocking pre-race readiness review with `CONTINUE ANYWAY`.
+
+### Targets, map, courses, and recovery
+
+- [x] Add full-height phone Targets bottom sheet from the active target card.
+- [ ] Build one-tap phone Targets sheet / tablet side panel using existing selected-target semantics.
+- [x] Require explicit selection confirmation after inspecting a target on the map.
+- [ ] Set north-up auto-frame for boat + target and full gate/finish geometry.
+- [ ] Suspend auto-frame after manual map interaction and show Re-center / Auto.
+- [ ] Add expanded map at approximately 70% height while retaining critical navigation.
+- [ ] Apply sparse marine-chart treatment and active/future/past route styling.
+- [x] Build no-course selector while reusing existing selection semantics.
+- [ ] Fix route reload/selection instability without replacing RouteLoader or Firebase adapters.
+- [~] Show restoration failure with `SELECT COURSE` and never silently select another course; transient restoring state remains.
+
+### Feedback, notification, and responsive layouts
+
+- [x] Keep pass feedback non-full-screen, dismissible, and no longer than ten seconds.
+- [x] Show pass event time with seconds and detected latitude/longitude.
+- [x] Show the next target in the pass banner when current ordered behavior supplies it.
+- [ ] Preserve one sound/haptic for existing confirmed passes only; do not add alerts for target/map/sync changes.
+- [x] Update persistent tracking notification copy and `OPEN` / confirmed `STOP TRACKING` actions.
+- [x] Implement landscape approximately 55% instrument / 45% map.
+- [~] Implement tablet 35–40% instrument / 60–65% map; Targets side-panel adaptation remains.
+- [ ] Enforce compression priority: target, endpoints, boat data, time data, position, map.
+
+### Validation and release gate
+
+- [x] Add focused tests for seconds-required time and pass-position formatting.
+- [ ] Add mapper, selection, and device-readiness unit tests.
+- [ ] Add UI tests for target list, map confirmation, warnings, pass banner, and responsive layouts.
+- [ ] Run route, pass, tracking, and Firebase-adapter regression suites.
+- [ ] Device smoke-test screen on/off, process death, recreation, crash recovery, reboot, battery saver, notification denial, offline network, and restored route.
+- [ ] Compare a recorded legacy race’s pass set and uploads before/after modernization.
+- [ ] Verify production and Release A clients operate concurrently and backend/rules rollback is safe.
+- [ ] Complete visual and accessibility review against the Release A review board.

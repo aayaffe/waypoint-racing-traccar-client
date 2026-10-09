@@ -41,6 +41,8 @@ import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import `in`.avimarine.androidutils.TAG
 import `in`.avimarine.waypointracing.utils.Preferences
+import `in`.avimarine.waypointracing.utils.RouteParser
+import java.util.Date
 
 
 class TrackingService : Service() {
@@ -146,11 +148,15 @@ class TrackingService : Service() {
     }
 
     private fun showTrackingNotification() {
+        val notification = createNotification(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(NOTIFICATION_ID, createNotification(this), FOREGROUND_SERVICE_TYPE_LOCATION)
+            startForeground(NOTIFICATION_ID, notification, FOREGROUND_SERVICE_TYPE_LOCATION)
         } else {
-            startForeground(NOTIFICATION_ID, createNotification(this))
+            startForeground(NOTIFICATION_ID, notification)
         }
+        // A user can dismiss the notification while the app is foregrounded.
+        // Explicitly repost it when we next move to the background.
+        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification)
     }
 
     override fun onDestroy() {
@@ -233,8 +239,8 @@ class TrackingService : Service() {
             if (!BuildConfig.HIDDEN_APP) {
                 intent = Intent(context, MainActivity::class.java)
                 builder
-                    .setContentTitle(context.getString(R.string.settings_status_on_summary))
-                    .setTicker(context.getString(R.string.settings_status_on_summary))
+                    .setContentTitle(context.getString(R.string.tracking_notification_title))
+                    .setTicker(context.getString(R.string.tracking_notification_title))
                     .color = ContextCompat.getColor(context, R.color.primary_dark)
             } else {
                 intent = Intent(Settings.ACTION_SETTINGS)
@@ -248,12 +254,21 @@ class TrackingService : Service() {
             val dismissIntent = Intent(context, StopTrackingReceiver::class.java)
                 .setAction(StopTrackingReceiver.ACTION_NOTIFICATION_DISMISSED)
             builder.setDeleteIntent(PendingIntent.getBroadcast(context, 2, dismissIntent, flags))
-            val stopIntent = Intent(context, StopTrackingReceiver::class.java)
-                .setAction(StopTrackingReceiver.ACTION_STOP_TRACKING)
+            val prefs = Preferences(PreferenceManager.getDefaultSharedPreferences(context))
+            val route = RouteParser.parseRoute(prefs.currentRoute)
+            builder.setContentText(context.getString(
+                R.string.tracking_notification_race,
+                route.eventName.ifBlank { context.getString(R.string.no_route_loaded) },
+                prefs.boatName,
+            ))
+            builder.setSubText(context.getString(R.string.tracking_notification_health))
+            val stopIntent = Intent(context, MainActivity::class.java)
+                .setAction(MainActivity.ACTION_CONFIRM_STOP_TRACKING)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             builder.addAction(
                 R.drawable.ic_baseline_x_24,
                 context.getString(R.string.tracking_notification_stop),
-                PendingIntent.getBroadcast(context, 1, stopIntent, flags)
+                PendingIntent.getActivity(context, 1, stopIntent, flags)
             )
             return builder.build()
         }

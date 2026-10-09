@@ -72,8 +72,8 @@ open class MainApplication : MultiDexApplication() {
                 if (startedActivities == 0) {
                     val prefs = Preferences(PreferenceManager.getDefaultSharedPreferences(this@MainApplication))
                     if (prefs.status) {
-                        val restored = TrackingService.refreshNotificationIfRunning()
                         isAppVisible = false
+                        val restored = TrackingService.refreshNotificationIfRunning()
                         if (restored == false ||
                             (restored == null && !TrackingService.canShowTrackingNotification(this@MainApplication))) {
                             prefs.status = false

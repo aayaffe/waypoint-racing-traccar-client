@@ -8,5 +8,18 @@
     <color name="pass_gate_accent">#087E91</color>
     <color name="pass_finish_accent">#AD7418</color>
     <color name="pass_secondary_text">#40566A</color>
+    <!-- Release A sunlight design tokens. -->
+    <color name="race_surface_background">#F7F8F5</color>
+    <color name="race_surface_panel">#FFFFFF</color>
+    <color name="race_surface_panel_alt">#EEF2F3</color>
+    <color name="race_surface_warning">#FFF4DC</color>
+    <color name="race_surface_critical">#FDECEA</color>
+    <color name="race_text_primary">#081A25</color>
+    <color name="race_text_secondary">#425763</color>
+    <color name="race_nav_primary">#005A8D</color>
+    <color name="race_success">#147A3A</color>
+    <color name="race_warning">#A45D00</color>
+    <color name="race_critical">#B42318</color>
+    <color name="race_divider">#CBD5D9</color>
 
 </resources>

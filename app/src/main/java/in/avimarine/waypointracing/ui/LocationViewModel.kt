@@ -15,6 +15,8 @@ import `in`.avimarine.androidutils.geo.Direction
 import `in`.avimarine.androidutils.geo.Speed
 import `in`.avimarine.androidutils.units.SpeedUnits
 import `in`.avimarine.androidutils.units.DistanceUnits
+import java.util.Locale
+import kotlin.math.roundToLong
 
 class LocationViewModel(
     val location: Location,
@@ -62,6 +64,10 @@ class LocationViewModel(
         return getLatString(location.latitude) + "\n" + getLonString(location.longitude)
     }
 
+    fun getPositionStripData(): String {
+        return getLatString(location.latitude) + " " + getLonString(location.longitude)
+    }
+
     fun getAccuracyData():String {
         return getLocationAccuracyString(location)
     }
@@ -78,6 +84,38 @@ class LocationViewModel(
             getDirection(location, wpt.portWpt),
             magnetic,
         ) + "/" + getDistString(getDistance(location, wpt.portWpt))
+    }
+
+    fun getPortEndpointData(): String = endpointData(wpt?.portWpt)
+
+    fun getStbdEndpointData(): String = endpointData(wpt?.stbdWpt)
+
+    private fun endpointData(endpoint: Location?): String {
+        if (endpoint == null) return "—"
+        val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
+        return formatDirection(getDirection(location, endpoint), magnetic) + "°\n" +
+            getDistString(getDistance(location, endpoint)) + " NM"
+    }
+
+    fun getActiveTargetBearingData(): String {
+        if (wpt == null) return "—"
+        val magnetic = sharedPreferences.getBoolean(SettingsFragment.KEY_MAGNETIC, false)
+        val direction = if (wpt.routeElementType == RouteElementType.WAYPOINT) {
+            getDirection(location, wpt.portWpt)
+        } else {
+            pointToLineDir(location, wpt.portWpt, wpt.stbdWpt)
+        }
+        return formatDirection(direction, magnetic) + "°"
+    }
+
+    fun getActiveTargetDistanceData(): String {
+        if (wpt == null) return "—"
+        val distance = if (wpt.routeElementType == RouteElementType.WAYPOINT) {
+            getDistance(location, wpt.portWpt)
+        } else {
+            pointToLineDist(location, wpt.portWpt, wpt.stbdWpt)
+        }
+        return getDistString(distance) + " NM"
     }
 
     fun getStbdData(): String {
@@ -137,5 +175,28 @@ class LocationViewModel(
         ) ?: return "-----"
 
         return RaceDeckFormatter.eta(arrival)
+    }
+
+    fun getTTGData(): String {
+        if (wpt == null) return "—"
+        val distance = if (wpt.routeElementType == RouteElementType.WAYPOINT) {
+            getDistance(location, wpt.portWpt)
+        } else {
+            pointToLineDist(location, wpt.portWpt, wpt.stbdWpt)
+        }
+        val vmgKnots = getVMG(location, wpt.portWpt, wpt.stbdWpt).getValue(SpeedUnits.Knots)
+        val distanceNm = distance.getValue(DistanceUnits.NauticalMiles)
+        if (!vmgKnots.isFinite() || !distanceNm.isFinite() || vmgKnots <= 0 || distanceNm < 0) {
+            return "—"
+        }
+        val seconds = (distanceNm / vmgKnots * 3_600).roundToLong()
+        val hours = seconds / 3_600
+        val minutes = (seconds % 3_600) / 60
+        val remainderSeconds = seconds % 60
+        return if (hours == 0L) {
+            String.format(Locale.getDefault(), "%02d:%02d", minutes, remainderSeconds)
+        } else {
+            String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, remainderSeconds)
+        }
     }
 }

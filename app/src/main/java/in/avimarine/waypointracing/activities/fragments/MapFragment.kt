@@ -3,12 +3,14 @@ package `in`.avimarine.waypointracing.activities.fragments
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
@@ -66,10 +68,13 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     private var bp_bronze: Bitmap? = null
     private var bp_finish: Bitmap? = null
     private var nextWpt = -1
+    private var lastCoordinateOverlayUpdateMillis = 0L
 
 
 
     companion object {
+        private const val COORDINATE_OVERLAY_INTERVAL_MS = 250L
+
         fun newInstance() = MapFragment()
     }
 
@@ -232,13 +237,21 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
 
     private fun handleLongClick(data: JsonElement?) {
         val ordinal = data?.asJsonObject?.get("properties")?.asJsonObject?.get("ordinal")?.asInt ?: -1
-        setNextWpt(ordinal)
-        val name = data?.asJsonObject?.get("properties")?.asJsonObject?.get("name")
-        Toast.makeText(
-            requireContext(),
-            "Set next waypoint $name",
-            Toast.LENGTH_SHORT
-        ).show()
+        if (ordinal !in route.elements.indices) return
+        val target = route.elements[ordinal]
+        AlertDialog.Builder(requireContext())
+            .setTitle(target.name)
+            .setMessage(R.string.map_target_selection_message)
+            .setPositiveButton(R.string.map_target_selection_confirm) { _, _ ->
+                setNextWpt(ordinal)
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.map_target_selected, target.name),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun pointAnnotationOptions(
@@ -365,6 +378,9 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     }
 
     override fun onIndicatorPositionChanged(point: Point) {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastCoordinateOverlayUpdateMillis < COORDINATE_OVERLAY_INTERVAL_MS) return
+        lastCoordinateOverlayUpdateMillis = now
         binding.coordinatesTv.text = "${getLatString(point.latitude())}\n${getLonString(point.longitude())}"
     }
 

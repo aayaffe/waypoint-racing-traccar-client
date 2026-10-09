@@ -14,6 +14,7 @@
         mapbox:mapbox_cameraTargetLat="40.7128"
         mapbox:mapbox_cameraTargetLng="-74.0060"
         mapbox:mapbox_cameraZoom="9.0"
+        mapbox:mapbox_mapSurface="texture_view"
         />
 
     <TextView

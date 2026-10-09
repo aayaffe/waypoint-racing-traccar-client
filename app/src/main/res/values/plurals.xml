@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="race_deck_device_issue_count">
+        <item quantity="one">%1$d setting may affect tracking</item>
+        <item quantity="other">%1$d settings may affect tracking</item>
+    </plurals>
+</resources>

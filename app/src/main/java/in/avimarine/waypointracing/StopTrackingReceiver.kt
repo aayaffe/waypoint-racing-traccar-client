@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.app.ActivityManager
 import android.app.NotificationManager
+import android.os.Handler
+import android.os.Looper
 import androidx.preference.PreferenceManager
 import `in`.avimarine.waypointracing.activities.StatusActivity
 import `in`.avimarine.waypointracing.utils.Preferences
@@ -16,7 +18,18 @@ class StopTrackingReceiver : BroadcastReceiver() {
         val notificationsBlocked = intent.action == NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED ||
             intent.action == NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED
         if (!closeApp) {
-            if (!notificationDismissed && !notificationsBlocked) return
+            if (notificationDismissed) {
+                if (!MainApplication.isAppVisible) {
+                    // Android completes the dismiss after this receiver returns; repost after
+                    // that transaction so the foreground notification remains persistent.
+                    Handler(Looper.getMainLooper()).postDelayed(
+                        { TrackingService.refreshNotificationIfRunning() },
+                        NOTIFICATION_RESTORE_DELAY_MS,
+                    )
+                }
+                return
+            }
+            if (!notificationsBlocked) return
             if (MainApplication.isAppVisible || TrackingService.refreshNotificationIfRunning() != false) return
         }
         Preferences(PreferenceManager.getDefaultSharedPreferences(context)).status = false
@@ -33,5 +46,6 @@ class StopTrackingReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION_STOP_TRACKING = "in.avimarine.waypointracing.STOP_TRACKING"
         const val ACTION_NOTIFICATION_DISMISSED = "in.avimarine.waypointracing.NOTIFICATION_DISMISSED"
+        private const val NOTIFICATION_RESTORE_DELAY_MS = 300L
     }
 }
