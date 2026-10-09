@@ -15,9 +15,6 @@ import `in`.avimarine.androidutils.geo.Direction
 import `in`.avimarine.androidutils.geo.Speed
 import `in`.avimarine.androidutils.units.SpeedUnits
 import `in`.avimarine.androidutils.units.DistanceUnits
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class LocationViewModel(
     val location: Location,
@@ -70,7 +67,7 @@ class LocationViewModel(
     }
 
     fun getTimeData():String {
-        return timeStampToDateString(location.time)
+        return RaceDeckFormatter.clock(location.time)
     }
     fun getPortData(): String {
         if (wpt == null){
@@ -139,6 +136,6 @@ class LocationViewModel(
             location.time
         ) ?: return "-----"
 
-        return SimpleDateFormat("EEE HH:mm", Locale.getDefault()).format(Date(arrival))
+        return RaceDeckFormatter.eta(arrival)
     }
 }

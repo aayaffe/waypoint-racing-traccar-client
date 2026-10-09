@@ -425,6 +425,14 @@
                         android:maxLines="2"
                         android:textColor="@color/pass_secondary_text"
                         android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/passCelebrationEventDetails"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/pass_secondary_text"
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <ImageButton

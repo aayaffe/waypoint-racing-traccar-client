@@ -54,6 +54,7 @@ import `in`.avimarine.waypointracing.databinding.ActivityMainBinding
 import `in`.avimarine.waypointracing.event.EventAssignmentResolver
 import `in`.avimarine.waypointracing.route.*
 import `in`.avimarine.waypointracing.ui.LocationViewModel
+import `in`.avimarine.waypointracing.ui.RaceDeckFormatter
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.ui.VersionViewModel
 import `in`.avimarine.waypointracing.utils.*
@@ -773,6 +774,11 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             if (isFinish) R.string.finish_pass_notification_title else R.string.gate_pass_notification_title
         )
         binding.passCelebrationName.text = pass.gateName
+        binding.passCelebrationEventDetails.text = RaceDeckFormatter.passDetails(
+            pass.time.time,
+            pass.latitude,
+            pass.longitude
+        )
         updatePassCelebrationStatus(pass)
         binding.passCelebrationAction.setText(R.string.view_route)
         binding.passCelebrationAction.backgroundTintList = ColorStateList.valueOf(accent)
