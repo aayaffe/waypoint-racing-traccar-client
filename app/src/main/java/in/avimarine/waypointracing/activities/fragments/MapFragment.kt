@@ -42,6 +42,7 @@ import `in`.avimarine.androidutils.Utils.Companion.mapRange
 import `in`.avimarine.androidutils.getLatString
 import `in`.avimarine.androidutils.getLonString
 import `in`.avimarine.waypointracing.R
+import `in`.avimarine.waypointracing.activities.MainActivity
 import `in`.avimarine.waypointracing.activities.SettingsFragment
 import `in`.avimarine.waypointracing.databinding.FragmentMapBinding
 import `in`.avimarine.waypointracing.route.GatePassings
@@ -97,6 +98,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     ): View {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
         val view = binding.root
+        binding.coordinatesTv.visibility = if (activity is MainActivity) View.GONE else View.VISIBLE
         createMapIconBitmaps()
         annotationApi = mapView.annotations
         pointAnnotationManager = annotationApi?.createPointAnnotationManager()

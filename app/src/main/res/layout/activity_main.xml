@@ -30,9 +30,9 @@
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/map_fragment_view"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/raceBottomActions"
             app:layout_constraintStart_toEndOf="@id/navigation_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintWidth_percent="0.45"
@@ -383,7 +383,7 @@
         <Button
             android:id="@+id/raceSelectCourseButton"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="64dp"
             android:layout_marginStart="24dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="24dp"
@@ -830,7 +830,7 @@
             android:layout_marginStart="4dp"
             android:layout_marginBottom="4dp"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@id/raceBottomActions"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
         <ImageView
@@ -841,7 +841,7 @@
             android:layout_marginBottom="8dp"
             android:contentDescription="Last send position"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@id/raceBottomActions"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/btn_rnd_red" />
 
@@ -853,13 +853,15 @@
             android:layout_marginBottom="4dp"
             android:visibility="gone"
             android:text="@{versionViewModel!=null ? versionViewModel.appVersion : `--`}"
-            app:layout_constraintBottom_toTopOf="@id/raceBottomActions"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
         <LinearLayout
             android:id="@+id/raceBottomActions"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="72dp"
             android:background="@color/race_surface_panel"
             android:gravity="center"
             android:orientation="horizontal"
@@ -874,30 +876,49 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:backgroundTint="@color/race_nav_primary"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minHeight="0dp"
+                android:backgroundTint="@color/race_surface_panel"
+                android:drawableTop="@drawable/ic_race_targets"
+                android:drawableTint="@color/race_nav_primary"
+                android:drawablePadding="2dp"
                 android:text="@string/race_deck_targets"
-                android:textColor="@color/race_surface_panel" />
+                android:textColor="@color/race_nav_primary"
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/raceMapAction"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minHeight="0dp"
                 android:backgroundTint="@color/race_nav_primary"
+                android:drawableTop="@drawable/ic_race_map"
+                android:drawableTint="@color/race_surface_panel"
+                android:drawablePadding="2dp"
                 android:text="@string/race_deck_map"
-                android:textColor="@color/race_surface_panel" />
+                android:textColor="@color/race_surface_panel"
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/raceMoreAction"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:backgroundTint="@color/race_nav_primary"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minHeight="0dp"
+                android:backgroundTint="@color/race_surface_panel"
+                android:drawableTop="@drawable/ic_race_more"
+                android:drawableTint="@color/race_nav_primary"
+                android:drawablePadding="2dp"
                 android:text="@string/race_deck_more"
-                android:textColor="@color/race_surface_panel" />
+                android:textColor="@color/race_nav_primary"
+                android:textSize="12sp" />
         </LinearLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/passCelebrationCard"

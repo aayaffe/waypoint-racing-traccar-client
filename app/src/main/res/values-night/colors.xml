@@ -19,5 +19,9 @@
     <color name="race_warning">#F6B657</color>
     <color name="race_critical">#FF7B72</color>
     <color name="race_divider">#29414C</color>
+    <color name="race_target_active_background">#123B56</color>
+    <color name="race_target_active_stroke">#5BC2F0</color>
+    <color name="race_target_chip">#203743</color>
+    <color name="race_target_uploaded_background">#153D29</color>
 
 </resources>

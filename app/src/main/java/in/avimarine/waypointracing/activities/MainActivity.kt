@@ -78,6 +78,7 @@ import `in`.avimarine.waypointracing.ui.RaceDeckTargetMapper
 import `in`.avimarine.waypointracing.ui.RaceDeckTargetLabel
 import `in`.avimarine.waypointracing.ui.RaceDeckAction
 import `in`.avimarine.waypointracing.ui.GpsAlertPolicy
+import `in`.avimarine.waypointracing.ui.RaceDeckUiState
 import `in`.avimarine.waypointracing.utils.*
 import java.util.*
 
@@ -122,6 +123,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private var gpsOutageAlertPlayed = false
     private var batterySaverDismissedForSession = false
     private var portraitMapExpanded = false
+    private var raceDeckUiState = RaceDeckUiState()
     private val hidePassCelebration = Runnable { dismissPassCelebration() }
     private val refreshDeviceReadiness = object : Runnable {
         override fun run() {
@@ -170,9 +172,8 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         binding.batterySaverButton.setOnClickListener { openBatterySaverSettings() }
         binding.passCelebrationDismiss.setOnClickListener { dismissPassCelebration() }
         binding.passCelebrationAction.setOnClickListener {
-            val selectedRoute = celebrationRoute ?: route
             dismissPassCelebration()
-            startActivity(Intent(this, RouteActivity::class.java).putExtra("route", selectedRoute))
+            showTargetSheet()
         }
         binding.activeTargetPanel.setOnClickListener { dispatchRaceDeckAction(RaceDeckAction.OPEN_TARGETS) }
         binding.raceTargetsAction.setOnClickListener { dispatchRaceDeckAction(RaceDeckAction.OPEN_TARGETS) }
@@ -249,9 +250,12 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             RaceDeckAction.TOGGLE_MAP -> {
                 if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     startActivity(Intent(this, MapActivity::class.java))
+                } else if (!shouldShowPortraitMap()) {
+                    startActivity(Intent(this, MapActivity::class.java))
                 } else {
                     portraitMapExpanded = !portraitMapExpanded
-                    configureRaceDeckMapLayout(landscape = false)
+                    raceDeckUiState = raceDeckUiState.copy(mapExpanded = portraitMapExpanded)
+                    configureRaceDeckMapLayout(landscape = false, showPortraitMap = true)
                     applyPortraitMapExpansion()
                     binding.raceMapAction.setText(
                         if (portraitMapExpanded) R.string.race_deck_collapse_map else R.string.race_deck_map
@@ -437,12 +441,16 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     }
 
     private fun updateRaceDeckHeader(route: Route) {
-        binding.raceDeckCourseName.text = if (route.isEmpty()) {
-            getString(R.string.no_route_loaded)
-        } else {
-            route.eventName
-        }
-        binding.raceDeckBoatName.text = prefs.boatName
+        raceDeckUiState = raceDeckUiState.copy(
+            courseName = if (route.isEmpty()) {
+                getString(R.string.no_route_loaded)
+            } else {
+                route.eventName
+            },
+            boatName = prefs.boatName,
+        )
+        binding.raceDeckCourseName.text = raceDeckUiState.courseName
+        binding.raceDeckBoatName.text = raceDeckUiState.boatName
         updateRaceDeckHealth(gpsAvailable = false)
     }
 
@@ -455,6 +463,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         val deviceIssues = deviceReadinessIssues()
         val deviceReady = deviceIssues.isEmpty()
         val health = RaceDeckHealthMapper.map(gpsAvailable, trackingActive, syncRecent)
+        raceDeckUiState = raceDeckUiState.copy(health = health)
 
         binding.raceDeckGpsStatus.setText(
             if (health.gps == RaceDeckHealthTone.HEALTHY) R.string.race_deck_gps_ok else R.string.race_deck_gps_lost
@@ -660,19 +669,38 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         setMainActivityVisibilityStatus(true)
         updateLastPass()
         val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        configureRaceDeckMapLayout(landscape)
-        if (supportFragmentManager.findFragmentById(R.id.map_fragment_view) == null) {
+        val showPortraitMap = landscape || shouldShowPortraitMap()
+        configureRaceDeckMapLayout(landscape, showPortraitMap)
+        if (showPortraitMap && supportFragmentManager.findFragmentById(R.id.map_fragment_view) == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.map_fragment_view, MapFragment())
                 .commit()
         }
-        binding.mapFragmentView.visibility = View.VISIBLE
+        binding.mapFragmentView.visibility = if (showPortraitMap) View.VISIBLE else View.GONE
     }
 
-    private fun configureRaceDeckMapLayout(landscape: Boolean) {
+    private fun shouldShowPortraitMap(): Boolean =
+        resources.configuration.screenHeightDp >= MIN_PORTRAIT_MAP_HEIGHT_DP
+
+    private fun configureRaceDeckMapLayout(landscape: Boolean, showPortraitMap: Boolean) {
         val navigation = binding.navigationView.layoutParams as ConstraintLayout.LayoutParams
         val map = binding.mapFragmentView.layoutParams as ConstraintLayout.LayoutParams
-        if (landscape) {
+        val actions = binding.raceBottomActions.layoutParams as ConstraintLayout.LayoutParams
+        if (!landscape && !showPortraitMap) {
+            binding.navigationView.setBackgroundColor(ContextCompat.getColor(this, R.color.race_surface_background))
+            navigation.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT
+            navigation.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT
+            navigation.startToStart = ConstraintLayout.LayoutParams.UNSET
+            navigation.endToStart = ConstraintLayout.LayoutParams.UNSET
+            navigation.endToEnd = ConstraintLayout.LayoutParams.UNSET
+            navigation.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+            navigation.bottomToTop = ConstraintLayout.LayoutParams.UNSET
+            navigation.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            actions.width = 0
+            actions.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            actions.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+        } else if (landscape) {
+            binding.navigationView.setBackgroundColor(ContextCompat.getColor(this, R.color.race_surface_background))
             navigation.width = 0
             navigation.height = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT
             navigation.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
@@ -689,12 +717,21 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             map.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
             map.topToBottom = ConstraintLayout.LayoutParams.UNSET
             map.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+            map.bottomToTop = ConstraintLayout.LayoutParams.UNSET
             map.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
             map.matchConstraintDefaultWidth = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_PERCENT
             map.matchConstraintPercentWidth = if (resources.configuration.smallestScreenWidthDp >= 600) 0.62f else 0.45f
+
+            actions.width = 0
+            actions.startToStart = R.id.navigation_view
+            actions.endToEnd = R.id.navigation_view
         } else {
+            binding.navigationView.setBackgroundColor(ContextCompat.getColor(this, R.color.race_surface_background))
             val guideline = binding.portraitMapGuideline.layoutParams as ConstraintLayout.LayoutParams
-            guideline.guidePercent = if (portraitMapExpanded) 0.30f else 0.70f
+            // In map mode the map should occupy all space above the persistent action bar.
+            // A zero-position guideline collapses the navigation pane rather than leaving a
+            // blank strip above the map.
+            guideline.guidePercent = if (portraitMapExpanded) 0f else 0.70f
             binding.portraitMapGuideline.layoutParams = guideline
             navigation.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT
             navigation.height = 0
@@ -702,8 +739,8 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             navigation.endToStart = ConstraintLayout.LayoutParams.UNSET
             navigation.endToEnd = ConstraintLayout.LayoutParams.UNSET
             navigation.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-            navigation.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
             navigation.bottomToTop = R.id.portraitMapGuideline
+            navigation.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
 
             map.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT
             map.height = 0
@@ -712,13 +749,19 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             map.endToEnd = ConstraintLayout.LayoutParams.UNSET
             map.topToTop = ConstraintLayout.LayoutParams.UNSET
             map.topToBottom = R.id.portraitMapGuideline
-            map.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            map.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
+            map.bottomToTop = R.id.raceBottomActions
             map.matchConstraintDefaultWidth = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_SPREAD
             map.matchConstraintDefaultHeight = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_SPREAD
             map.verticalWeight = 0f
+
+            actions.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT
+            actions.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            actions.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
         }
         binding.navigationView.layoutParams = navigation
         binding.mapFragmentView.layoutParams = map
+        binding.raceBottomActions.layoutParams = actions
     }
 
     private fun applyPortraitMapExpansion() {
@@ -748,6 +791,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             isMark = wpt.routeElementType == RouteElementType.WAYPOINT,
             isFinish = wpt.routeElementType == RouteElementType.FINISH,
         )
+        raceDeckUiState = raceDeckUiState.copy(target = targetState)
         binding.activeTargetName.text = targetState.name
         binding.activeTargetPanel.contentDescription = getString(
             R.string.race_deck_active_target_description,
@@ -1188,32 +1232,95 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         val dialog: Dialog = if (tablet) Dialog(this) else BottomSheetDialog(this)
         val sheet = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(24, 24, 24, 24)
+            setPadding(20, 24, 20, 16)
             setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.race_surface_panel))
         }
         sheet.addView(TextView(this).apply {
             text = getString(R.string.race_deck_targets)
-            textSize = 22f
+            textSize = 32f
             setTextColor(ContextCompat.getColor(this@MainActivity, R.color.race_text_primary))
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         })
-        val targets = route.elements.mapIndexed { index, element -> targetSheetLabel(index, element) }
+        sheet.addView(TextView(this).apply {
+            text = getString(R.string.race_deck_target_hint)
+            textSize = 17f
+            setTextColor(ContextCompat.getColor(this@MainActivity, R.color.race_text_secondary))
+        }, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+        ).apply { setMargins(0, 4, 0, 18) })
+        val passes = GatePassings.getCurrentRouteGatePassings(this, route.id)
         val list = android.widget.ListView(this).apply {
-            choiceMode = android.widget.ListView.CHOICE_MODE_SINGLE
-            adapter = object : android.widget.ArrayAdapter<String>(
+            divider = null
+            setSelector(android.R.color.transparent)
+            clipToPadding = false
+            adapter = object : android.widget.ArrayAdapter<RouteElement>(
                 this@MainActivity,
-                android.R.layout.simple_list_item_single_choice,
-                targets,
+                R.layout.target_sheet_item,
+                route.elements,
             ) {
                 override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
-                    return super.getView(position, convertView, parent).also { row ->
-                        (row as? TextView)?.setTextColor(
-                            ContextCompat.getColor(this@MainActivity, R.color.race_text_primary)
+                    val row = convertView ?: layoutInflater.inflate(
+                        R.layout.target_sheet_item, parent, false
+                    )
+                    val target = getItem(position) ?: return row
+                    val pass = passes.getLatestGatePassForGate(target.id)
+                    val isCurrent = position == prefs.nextWpt
+                    val card = row.findViewById<com.google.android.material.card.MaterialCardView>(R.id.targetCard)
+                    card.setCardBackgroundColor(ContextCompat.getColor(
+                        this@MainActivity,
+                        if (isCurrent) R.color.race_target_active_background else R.color.race_surface_panel,
+                    ))
+                    card.strokeColor = ContextCompat.getColor(
+                        this@MainActivity,
+                        if (isCurrent) R.color.race_target_active_stroke else R.color.race_surface_panel_alt,
+                    )
+                    card.strokeWidth = (if (isCurrent) 2 else 1) * resources.displayMetrics.density.toInt()
+
+                    row.findViewById<TextView>(R.id.targetNumber).text = (position + 1).toString()
+                    row.findViewById<TextView>(R.id.targetName).text = target.name
+                    row.findViewById<TextView>(R.id.targetType).text = targetSheetType(target)
+
+                    val distance = row.findViewById<TextView>(R.id.targetDistance)
+                    val current = row.findViewById<TextView>(R.id.targetCurrent)
+                    val passedIcon = row.findViewById<android.widget.ImageView>(R.id.targetPassedIcon)
+                    val passedAt = row.findViewById<TextView>(R.id.targetPassedAt)
+                    val upload = row.findViewById<TextView>(R.id.targetUploadStatus)
+                    if (pass == null) {
+                        distance.visibility = View.VISIBLE
+                        distance.text = targetSheetDistance(target) ?: "—"
+                        current.visibility = if (isCurrent) View.VISIBLE else View.GONE
+                        passedIcon.visibility = View.GONE
+                        passedAt.visibility = View.GONE
+                        upload.visibility = View.GONE
+                    } else {
+                        distance.visibility = View.GONE
+                        current.visibility = View.GONE
+                        passedIcon.visibility = View.VISIBLE
+                        passedAt.visibility = View.VISIBLE
+                        passedAt.text = getString(
+                            R.string.race_deck_target_passed_at,
+                            RaceDeckFormatter.clock(pass.time.time),
                         )
+                        upload.visibility = View.VISIBLE
+                        when (PassUploadStatus.get(this@MainActivity, pass)) {
+                            PassUploadStatus.State.UPLOADED -> {
+                                upload.setText(R.string.race_deck_target_uploaded)
+                                upload.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.race_success))
+                            }
+                            PassUploadStatus.State.PENDING -> {
+                                upload.setText(R.string.race_deck_target_pending)
+                                upload.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.race_text_secondary))
+                            }
+                            PassUploadStatus.State.FAILED -> {
+                                upload.setText(R.string.race_deck_target_failed)
+                                upload.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.race_critical))
+                            }
+                        }
                     }
+                    return row
                 }
             }
-            setItemChecked(prefs.nextWpt, true)
             setOnItemClickListener { _, _, position, _ ->
                 setNextWpt(position)
                 binding.routeElementSpinner.setSelection(position)
@@ -1247,8 +1354,8 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         dialog.show()
     }
 
-    private fun targetSheetLabel(index: Int, target: RouteElement): String {
-        val distance = latestRaceDeckLocation?.let { location ->
+    private fun targetSheetDistance(target: RouteElement): String? =
+        latestRaceDeckLocation?.let { location ->
             val targetDistance = if (target.routeElementType == RouteElementType.WAYPOINT) {
                 getDistance(location, target.portWpt)
             } else {
@@ -1256,14 +1363,11 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             }
             getDistString(targetDistance)
         }
-        val current = if (index == prefs.nextWpt) " · ${getString(R.string.race_deck_current_target)}" else ""
-        return buildString {
-            append(index + 1)
-            append("  ")
-            append(target.name)
-            if (distance != null) append("  ").append(distance)
-            append(current)
-        }
+
+    private fun targetSheetType(target: RouteElement): String = when (target.routeElementType) {
+        RouteElementType.WAYPOINT -> "Mark"
+        RouteElementType.FINISH -> "Finish"
+        RouteElementType.GATE, RouteElementType.START -> "Gate"
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -1339,7 +1443,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             getString(R.string.pass_next_target, it)
         }
         updatePassCelebrationStatus(pass)
-        binding.passCelebrationAction.setText(R.string.view_route)
+        binding.passCelebrationAction.setText(R.string.race_deck_view_targets)
         binding.passCelebrationAction.backgroundTintList = ColorStateList.valueOf(accent)
 
         binding.passCelebrationCard.removeCallbacks(hidePassCelebration)
@@ -1583,6 +1687,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         private const val DEVICE_READINESS_REFRESH_INTERVAL_MS = 15_000L
         private const val GPS_WARNING_REFRESH_INTERVAL_MS = 1_000L
         private const val TARGET_CHANGE_ANIMATION_MS = 200L
+        private const val MIN_PORTRAIT_MAP_HEIGHT_DP = 800
     }
 
 }

@@ -1,6 +1,6 @@
 # Release A implementation checklist
 
-Progress is measured by the twelve independently verifiable Release A work items below. This file is updated with each implementation slice.
+Progress is measured by the twelve independently verifiable Release A work items below. This file is updated with each implementation slice. The compact table is historical; use **Handoff: remaining Release A work** as the authoritative list of unfinished items.
 
 | # | Work item | Status |
 |---|---|---|
@@ -24,7 +24,7 @@ Progress is measured by the twelve independently verifiable Release A work items
 - [x] Added the detected pass event time and latitude/longitude to the existing non-blocking pass banner.
 - [ ] Connect the formatter-backed presentation state to the instrument-first Race Deck layout.
 
-**Overall Release A progress: 95%**
+**Overall Release A progress: 97%**
 
 ## Complete delivery plan
 
@@ -107,3 +107,37 @@ Progress is measured by the twelve independently verifiable Release A work items
 - [ ] Compare a recorded legacy race’s pass set and uploads before/after modernization.
 - [ ] Verify production and Release A clients operate concurrently and backend/rules rollback is safe.
 - [ ] Complete visual and accessibility review against the Release A review board.
+
+## Handoff: remaining Release A work
+
+This section is the authoritative handoff backlog. Do not mark Release A complete until every item below has direct evidence.
+
+### A. Finish / verify code-level presentation work
+
+- [ ] **Complete `RaceDeckUiState` migration.** `RaceDeckUiState` currently holds header, target, health, and map state. Add navigation metrics, endpoint values, position, warnings, and pass-banner state; make view rendering consume this state rather than directly mixing `LocationViewModel` values and Activity-side mutations.
+- [ ] **Apply common layout tokens consistently.** Define/use 4dp spacing, panel radius, divider, typography, and 56dp control tokens across Race Deck, Target list, Device Setup, and pass banner. Avoid hard-coded colors/sizes in programmatic dialogs.
+- [ ] **Finish compact-portrait compression behavior.** Exercise normal and expanded portrait modes on small/large devices. Ensure primary target, gate endpoints, bottom actions, and position remain accessible; map must be hidden rather than crowd navigation when `screenHeightDp < 800`.
+- [ ] **Validate dark mode end-to-end.** Check bottom navigation icons/text, target selector/dropdown, Targets dialog/panel, Device Setup, GPS warning, pass banner, and popup menu in dark mode. Fix any remaining light Material defaults.
+- [ ] **Accessibility polish.** Verify every primary status/control has clear TalkBack text; verify TalkBack traversal matches visual priority; validate font scale 1.3× without clipped critical values.
+- [ ] **Add/finish UI tests.** Cover Targets one-tap behavior/passage state, map confirmation and re-center, GPS/Tracking/Sync/Device warnings, pass banner auto-dismiss/action, portrait map threshold, expanded map, landscape, and tablet panel.
+
+### B. Functional regression verification
+
+- [ ] **Run full local Android unit suite after stopping competing Gradle/Android Studio workers.** The most recent focused suites pass, but clean full runs intermittently collide with Windows locks on generated `R.jar`, KAPT output, or `AviMarineAndroidUtils` classes. Capture the final suite/test count and zero-failure result.
+- [ ] **Legacy parity fixture/test.** Add or run a recorded legacy course/track fixture and assert exactly the same selected-target passes and uploads before/after the UI implementation. Do not modify detector eligibility or persisted event shapes.
+- [ ] **Route recovery tests.** Test restored route, invalid saved next-target index, failed restore → `SELECT COURSE`, fresh selection, and route update flow.
+- [ ] **Tracking/notification tests.** Test foreground notification dismiss → background restore, notification-denied behavior, confirmed Stop Tracking dialog, screen-off behavior, and service recovery.
+
+### C. Physical-device and backend release gate
+
+- [ ] Run every scenario in [`RELEASE_A_DEVICE_SMOKE_TEST.md`](RELEASE_A_DEVICE_SMOKE_TEST.md) on a physical device, including screen off/on, process death, recreation, reboot behavior, Battery Saver, notification denial, offline operation, GPS outage, small portrait, landscape, and tablet.
+- [ ] Record results against both Light and Dark system mode, including 1.3× font scale and TalkBack.
+- [ ] Compare a recorded legacy race between production and Release A builds for exact pass set and upload parity.
+- [ ] Verify production and Release A clients concurrently against the same backend/rules; verify rollback does not break either client.
+- [ ] Perform final visual review against `waypoint-racing-shared/docs/Release A/Waypoint Racing Android App Review Board.png` and resolve deviations.
+
+### Current build-state note
+
+- The worktree has uncommitted Release A changes after commit `f2e004e`.
+- `MainActivity`, `MapFragment`, `activity_main.xml`, and `strings.xml` were modified; new Race Deck state, bottom-navigation drawables, and Targets row layout/test files are untracked.
+- Recent focused tests passed. Clean Gradle rebuild/test processes may be active or blocked by Windows file locks; do not treat a missing/partial report as successful validation.

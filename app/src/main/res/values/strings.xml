@@ -114,6 +114,13 @@
     <string name="race_deck_recenter">RE-CENTER</string>
     <string name="race_deck_more">MORE</string>
     <string name="race_deck_current_target">CURRENT TARGET</string>
+    <string name="race_deck_target_passed">✓ PASSED %1$s</string>
+    <string name="race_deck_target_hint">Tap any target to navigate to it</string>
+    <string name="race_deck_target_passed_at">Passed %1$s</string>
+    <string name="race_deck_target_uploaded">UPLOADED</string>
+    <string name="race_deck_target_pending">SAVED ON DEVICE</string>
+    <string name="race_deck_target_failed">UPLOAD FAILED</string>
+    <string name="race_deck_view_targets">VIEW TARGETS</string>
     <string name="race_deck_tracking_off_title">TRACKING OFF</string>
     <string name="race_deck_tracking_off_message">Position is not being recorded.</string>
     <string name="map_target_selection_message">Select this as the active race target?</string>
