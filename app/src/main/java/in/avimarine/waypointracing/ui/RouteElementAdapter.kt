@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
 import `in`.avimarine.waypointracing.R
@@ -59,6 +60,7 @@ class RouteElementAdapter(context: Context,
             points_str = " (" + value.points.toInt() + " points)"
         }
         view.text = value.name + points_str
+        view.setTextColor(ContextCompat.getColor(view.context, R.color.race_text_primary))
         view.setCompoundDrawablesRelativeWithIntrinsicBounds(
             if (showFinishFlag && value.routeElementType == RouteElementType.FINISH) {
                 R.drawable.ic_finish_flag

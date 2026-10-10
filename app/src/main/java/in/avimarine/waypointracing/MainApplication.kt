@@ -16,6 +16,7 @@
 package `in`.avimarine.waypointracing
 
 import androidx.multidex.MultiDexApplication
+import androidx.appcompat.app.AppCompatDelegate
 import android.annotation.TargetApi
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -39,6 +40,7 @@ open class MainApplication : MultiDexApplication() {
 
     override fun onCreate() {
         super.onCreate()
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
             override fun onActivityResumed(activity: Activity) = Unit

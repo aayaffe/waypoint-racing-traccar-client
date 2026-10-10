@@ -20,6 +20,13 @@
         android:background="@color/race_surface_background"
         tools:context="in.avimarine.waypointracing.activities.MainActivity">
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/portraitMapGuideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.70" />
+
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/map_fragment_view"
             android:layout_width="0dp"
@@ -36,6 +43,7 @@
         android:id="@+id/navigation_view"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:background="@color/race_surface_background"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -267,7 +275,7 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/raceDeckHeader">
+            app:layout_constraintTop_toBottomOf="@id/restoringNavigationBanner">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -285,6 +293,25 @@
                 android:text="@string/race_deck_device_review" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/restoringNavigationBanner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="12dp"
+            android:background="@color/race_surface_panel_alt"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/race_deck_restoring_navigation"
+            android:textColor="@color/race_text_secondary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/raceDeckHeader" />
+
         <LinearLayout
             android:id="@+id/gpsWarningBanner"
             android:layout_width="0dp"
@@ -300,7 +327,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/trackingOffBanner">
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/race_deck_gps_lost_title" android:textColor="@color/race_warning" android:textSize="14sp" android:textStyle="bold" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/race_deck_gps_lost_message" android:textColor="@color/race_text_primary" android:textSize="13sp" />
+            <TextView android:id="@+id/gpsWarningMessage" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/race_deck_gps_lost_message" android:textColor="@color/race_text_primary" android:textSize="13sp" />
+            <Button
+                android:id="@+id/silenceGpsAlerts"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_gravity="end"
+                android:text="@string/race_deck_silence_gps_alerts" />
         </LinearLayout>
 
 
@@ -326,7 +359,8 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/gradient_spinner"
-            android:popupBackground="@drawable/blue_outline_white_background"
+            android:popupBackground="@color/race_surface_panel"
+            android:contentDescription="@string/race_deck_active_target"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/nextWptHeader"
             app:layout_constraintTop_toTopOf="@+id/nextWptHeader"
@@ -341,6 +375,7 @@
             android:layout_marginTop="10dp"
             android:layout_weight="1"
             android:text="@string/next_waypoint_gate"
+            android:textColor="@color/race_text_secondary"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/gpsWarningBanner" />
@@ -794,6 +829,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:layout_marginBottom="4dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/raceBottomActions"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -804,6 +840,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginBottom="8dp"
             android:contentDescription="Last send position"
+            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/raceBottomActions"
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/btn_rnd_red" />
@@ -814,6 +851,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:layout_marginBottom="4dp"
+            android:visibility="gone"
             android:text="@{versionViewModel!=null ? versionViewModel.appVersion : `--`}"
             app:layout_constraintBottom_toTopOf="@id/raceBottomActions"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -836,21 +874,27 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="@string/race_deck_targets" />
+                android:backgroundTint="@color/race_nav_primary"
+                android:text="@string/race_deck_targets"
+                android:textColor="@color/race_surface_panel" />
 
             <Button
                 android:id="@+id/raceMapAction"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="@string/race_deck_map" />
+                android:backgroundTint="@color/race_nav_primary"
+                android:text="@string/race_deck_map"
+                android:textColor="@color/race_surface_panel" />
 
             <Button
                 android:id="@+id/raceMoreAction"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="@string/race_deck_more" />
+                android:backgroundTint="@color/race_nav_primary"
+                android:text="@string/race_deck_more"
+                android:textColor="@color/race_surface_panel" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,6 +6,7 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.app.ActivityManager
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -23,11 +24,15 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.media.RingtoneManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.HapticFeedbackConstants
+import android.view.Gravity
 import android.view.View
 import android.widget.AdapterView
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -35,6 +40,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
@@ -67,6 +73,11 @@ import `in`.avimarine.waypointracing.ui.DeviceReadiness
 import `in`.avimarine.waypointracing.ui.DeviceReadinessIssue
 import `in`.avimarine.waypointracing.ui.RouteElementAdapter
 import `in`.avimarine.waypointracing.ui.VersionViewModel
+import `in`.avimarine.waypointracing.ui.TargetSelection
+import `in`.avimarine.waypointracing.ui.RaceDeckTargetMapper
+import `in`.avimarine.waypointracing.ui.RaceDeckTargetLabel
+import `in`.avimarine.waypointracing.ui.RaceDeckAction
+import `in`.avimarine.waypointracing.ui.GpsAlertPolicy
 import `in`.avimarine.waypointracing.utils.*
 import java.util.*
 
@@ -83,6 +94,9 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private var route = Route.emptyRoute()
     val delayedHandler = Handler(Looper.getMainLooper())
     private val notificationRestoreHandler = Handler(Looper.getMainLooper())
+    private val deviceReadinessHandler = Handler(Looper.getMainLooper())
+    private val gpsWarningHandler = Handler(Looper.getMainLooper())
+    private val gpsLossAlertHandler = Handler(Looper.getMainLooper())
     private var isFirstSpinnerLoad = true
     private lateinit var binding: ActivityMainBinding
     private val debugMode = BuildConfig.DEBUG
@@ -103,7 +117,34 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private var celebrationPass: GatePassing? = null
     private var latestRaceDeckLocation: Location? = null
     private var lastKnownGpsAvailable = false
+    private var lastGpsFixTimeMillis = 0L
+    private var gpsAlertsSilencedForSession = false
+    private var gpsOutageAlertPlayed = false
+    private var batterySaverDismissedForSession = false
+    private var portraitMapExpanded = false
     private val hidePassCelebration = Runnable { dismissPassCelebration() }
+    private val refreshDeviceReadiness = object : Runnable {
+        override fun run() {
+            updateNotificationPermissionBanner()
+            updateBatterySaverBanner()
+            deviceReadinessHandler.postDelayed(this, DEVICE_READINESS_REFRESH_INTERVAL_MS)
+        }
+    }
+    private val refreshGpsWarningAge = object : Runnable {
+        override fun run() {
+            updateGpsWarningMessage()
+            if (binding.gpsWarningBanner.isVisible) {
+                gpsWarningHandler.postDelayed(this, GPS_WARNING_REFRESH_INTERVAL_MS)
+            }
+        }
+    }
+    private val playProlongedGpsAlert = Runnable {
+        if (!gpsAlertsSilencedForSession && binding.gpsWarningBanner.isVisible && !gpsOutageAlertPlayed) {
+            binding.gpsWarningBanner.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            RingtoneManager.getRingtone(this, Settings.System.DEFAULT_NOTIFICATION_URI)?.play()
+            gpsOutageAlertPlayed = true
+        }
+    }
     private val raceDeckClockTicker = object : Runnable {
         override fun run() {
             binding.raceDeckClock.text = RaceDeckFormatter.clock(Date().time)
@@ -120,6 +161,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         binding.versionViewModel = VersionViewModel(getInstalledVersion(this))
@@ -132,14 +174,17 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             dismissPassCelebration()
             startActivity(Intent(this, RouteActivity::class.java).putExtra("route", selectedRoute))
         }
-        binding.activeTargetPanel.setOnClickListener { showTargetSheet() }
-        binding.raceTargetsAction.setOnClickListener { showTargetSheet() }
-        binding.raceMapAction.setOnClickListener { startActivity(Intent(this, MapActivity::class.java)) }
-        binding.raceMoreAction.setOnClickListener { openOptionsMenu() }
-        binding.raceSelectCourseButton.setOnClickListener {
-            getRouteStartForResult.launch(Intent(this, LoadRouteActivity::class.java))
-        }
+        binding.activeTargetPanel.setOnClickListener { dispatchRaceDeckAction(RaceDeckAction.OPEN_TARGETS) }
+        binding.raceTargetsAction.setOnClickListener { dispatchRaceDeckAction(RaceDeckAction.OPEN_TARGETS) }
+        binding.raceMapAction.setOnClickListener { dispatchRaceDeckAction(RaceDeckAction.TOGGLE_MAP) }
+        binding.raceMoreAction.setOnClickListener { dispatchRaceDeckAction(RaceDeckAction.OPEN_MORE) }
+        binding.raceSelectCourseButton.setOnClickListener { dispatchRaceDeckAction(RaceDeckAction.SELECT_COURSE) }
         binding.deviceSetupReview.setOnClickListener { showDeviceSetupPanel() }
+        binding.silenceGpsAlerts.setOnClickListener {
+            gpsAlertsSilencedForSession = true
+            binding.silenceGpsAlerts.visibility = View.GONE
+            gpsLossAlertHandler.removeCallbacks(playProlongedGpsAlert)
+        }
         Auth.launchAuthenticationProcess(signInLauncher)
         sharedPreferences = getDefaultSharedPreferences(this.applicationContext)
         prefs = Preferences(sharedPreferences)
@@ -192,6 +237,28 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         setOnBackPressed()
 
         Log.d(TAG, "Save all Locations: ${RemoteConfig.getBool("save_all_locations")}")
+    }
+
+    private fun dispatchRaceDeckAction(action: RaceDeckAction) {
+        when (action) {
+            RaceDeckAction.OPEN_TARGETS -> showTargetSheet()
+            RaceDeckAction.OPEN_MORE -> showRaceMoreMenu()
+            RaceDeckAction.SELECT_COURSE -> getRouteStartForResult.launch(
+                Intent(this, LoadRouteActivity::class.java)
+            )
+            RaceDeckAction.TOGGLE_MAP -> {
+                if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    startActivity(Intent(this, MapActivity::class.java))
+                } else {
+                    portraitMapExpanded = !portraitMapExpanded
+                    configureRaceDeckMapLayout(landscape = false)
+                    applyPortraitMapExpansion()
+                    binding.raceMapAction.setText(
+                        if (portraitMapExpanded) R.string.race_deck_collapse_map else R.string.race_deck_map
+                    )
+                }
+            }
+        }
     }
 
     private fun isRouteUpdated(docs: QuerySnapshot?) {
@@ -302,7 +369,11 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     }
 
 
-    private fun loadRoute(r: Route?, newRoute: Boolean = false) {
+    private fun loadRoute(
+        r: Route?,
+        newRoute: Boolean = false,
+        showReadinessReview: Boolean = false,
+    ) {
         if (r == null) {
             route = Route.emptyRoute()
             prefs.currentRoute = route.toString()
@@ -313,12 +384,21 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             errorLoadingRoute(getString(R.string.race_deck_restore_failed))
             return
         }
+        showRestoringNavigation()
         if (newRoute) {
             //Loading new route, reset last checked version
             prefs.routeUpdatedVersion = 0
-            prefs.nextWpt = route.getNextNonOptionalWpt(-1)
         }
         route = r
+        if (newRoute) {
+            prefs.nextWpt = route.getNextNonOptionalWpt(-1)
+        } else if (!route.isEmpty()) {
+            prefs.nextWpt = TargetSelection.validOrFallback(
+                prefs.nextWpt,
+                route.elements.size,
+                route.getNextNonOptionalWpt(-1),
+            )
+        }
         prefs.currentRoute = route.toString()
         if (FirebaseAuth.getInstance().currentUser != null &&
             RemoteConfig.getBool("event_scoped_location_uploads")) {
@@ -339,6 +419,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         }
         createAlarmIntent()
         ensureTrackingRunning()
+        if (showReadinessReview) showPreRaceReadinessReview()
     }
 
     private fun setActivityTitle(r: Route) {
@@ -370,6 +451,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         val trackingActive = prefs.status
         val syncRecent = trackingActive && prefs.lastSend > 0 &&
             Utils.timeDiffInSeconds(prefs.lastSend, Date().time) < prefs.GPSInterval.toInt() * 1.5
+        val networkOnline = NetworkManager(this, null).isOnline
         val deviceIssues = deviceReadinessIssues()
         val deviceReady = deviceIssues.isEmpty()
         val health = RaceDeckHealthMapper.map(gpsAvailable, trackingActive, syncRecent)
@@ -381,20 +463,29 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             if (health.tracking == RaceDeckHealthTone.HEALTHY) R.string.race_deck_tracking_on else R.string.race_deck_tracking_off
         )
         binding.raceDeckSyncStatus.setText(
-            if (health.sync == RaceDeckHealthTone.HEALTHY) R.string.race_deck_sync_online else R.string.race_deck_sync_offline
+            when {
+                !networkOnline -> R.string.race_deck_sync_offline
+                health.sync == RaceDeckHealthTone.HEALTHY -> R.string.race_deck_sync_online
+                else -> R.string.race_deck_sync_pending
+            }
         )
         binding.raceDeckDeviceStatus.setText(
             if (deviceReady) R.string.race_deck_device_ready else R.string.race_deck_device_warning
         )
         binding.raceDeckGpsStatus.setTextColor(ContextCompat.getColor(this, colorForHealthTone(health.gps)))
         binding.raceDeckTrackingStatus.setTextColor(ContextCompat.getColor(this, colorForHealthTone(health.tracking)))
-        binding.raceDeckSyncStatus.setTextColor(ContextCompat.getColor(this, colorForHealthTone(health.sync)))
+        binding.raceDeckSyncStatus.setTextColor(ContextCompat.getColor(
+            this,
+            if (!networkOnline) R.color.race_warning else colorForHealthTone(health.sync),
+        ))
         binding.raceDeckDeviceStatus.setTextColor(ContextCompat.getColor(
             this,
             if (deviceReady) R.color.race_success else R.color.race_warning
         ))
+        val batterySaverOnly = deviceIssues.all { it == DeviceReadinessIssue.BATTERY_SAVER }
         binding.deviceSetupBanner.visibility = if (
-            FirebaseAuth.getInstance().currentUser != null && deviceIssues.isNotEmpty()
+            FirebaseAuth.getInstance().currentUser != null && deviceIssues.isNotEmpty() &&
+                !(batterySaverOnly && batterySaverDismissedForSession)
         ) View.VISIBLE else View.GONE
         binding.deviceSetupSummary.text = resources.getQuantityString(
             R.plurals.race_deck_device_issue_count,
@@ -432,13 +523,41 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private fun showDeviceSetupPanel() {
         val issues = deviceReadinessIssues()
         if (issues.isEmpty()) return
-        AlertDialog.Builder(this)
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(32, 8, 32, 8)
+        }
+        issues.forEach { issue ->
+            content.addView(LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(0, 12, 0, 12)
+                addView(TextView(this@MainActivity).apply {
+                    text = deviceIssueLabel(issue)
+                    textSize = 17f
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                })
+                addView(TextView(this@MainActivity).apply {
+                    text = getString(deviceIssueDescription(issue))
+                    textSize = 14f
+                })
+                addView(Button(this@MainActivity).apply {
+                    text = getString(deviceIssueAction(issue))
+                    minHeight = (48 * resources.displayMetrics.density).toInt()
+                    setOnClickListener { openDeviceIssueSettings(issue) }
+                })
+            })
+        }
+        val dialog = AlertDialog.Builder(this)
             .setTitle(R.string.race_deck_device_setup_title)
-            .setItems(issues.map(::deviceIssueLabel).toTypedArray()) { _, which ->
-                openDeviceIssueSettings(issues[which])
-            }
+            .setView(content)
             .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        if (issues.all { it == DeviceReadinessIssue.BATTERY_SAVER }) {
+            dialog.setNeutralButton(R.string.race_deck_dismiss_for_session) { _, _ ->
+                batterySaverDismissedForSession = true
+                refreshRaceDeckHealth()
+            }
+        }
+        dialog.show()
     }
 
     private fun deviceIssueLabel(issue: DeviceReadinessIssue): String = getString(when (issue) {
@@ -447,6 +566,20 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         DeviceReadinessIssue.BATTERY_OPTIMIZED -> R.string.race_deck_battery_optimized
         DeviceReadinessIssue.BATTERY_SAVER -> R.string.race_deck_battery_saver
     })
+
+    private fun deviceIssueDescription(issue: DeviceReadinessIssue): Int = when (issue) {
+        DeviceReadinessIssue.BACKGROUND_RESTRICTED -> R.string.race_deck_background_restricted_detail
+        DeviceReadinessIssue.NOTIFICATIONS_DISABLED -> R.string.race_deck_notifications_disabled_detail
+        DeviceReadinessIssue.BATTERY_OPTIMIZED -> R.string.race_deck_battery_optimized_detail
+        DeviceReadinessIssue.BATTERY_SAVER -> R.string.race_deck_battery_saver_detail
+    }
+
+    private fun deviceIssueAction(issue: DeviceReadinessIssue): Int = when (issue) {
+        DeviceReadinessIssue.NOTIFICATIONS_DISABLED -> R.string.race_deck_enable_notifications
+        DeviceReadinessIssue.BACKGROUND_RESTRICTED -> R.string.race_deck_fix_background_use
+        DeviceReadinessIssue.BATTERY_OPTIMIZED -> R.string.race_deck_fix_battery_setting
+        DeviceReadinessIssue.BATTERY_SAVER -> R.string.race_deck_view_settings
+    }
 
     private fun openDeviceIssueSettings(issue: DeviceReadinessIssue) {
         when (issue) {
@@ -468,6 +601,13 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     private fun errorLoadingRoute(s: String) {
         Toast.makeText(this, s, Toast.LENGTH_LONG).show()
+    }
+
+    private fun showRestoringNavigation() {
+        binding.restoringNavigationBanner.visibility = View.VISIBLE
+        binding.restoringNavigationBanner.post {
+            binding.restoringNavigationBanner.visibility = View.GONE
+        }
     }
 
 
@@ -501,6 +641,8 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         registerBatterySaverReceiver()
         updateNotificationPermissionBanner()
         updateBatterySaverBanner()
+        deviceReadinessHandler.removeCallbacks(refreshDeviceReadiness)
+        deviceReadinessHandler.postDelayed(refreshDeviceReadiness, DEVICE_READINESS_REFRESH_INTERVAL_MS)
         lastShownPassToken = GatePassings.getLastGatePass(this, route.id)?.let(PassUploadStatus::token)
         sharedPreferences.registerOnSharedPreferenceChangeListener(this)
         celebrationPass?.let(::updatePassCelebrationStatus)
@@ -551,42 +693,67 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             map.matchConstraintDefaultWidth = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_PERCENT
             map.matchConstraintPercentWidth = if (resources.configuration.smallestScreenWidthDp >= 600) 0.62f else 0.45f
         } else {
-            navigation.width = 0
+            val guideline = binding.portraitMapGuideline.layoutParams as ConstraintLayout.LayoutParams
+            guideline.guidePercent = if (portraitMapExpanded) 0.30f else 0.70f
+            binding.portraitMapGuideline.layoutParams = guideline
+            navigation.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT
             navigation.height = 0
-            navigation.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            navigation.startToStart = ConstraintLayout.LayoutParams.UNSET
             navigation.endToStart = ConstraintLayout.LayoutParams.UNSET
-            navigation.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            navigation.endToEnd = ConstraintLayout.LayoutParams.UNSET
             navigation.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
             navigation.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
-            navigation.bottomToTop = R.id.map_fragment_view
+            navigation.bottomToTop = R.id.portraitMapGuideline
 
-            map.width = 0
+            map.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT
             map.height = 0
             map.startToEnd = ConstraintLayout.LayoutParams.UNSET
-            map.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            map.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-            map.topToBottom = R.id.navigation_view
+            map.startToStart = ConstraintLayout.LayoutParams.UNSET
+            map.endToEnd = ConstraintLayout.LayoutParams.UNSET
+            map.topToTop = ConstraintLayout.LayoutParams.UNSET
+            map.topToBottom = R.id.portraitMapGuideline
             map.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
             map.matchConstraintDefaultWidth = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_SPREAD
-            map.matchConstraintDefaultHeight = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_PERCENT
-            map.matchConstraintPercentHeight = 0.30f
+            map.matchConstraintDefaultHeight = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_SPREAD
+            map.verticalWeight = 0f
         }
         binding.navigationView.layoutParams = navigation
         binding.mapFragmentView.layoutParams = map
     }
 
+    private fun applyPortraitMapExpansion() {
+        if (route.isEmpty()) return
+        binding.raceDeckMetricsPanel.visibility = if (portraitMapExpanded) View.GONE else View.VISIBLE
+    }
+
     private fun getNextWpt() {
 //        nextWpt = prefs.nextWpt
-        if (prefs.nextWpt >= route.elements.size) {
-            setNextWpt(0)
+        if (!route.isEmpty()) {
+            prefs.nextWpt = TargetSelection.validOrFallback(
+                prefs.nextWpt,
+                route.elements.size,
+                route.getNextNonOptionalWpt(-1),
+            )
         }
         binding.routeElementSpinner.setSelection(prefs.nextWpt)
         route.elements.elementAtOrNull(prefs.nextWpt)?.let { setNextWaypointUI(it) }
     }
 
     private fun setNextWaypointUI(wpt: RouteElement) {
-        binding.activeTargetName.text = wpt.name
-        if (wpt.routeElementType == RouteElementType.WAYPOINT) {
+        binding.activeTargetPanel.animate().cancel()
+        binding.activeTargetPanel.alpha = 0f
+        binding.activeTargetPanel.animate().alpha(1f).setDuration(TARGET_CHANGE_ANIMATION_MS).start()
+        val targetState = RaceDeckTargetMapper.map(
+            wpt.name,
+            isMark = wpt.routeElementType == RouteElementType.WAYPOINT,
+            isFinish = wpt.routeElementType == RouteElementType.FINISH,
+        )
+        binding.activeTargetName.text = targetState.name
+        binding.activeTargetPanel.contentDescription = getString(
+            R.string.race_deck_active_target_description,
+            wpt.name,
+        )
+        if (!targetState.showsEndpoints) {
             binding.activeTargetType.setText(R.string.race_deck_next_mark)
             // The instrument must not expose proof-sector geometry for marks.
             binding.portGate.visibility = View.GONE
@@ -601,13 +768,11 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             binding.gateEndpointsPanel.visibility = View.GONE
             setEndpointInstrumentVisible(false)
         } else { //Gate
-            binding.activeTargetType.setText(
-                if (wpt.routeElementType == RouteElementType.FINISH) {
-                    R.string.race_deck_nearest_on_finish
-                } else {
-                    R.string.race_deck_nearest_on_gate
-                }
-            )
+            binding.activeTargetType.setText(when (targetState.label) {
+                RaceDeckTargetLabel.NEAREST_FINISH -> R.string.race_deck_nearest_on_finish
+                RaceDeckTargetLabel.NEAREST_GATE -> R.string.race_deck_nearest_on_gate
+                RaceDeckTargetLabel.NEXT_MARK -> R.string.race_deck_next_mark
+            })
             binding.portGate.visibility = View.VISIBLE
             binding.shortestDistanceToGate.visibility = View.VISIBLE
             binding.stbdGate.visibility = View.VISIBLE
@@ -648,6 +813,9 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     override fun onPause() {
         activityResumed = false
         binding.raceDeckClock.removeCallbacks(raceDeckClockTicker)
+        deviceReadinessHandler.removeCallbacks(refreshDeviceReadiness)
+        gpsWarningHandler.removeCallbacks(refreshGpsWarningAge)
+        gpsLossAlertHandler.removeCallbacks(playProlongedGpsAlert)
         unregisterBatterySaverReceiver()
         dismissPassCelebration()
         super.onPause()
@@ -701,6 +869,21 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             .show()
     }
 
+    private fun showPreRaceReadinessReview() {
+        val issueCount = deviceReadinessIssues().size
+        if (issueCount == 0) return
+        AlertDialog.Builder(this)
+            .setTitle(R.string.race_deck_pre_race_title)
+            .setMessage(resources.getQuantityString(
+                R.plurals.race_deck_device_issue_count,
+                issueCount,
+                issueCount,
+            ))
+            .setPositiveButton(R.string.race_deck_review_settings) { _, _ -> showDeviceSetupPanel() }
+            .setNegativeButton(R.string.race_deck_continue_anyway, null)
+            .show()
+    }
+
     private fun populateRouteElementSpinner(route: Route) {
         val adapter = RouteElementAdapter(
             this,
@@ -712,6 +895,11 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main, menu)
+        configureRaceMenu(menu)
+        return true
+    }
+
+    private fun configureRaceMenu(menu: Menu) {
         menu.findItem(R.id.expert_mode_menu_action).isVisible = debugMode
         if (FirebaseAuth.getInstance().currentUser == null) {
             menu.findItem(R.id.login_menu_action).icon =
@@ -724,7 +912,15 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             menu.findItem(R.id.login_menu_action).title =
                 getString(R.string.logout)
         }
-        return true
+    }
+
+    private fun showRaceMoreMenu() {
+        PopupMenu(this, binding.raceMoreAction).apply {
+            menuInflater.inflate(R.menu.main, menu)
+            configureRaceMenu(menu)
+            setOnMenuItemClickListener { item -> onOptionsItemSelected(item) }
+            show()
+        }
     }
 
     private val getRouteStartForResult =
@@ -737,7 +933,9 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
                         Log.d(TAG, it)
                         prefs.status = false
                         resetRoute(false)
-                        RouteLoader.loadRouteFromString(this, it, this::loadRoute)
+                        RouteLoader.loadRouteFromString(this, it) { loadedRoute ->
+                            loadRoute(loadedRoute, showReadinessReview = true)
+                        }
                         resetRoute(false)
                     }
                 }
@@ -854,6 +1052,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     }
 
     private fun updateUI(location: Location) {
+        lastGpsFixTimeMillis = Date().time
         latestRaceDeckLocation = location
         val wpt = route.elements.elementAtOrNull(prefs.nextWpt)
         binding.viewmodel = LocationViewModel(location, wpt, sharedPreferences)
@@ -871,7 +1070,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             updateRaceDeckHealth(gpsAvailable = false)
         }, interval)
         if (prefs.tracking) {
-            binding.lastSend.visibility = View.VISIBLE
+            binding.lastSend.visibility = View.GONE
             val lastLocationSentTime = prefs.lastSend
             if (lastLocationSentTime > 0 && Utils.timeDiffInSeconds(
                     lastLocationSentTime,
@@ -889,11 +1088,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     }
 
     private fun setEmptyRouteUI(isEmpty: Boolean) {
-        if (prefs.tracking) {
-            binding.lastSend.visibility = View.VISIBLE
-        } else {
-            binding.lastSend.visibility = View.GONE
-        }
+        binding.lastSend.visibility = View.GONE
 
 //        binding.location.setTextColor(Color.BLACK)
         if (isEmpty) {
@@ -923,9 +1118,25 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     }
 
     private fun setUiForGPS(isAvailable: Boolean) {
+        gpsWarningHandler.removeCallbacks(refreshGpsWarningAge)
+        gpsLossAlertHandler.removeCallbacks(playProlongedGpsAlert)
+        updateGpsWarningMessage()
         binding.gpsWarningBanner.visibility = if (
             !isAvailable && FirebaseAuth.getInstance().currentUser != null
         ) View.VISIBLE else View.GONE
+        if (!isAvailable && binding.gpsWarningBanner.isVisible) {
+            binding.silenceGpsAlerts.visibility = if (gpsAlertsSilencedForSession) View.GONE else View.VISIBLE
+            gpsWarningHandler.postDelayed(refreshGpsWarningAge, GPS_WARNING_REFRESH_INTERVAL_MS)
+            if (!gpsAlertsSilencedForSession && !gpsOutageAlertPlayed) {
+                gpsLossAlertHandler.postDelayed(
+                    playProlongedGpsAlert,
+                    GpsAlertPolicy.alertDelayMillis((prefs.GPSInterval.toLong()) * 4_000),
+                )
+            }
+        } else if (isAvailable) {
+            gpsAlertsSilencedForSession = false
+            gpsOutageAlertPlayed = false
+        }
         if ((isAvailable) && (FirebaseAuth.getInstance().currentUser != null)) {
             binding.portGate.setTextColor(Color.BLACK)
             binding.stbdGate.setTextColor(Color.BLACK)
@@ -948,6 +1159,17 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         }
     }
 
+    private fun updateGpsWarningMessage() {
+        binding.gpsWarningMessage.text = if (lastGpsFixTimeMillis > 0) {
+            getString(
+                R.string.race_deck_gps_lost_since,
+                ((Date().time - lastGpsFixTimeMillis).coerceAtLeast(0) / 1_000),
+            )
+        } else {
+            getString(R.string.race_deck_gps_lost_message)
+        }
+    }
+
     private fun setUiForLogin(user: FirebaseUser?) {
         if (user == null) {
             prefs.status = false
@@ -962,10 +1184,12 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private fun showTargetSheet() {
         if (route.isEmpty()) return
 
-        val dialog = BottomSheetDialog(this)
+        val tablet = resources.configuration.smallestScreenWidthDp >= 600
+        val dialog: Dialog = if (tablet) Dialog(this) else BottomSheetDialog(this)
         val sheet = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(24, 24, 24, 24)
+            setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.race_surface_panel))
         }
         sheet.addView(TextView(this).apply {
             text = getString(R.string.race_deck_targets)
@@ -976,11 +1200,19 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         val targets = route.elements.mapIndexed { index, element -> targetSheetLabel(index, element) }
         val list = android.widget.ListView(this).apply {
             choiceMode = android.widget.ListView.CHOICE_MODE_SINGLE
-            adapter = android.widget.ArrayAdapter(
+            adapter = object : android.widget.ArrayAdapter<String>(
                 this@MainActivity,
                 android.R.layout.simple_list_item_single_choice,
-                targets
-            )
+                targets,
+            ) {
+                override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+                    return super.getView(position, convertView, parent).also { row ->
+                        (row as? TextView)?.setTextColor(
+                            ContextCompat.getColor(this@MainActivity, R.color.race_text_primary)
+                        )
+                    }
+                }
+            }
             setItemChecked(prefs.nextWpt, true)
             setOnItemClickListener { _, _, position, _ ->
                 setNextWpt(position)
@@ -996,11 +1228,21 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         ))
         dialog.setContentView(sheet)
         dialog.setOnShowListener {
-            val bottomSheet = dialog.findViewById<View>(
-                com.google.android.material.R.id.design_bottom_sheet
-            ) ?: return@setOnShowListener
-            bottomSheet.layoutParams.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT
-            BottomSheetBehavior.from(bottomSheet).state = BottomSheetBehavior.STATE_EXPANDED
+            if (dialog is BottomSheetDialog) {
+                val bottomSheet = dialog.findViewById<View>(
+                    com.google.android.material.R.id.design_bottom_sheet
+                ) ?: return@setOnShowListener
+                bottomSheet.layoutParams.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                BottomSheetBehavior.from(bottomSheet).state = BottomSheetBehavior.STATE_EXPANDED
+            } else {
+                dialog.window?.apply {
+                    setGravity(Gravity.END)
+                    setLayout(
+                        (360 * resources.displayMetrics.density).toInt(),
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    )
+                }
+            }
         }
         dialog.show()
     }
@@ -1105,6 +1347,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         binding.passCelebrationCard.alpha = 0f
         binding.passCelebrationCard.translationY = -12 * resources.displayMetrics.density
         binding.passCelebrationCard.visibility = View.VISIBLE
+        binding.passCelebrationCard.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         binding.passCelebrationCard.animate().alpha(1f).translationY(0f).setDuration(220).start()
         binding.passCelebrationCard.postDelayed(hidePassCelebration, 10000)
     }
@@ -1205,6 +1448,9 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
 
     private fun updateBatterySaverBanner() {
         binding.batterySaverBanner.visibility = View.GONE
+        if (!getSystemService(PowerManager::class.java).isPowerSaveMode) {
+            batterySaverDismissedForSession = false
+        }
         refreshRaceDeckHealth()
     }
 
@@ -1334,6 +1580,9 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
         private const val PERMISSIONS_REQUEST_NOTIFICATIONS = 3
         private const val ALARM_MANAGER_INTERVAL = 15000
         private const val NOTIFICATION_RESTORE_DELAY_MS = 300L
+        private const val DEVICE_READINESS_REFRESH_INTERVAL_MS = 15_000L
+        private const val GPS_WARNING_REFRESH_INTERVAL_MS = 1_000L
+        private const val TARGET_CHANGE_ANIMATION_MS = 200L
     }
 
 }

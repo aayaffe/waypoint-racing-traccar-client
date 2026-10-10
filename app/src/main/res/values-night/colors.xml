@@ -6,4 +6,18 @@
     <color name="accent">#81C784</color>
     <color name="light">#FAFAFA</color>
 
+    <!-- Release A dusk/night tokens preserve the sunlight hierarchy. -->
+    <color name="race_surface_background">#07131B</color>
+    <color name="race_surface_panel">#0E202B</color>
+    <color name="race_surface_panel_alt">#132B37</color>
+    <color name="race_surface_warning">#3B2C16</color>
+    <color name="race_surface_critical">#3A1E20</color>
+    <color name="race_text_primary">#F3F8FA</color>
+    <color name="race_text_secondary">#B8C9D0</color>
+    <color name="race_nav_primary">#5BC2F0</color>
+    <color name="race_success">#6FD58A</color>
+    <color name="race_warning">#F6B657</color>
+    <color name="race_critical">#FF7B72</color>
+    <color name="race_divider">#29414C</color>
+
 </resources>

@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item><layer-list>
-        <item><shape>
-            <solid android:color="@color/race_surface_panel" />
+    <item>
+        <shape>
+            <solid android:color="@color/race_surface_panel_alt" />
             <stroke android:width="1dp" android:color="@color/race_nav_primary" />
-
             <corners android:radius="4dp" />
-
             <padding android:bottom="2dp" android:left="1dp" android:right="2dp" android:top="2dp" />
-        </shape></item>
-        <item ><bitmap android:gravity="right" android:src="@android:drawable/arrow_down_float" />
-        </item>
-    </layer-list></item>
-
+        </shape>
+    </item>
 </selector>

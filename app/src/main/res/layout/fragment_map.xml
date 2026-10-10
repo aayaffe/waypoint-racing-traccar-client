@@ -29,6 +29,17 @@
         android:background="@drawable/rounded_background"
         android:hint="32 52.55N\n033 53.54E"/>
 
+    <Button
+        android:id="@+id/recenterMapButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/race_deck_recenter"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@id/mapView"
+        app:layout_constraintTop_toTopOf="@id/mapView" />
+
     <TextView
         android:id="@+id/navigation_warning__tv"
         android:layout_width="wrap_content"

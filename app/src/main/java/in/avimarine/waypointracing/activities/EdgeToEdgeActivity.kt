@@ -40,7 +40,7 @@ abstract class EdgeToEdgeActivity : AppCompatActivity() {
             root.paddingRight,
             root.paddingBottom
         )
-        val actionBarHeight = supportActionBar?.let {
+        val actionBarHeight = supportActionBar?.takeIf { it.isShowing }?.let {
             val value = TypedValue()
             if (theme.resolveAttribute(androidx.appcompat.R.attr.actionBarSize, value, true)) {
                 TypedValue.complexToDimensionPixelSize(value.data, resources.displayMetrics)

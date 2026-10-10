@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.app.AlertDialog
@@ -19,6 +20,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.mapbox.geojson.Point
 import com.mapbox.maps.EdgeInsets
+import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.annotation.AnnotationPlugin
@@ -69,6 +71,9 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     private var bp_finish: Bitmap? = null
     private var nextWpt = -1
     private var lastCoordinateOverlayUpdateMillis = 0L
+    private var latestIndicatorPoint: Point? = null
+    private var needsAutoFrame = true
+    private var autoFrameEnabled = true
 
 
 
@@ -96,9 +101,23 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         annotationApi = mapView.annotations
         pointAnnotationManager = annotationApi?.createPointAnnotationManager()
         lineAnnotationManager = annotationApi?.createPolylineAnnotationManager()
+        mapView.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                autoFrameEnabled = false
+                binding.recenterMapButton.visibility = View.VISIBLE
+            }
+            false
+        }
+        binding.recenterMapButton.setOnClickListener {
+            autoFrameEnabled = true
+            needsAutoFrame = false
+            adjustZoom()
+            binding.recenterMapButton.visibility = View.GONE
+        }
         mapView.getMapboxMap().loadStyleUri(
             "mapbox://styles/aayaffe/clmbnvfaa018401pjfbco00px"
         ) {
+            mapView.getMapboxMap().setCamera(CameraOptions.Builder().bearing(0.0).build())
             mapView.scalebar.updateSettings {
                 isMetricUnits = true
             }
@@ -230,7 +249,10 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
             true
         })
         if (adjustZoom) {
+            autoFrameEnabled = true
+            needsAutoFrame = latestIndicatorPoint == null
             adjustZoom()
+            binding.recenterMapButton.visibility = View.GONE
         }
 
     }
@@ -297,6 +319,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     }
 
     private fun routeElementToColor(re: RouteElement, selected: Boolean): String {
+        if (selected) return "#005A8D"
         val gp =
             activity?.let {
                 GatePassings.getCurrentRouteGatePassings(
@@ -307,29 +330,31 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         if (gp != null) {
             val latestGp = gp.getLatestGatePassForGate(re.id)
             if (latestGp != null) {
-                if (selected) {
-                    return "#38761d"
-                }
-                return "#8fce00"
+                return "#A5B1B7"
             }
         }
-        if (selected) {
-            return "#004aff"
-        }
-        return "#458B74"
+        return "#7298AA"
     }
 
     private fun adjustZoom() {
-        val points = pointAnnotationManager?.annotations?.map { it.point }?: emptyList()
-        val linePoints = lineAnnotationManager?.annotations?.flatMap { it.points }?: emptyList()
+        val activeTarget = route.elements.elementAtOrNull(nextWpt) ?: return
+        val targetPoints = if (activeTarget.routeElementType == RouteElementType.WAYPOINT) {
+            listOf(Point.fromLngLat(activeTarget.portWpt.longitude, activeTarget.portWpt.latitude))
+        } else {
+            listOf(
+                Point.fromLngLat(activeTarget.portWpt.longitude, activeTarget.portWpt.latitude),
+                Point.fromLngLat(activeTarget.stbdWpt.longitude, activeTarget.stbdWpt.latitude),
+            )
+        }
+        val points = latestIndicatorPoint?.let { listOf(it) + targetPoints } ?: targetPoints
         val padding = EdgeInsets(
             50.0,
             50.0,
             50.0,
             50.0
         )
-        if ((points + linePoints).isNotEmpty()) {
-            val cameraPosition = mapView.getMapboxMap().cameraForCoordinates(points + linePoints, padding)
+        if (points.isNotEmpty()) {
+            val cameraPosition = mapView.getMapboxMap().cameraForCoordinates(points, padding)
             mapView.getMapboxMap().setCamera(cameraPosition)
         }
     }
@@ -344,6 +369,10 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
             return bp_finish!!
         }
 
+        if (selected) {
+            return bp_selected!!
+        }
+
         val gp =
             activity?.let {
                 GatePassings.getCurrentRouteGatePassings(
@@ -354,15 +383,8 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         if (gp != null) {
             val latestGp = gp.getLatestGatePassForGate(routeElement.id)
             if (latestGp != null) {
-                if (selected) {
-                    return bp_selected_green!!
-                }
                 return bp_green!!
             }
-        }
-
-        if (selected) {
-            return bp_selected!!
         }
 
         return when (mapRange(routeElement.points, Pair(minPoints, maxPoints), Pair(1, 3))) {
@@ -378,6 +400,11 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     }
 
     override fun onIndicatorPositionChanged(point: Point) {
+        latestIndicatorPoint = point
+        if (needsAutoFrame && autoFrameEnabled) {
+            needsAutoFrame = false
+            adjustZoom()
+        }
         val now = SystemClock.elapsedRealtime()
         if (now - lastCoordinateOverlayUpdateMillis < COORDINATE_OVERLAY_INTERVAL_MS) return
         lastCoordinateOverlayUpdateMillis = now

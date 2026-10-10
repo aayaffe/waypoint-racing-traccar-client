@@ -5,6 +5,19 @@ import org.junit.Test
 
 class DeviceReadinessTest {
     @Test
+    fun healthyDeviceHasNoReadinessIssues() {
+        assertEquals(
+            emptyList<DeviceReadinessIssue>(),
+            DeviceReadiness.issues(
+                notificationsEnabled = true,
+                batteryOptimizationIgnored = true,
+                backgroundRestricted = false,
+                batterySaverEnabled = false,
+            )
+        )
+    }
+
+    @Test
     fun restrictionIsFirstAndWarningsRemainIndependent() {
         assertEquals(
             listOf(

@@ -8,4 +8,5 @@
     android:ellipsize="marquee"
     android:singleLine="true"
     android:textAlignment="inherit"
+    android:textColor="@color/race_text_primary"
     android:textSize="18sp" />
