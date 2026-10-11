@@ -9,6 +9,9 @@
             name="viewmodel"
             type="in.avimarine.waypointracing.ui.LocationViewModel" />
         <variable
+            name="raceDeckUiState"
+            type="in.avimarine.waypointracing.ui.RaceDeckUiState" />
+        <variable
             name="versionViewModel"
             type="in.avimarine.waypointracing.ui.VersionViewModel" />
 
@@ -36,6 +39,8 @@
             app:layout_constraintStart_toEndOf="@id/navigation_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintWidth_percent="0.45"
+            android:accessibilityTraversalAfter="@id/navigation_view"
+            android:accessibilityTraversalBefore="@id/raceBottomActions"
             android:visibility="gone"/>
 
 
@@ -53,10 +58,10 @@
             android:id="@+id/notificationPermissionBanner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="#FFF4D6"
+            android:layout_margin="@dimen/race_space_8"
+            android:background="@color/race_surface_warning"
             android:orientation="vertical"
-            android:padding="12dp"
+            android:padding="@dimen/race_space_12"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -66,22 +71,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/tracking_notification_hidden_title"
-                android:textColor="#1F1F1F"
+                android:textColor="@color/race_warning"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/race_space_4"
                 android:text="@string/tracking_notification_hidden_message"
-                android:textColor="#1F1F1F" />
+                android:textColor="@color/race_text_primary" />
 
             <Button
                 android:id="@+id/notificationPermissionButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/race_space_4"
                 android:text="@string/tracking_notification_settings" />
         </LinearLayout>
 
@@ -89,10 +94,10 @@
             android:id="@+id/batterySaverBanner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="#FDE8E7"
+            android:layout_margin="@dimen/race_space_8"
+            android:background="@color/race_surface_critical"
             android:orientation="vertical"
-            android:padding="12dp"
+            android:padding="@dimen/race_space_12"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -102,35 +107,36 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/tracking_battery_saver_title"
-                android:textColor="#1F1F1F"
+                android:textColor="@color/race_critical"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/race_space_4"
                 android:text="@string/tracking_battery_saver_message"
-                android:textColor="#1F1F1F" />
+                android:textColor="@color/race_text_primary" />
 
             <Button
                 android:id="@+id/batterySaverButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/race_space_4"
                 android:text="@string/tracking_battery_saver_settings" />
         </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/raceDeckHeader"
             android:layout_width="0dp"
-            android:layout_height="76dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="12dp"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/race_header_min_height"
+            android:layout_marginStart="@dimen/race_space_12"
+            android:layout_marginTop="@dimen/race_space_8"
+            android:layout_marginEnd="@dimen/race_space_12"
             android:background="@drawable/drawer_bg"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:paddingStart="@dimen/race_space_12"
+            android:paddingEnd="@dimen/race_space_12"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/batterySaverBanner">
@@ -142,8 +148,9 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@color/race_text_primary"
-                android:textSize="18sp"
+                android:textSize="@dimen/race_text_target_name"
                 android:textStyle="bold"
+                android:text="@{raceDeckUiState.courseName}"
                 app:layout_constraintEnd_toStartOf="@id/raceDeckClock"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -155,8 +162,9 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@color/race_text_secondary"
-                android:textSize="12sp"
+                android:textSize="@dimen/race_text_target_subtitle"
                 android:textStyle="bold"
+                android:text="@{raceDeckUiState.boatName}"
                 app:layout_constraintEnd_toStartOf="@id/raceDeckClock"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/raceDeckCourseName" />
@@ -166,8 +174,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
+                android:fontFeatureSettings="tnum"
                 android:textColor="@color/race_text_primary"
-                android:textSize="20sp"
+                android:textSize="@dimen/race_text_instrument_secondary"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -176,7 +185,7 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/race_space_8"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -188,8 +197,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:text="@{raceDeckUiState.healthLabels.gps}"
                     android:textColor="@color/race_text_secondary"
-                    android:textSize="11sp"
+                    android:textSize="@dimen/race_text_health"
                     android:textStyle="bold"
                     tools:text="GPS ●" />
 
@@ -199,8 +209,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
+                    android:text="@{raceDeckUiState.healthLabels.tracking}"
                     android:textColor="@color/race_text_secondary"
-                    android:textSize="11sp"
+                    android:textSize="@dimen/race_text_health"
                     android:textStyle="bold"
                     tools:text="TRACKING ●" />
 
@@ -210,8 +221,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="end"
+                    android:text="@{raceDeckUiState.healthLabels.sync}"
                     android:textColor="@color/race_text_secondary"
-                    android:textSize="11sp"
+                    android:textSize="@dimen/race_text_health"
                     android:textStyle="bold"
                     tools:text="SYNC ●" />
 
@@ -221,8 +233,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="end"
+                    android:text="@{raceDeckUiState.healthLabels.device}"
                     android:textColor="@color/race_text_secondary"
-                    android:textSize="11sp"
+                    android:textSize="@dimen/race_text_health"
                     android:textStyle="bold"
                     tools:text="DEVICE ✓" />
             </LinearLayout>
@@ -232,14 +245,14 @@
             android:id="@+id/trackingOffBanner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginStart="@dimen/race_space_12"
+            android:layout_marginTop="@dimen/race_space_8"
+            android:layout_marginEnd="@dimen/race_space_12"
             android:background="@color/race_surface_critical"
             android:gravity="center_vertical"
             android:orientation="vertical"
-            android:padding="10dp"
-            android:visibility="gone"
+            android:padding="@dimen/race_space_12"
+            android:visibility="@{raceDeckUiState.trackingWarningVisible ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/deviceSetupBanner">
@@ -249,7 +262,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/race_deck_tracking_off_title"
                 android:textColor="@color/race_critical"
-                android:textSize="14sp"
+                android:textSize="@dimen/race_text_label"
                 android:textStyle="bold" />
 
             <TextView
@@ -258,21 +271,21 @@
                 android:layout_marginTop="2dp"
                 android:text="@string/race_deck_tracking_off_message"
                 android:textColor="@color/race_text_primary"
-                android:textSize="13sp" />
+                android:textSize="@dimen/race_text_supporting" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/deviceSetupBanner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="12dp"
-            android:background="@color/race_surface_warning"
+            android:layout_marginStart="@dimen/race_space_12"
+            android:layout_marginTop="@dimen/race_space_8"
+            android:layout_marginEnd="@dimen/race_space_12"
+            android:background="@{raceDeckUiState.deviceWarningCritical ? @color/race_surface_critical : @color/race_surface_warning}"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="10dp"
-            android:visibility="gone"
+            android:padding="@dimen/race_space_12"
+            android:visibility="@{raceDeckUiState.deviceWarning != null ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/restoringNavigationBanner">
@@ -282,13 +295,13 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/race_deck_device_setup_title" android:textColor="@color/race_warning" android:textSize="14sp" android:textStyle="bold" />
-                <TextView android:id="@+id/deviceSetupSummary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:textColor="@color/race_text_primary" android:textSize="13sp" tools:text="2 settings may affect tracking" />
+                <TextView android:id="@+id/deviceSetupTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@{raceDeckUiState.deviceWarningCritical ? @string/race_deck_background_restricted_banner : @string/race_deck_device_setup_title}" android:textColor="@{raceDeckUiState.deviceWarningCritical ? @color/race_critical : @color/race_warning}" android:textSize="@dimen/race_text_label" android:textStyle="bold" />
+                <TextView android:id="@+id/deviceSetupSummary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@{raceDeckUiState.deviceWarning}" android:textColor="@color/race_text_primary" android:textSize="@dimen/race_text_supporting" tools:text="2 settings may affect tracking" />
             </LinearLayout>
             <Button
                 android:id="@+id/deviceSetupReview"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                android:layout_height="@dimen/race_control_min_height"
                 android:minWidth="56dp"
                 android:text="@string/race_deck_device_review" />
         </LinearLayout>
@@ -297,12 +310,12 @@
             android:id="@+id/restoringNavigationBanner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginStart="@dimen/race_space_12"
+            android:layout_marginTop="@dimen/race_space_8"
+            android:layout_marginEnd="@dimen/race_space_12"
             android:background="@color/race_surface_panel_alt"
             android:gravity="center"
-            android:padding="10dp"
+            android:padding="@dimen/race_space_12"
             android:text="@string/race_deck_restoring_navigation"
             android:textColor="@color/race_text_secondary"
             android:textSize="14sp"
@@ -316,22 +329,22 @@
             android:id="@+id/gpsWarningBanner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginStart="@dimen/race_space_12"
+            android:layout_marginTop="@dimen/race_space_8"
+            android:layout_marginEnd="@dimen/race_space_12"
             android:background="@color/race_surface_warning"
             android:orientation="vertical"
-            android:padding="10dp"
-            android:visibility="gone"
+            android:padding="@dimen/race_space_12"
+            android:visibility="@{raceDeckUiState.gpsWarning != null ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/trackingOffBanner">
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/race_deck_gps_lost_title" android:textColor="@color/race_warning" android:textSize="14sp" android:textStyle="bold" />
-            <TextView android:id="@+id/gpsWarningMessage" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/race_deck_gps_lost_message" android:textColor="@color/race_text_primary" android:textSize="13sp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/race_deck_gps_lost_title" android:textColor="@color/race_warning" android:textSize="@dimen/race_text_label" android:textStyle="bold" />
+            <TextView android:id="@+id/gpsWarningMessage" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@{raceDeckUiState.gpsWarning != null ? raceDeckUiState.gpsWarning : @string/race_deck_gps_lost_message}" android:textColor="@color/race_text_primary" android:textSize="@dimen/race_text_supporting" />
             <Button
                 android:id="@+id/silenceGpsAlerts"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                android:layout_height="@dimen/race_control_min_height"
                 android:layout_gravity="end"
                 android:text="@string/race_deck_silence_gps_alerts" />
         </LinearLayout>
@@ -356,8 +369,8 @@
             android:id="@+id/routeElementSpinner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="@dimen/race_space_8"
+            android:layout_marginEnd="@dimen/race_space_8"
             android:background="@drawable/gradient_spinner"
             android:popupBackground="@color/race_surface_panel"
             android:contentDescription="@string/race_deck_active_target"
@@ -371,7 +384,7 @@
             android:id="@+id/nextWptHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="@dimen/race_space_8"
             android:layout_marginTop="10dp"
             android:layout_weight="1"
             android:text="@string/next_waypoint_gate"
@@ -396,12 +409,14 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/activeTargetPanel"
             android:layout_width="0dp"
-            android:layout_height="112dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="8dp"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/race_target_min_height"
+            android:layout_marginStart="@dimen/race_space_8"
+            android:layout_marginTop="@dimen/race_space_8"
+            android:layout_marginEnd="@dimen/race_space_8"
+            android:contentDescription="@{raceDeckUiState.target != null ? raceDeckUiState.target.accessibilityDescription : @string/race_deck_active_target}"
             app:cardBackgroundColor="@color/race_surface_panel"
-            app:cardCornerRadius="12dp"
+            app:cardCornerRadius="@dimen/race_panel_radius"
             app:cardElevation="0dp"
             app:strokeColor="@color/race_divider"
             app:strokeWidth="1dp"
@@ -411,8 +426,9 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="10dp">
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/race_target_min_height"
+                android:padding="@dimen/race_space_8">
 
                 <TextView
                     android:id="@+id/activeTargetName"
@@ -422,8 +438,9 @@
                     android:gravity="center"
                     android:maxLines="1"
                     android:textColor="@color/race_text_primary"
-                    android:textSize="22sp"
+                    android:textSize="@dimen/race_text_active_target_title"
                     android:textStyle="bold"
+                    android:text="@{raceDeckUiState.target != null ? raceDeckUiState.target.name : ``}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -434,8 +451,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:text="@{raceDeckUiState.target != null ? raceDeckUiState.target.displayLabel : ``}"
                     android:textColor="@color/race_text_secondary"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/race_text_target_subtitle"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -445,17 +463,18 @@
                 <TextView
                     android:id="@+id/activeTargetBearing"
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:fontFeatureSettings="tnum"
                     android:textColor="@color/race_text_primary"
-                    android:textSize="36sp"
+                    android:textSize="@dimen/race_text_primary_value"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/activeTargetDivider"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/activeTargetType"
                     app:layout_constraintWidth_percent="0.5"
-                    android:text="@{viewmodel != null ? viewmodel.activeTargetBearingData : `—`}" />
+                    android:text="@{raceDeckUiState.navigation.bearing}" />
 
                 <View
                     android:id="@+id/activeTargetDivider"
@@ -470,29 +489,31 @@
                 <TextView
                     android:id="@+id/activeTargetDistance"
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:fontFeatureSettings="tnum"
                     android:textColor="@color/race_text_primary"
-                    android:textSize="36sp"
+                    android:textSize="@dimen/race_text_primary_value"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="@id/activeTargetBearing"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/activeTargetDivider"
                     app:layout_constraintTop_toTopOf="@id/activeTargetBearing"
-                    android:text="@{viewmodel != null ? viewmodel.activeTargetDistanceData : `—`}" />
+                    android:text="@{raceDeckUiState.navigation.distance}" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/gateEndpointsPanel"
             android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="8dp"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/race_endpoints_min_height"
+            android:layout_marginStart="@dimen/race_space_8"
+            android:layout_marginTop="@dimen/race_space_8"
+            android:layout_marginEnd="@dimen/race_space_8"
             android:visibility="gone"
             app:cardBackgroundColor="@color/race_surface_panel_alt"
-            app:cardCornerRadius="12dp"
+            app:cardCornerRadius="@dimen/race_panel_radius"
             app:cardElevation="0dp"
             app:strokeColor="@color/race_divider"
             app:strokeWidth="1dp"
@@ -502,29 +523,33 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/race_endpoints_min_height"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
+                    android:paddingVertical="@dimen/race_space_4"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/race_deck_port" android:textColor="@color/race_text_secondary" android:textSize="12sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center" android:text="@{viewmodel != null ? viewmodel.portEndpointData : `—`}" android:textColor="@color/race_text_primary" android:textSize="20sp" android:textStyle="bold" tools:text="031°&#10;302 m" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/race_deck_port" android:textColor="@color/race_text_secondary" android:textSize="@dimen/race_text_metric_label" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:gravity="center" android:text="@{raceDeckUiState.navigation.portEndpoint}" android:textColor="@color/race_text_primary" android:textSize="@dimen/race_text_endpoint" android:textStyle="bold" tools:text="031°&#10;302 m" />
                 </LinearLayout>
 
-                <View android:layout_width="1dp" android:layout_height="match_parent" android:background="@color/race_divider" />
+                <View android:layout_width="@dimen/race_panel_stroke" android:layout_height="@dimen/race_endpoints_min_height" android:background="@color/race_divider" />
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
+                    android:paddingVertical="@dimen/race_space_4"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/race_deck_stbd" android:textColor="@color/race_text_secondary" android:textSize="12sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center" android:text="@{viewmodel != null ? viewmodel.stbdEndpointData : `—`}" android:textColor="@color/race_text_primary" android:textSize="20sp" android:textStyle="bold" tools:text="046°&#10;296 m" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/race_deck_stbd" android:textColor="@color/race_text_secondary" android:textSize="@dimen/race_text_metric_label" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:gravity="center" android:text="@{raceDeckUiState.navigation.starboardEndpoint}" android:textColor="@color/race_text_primary" android:textSize="@dimen/race_text_endpoint" android:textStyle="bold" tools:text="046°&#10;296 m" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -533,15 +558,17 @@
             android:id="@+id/positionStrip"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginStart="@dimen/race_space_12"
+            android:layout_marginTop="@dimen/race_space_8"
+            android:layout_marginEnd="@dimen/race_space_12"
+            android:minHeight="@dimen/race_position_min_height"
             android:ellipsize="end"
             android:gravity="center"
-            android:maxLines="1"
-            android:text="@{viewmodel != null ? `POS  ` + viewmodel.positionStripData : `POS  —`}"
+            android:maxLines="2"
+                    android:fontFeatureSettings="tnum"
+                    android:text="@{`POS  ` + raceDeckUiState.navigation.position}"
             android:textColor="@color/race_text_secondary"
-            android:textSize="13sp"
+            android:textSize="@dimen/race_text_position"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -551,10 +578,11 @@
         <LinearLayout
             android:id="@+id/raceDeckMetricsPanel"
             android:layout_width="0dp"
-            android:layout_height="144dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="8dp"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/race_metrics_min_height"
+            android:layout_marginStart="@dimen/race_space_8"
+            android:layout_marginTop="@dimen/race_space_8"
+            android:layout_marginEnd="@dimen/race_space_8"
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -569,81 +597,81 @@
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginEnd="2dp"
+                    android:layout_marginEnd="@dimen/race_space_4"
                     android:layout_weight="1"
                     android:background="@drawable/drawer_bg"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="COG" android:textColor="@color/race_text_secondary" android:textSize="12sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@{viewmodel != null ? viewmodel.COGData : `—`}" android:textColor="@color/race_text_primary" android:textSize="24sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="COG" android:textColor="@color/race_text_secondary" android:textSize="@dimen/race_text_metric_label" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:text="@{raceDeckUiState.navigation.cog}" android:textColor="@color/race_text_primary" android:textSize="@dimen/race_text_metric" android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginHorizontal="2dp"
+                    android:layout_marginHorizontal="@dimen/race_space_4"
                     android:layout_weight="1"
                     android:background="@drawable/drawer_bg"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SOG" android:textColor="@color/race_text_secondary" android:textSize="12sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@{viewmodel != null ? viewmodel.SOGData : `—`}" android:textColor="@color/race_text_primary" android:textSize="24sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SOG" android:textColor="@color/race_text_secondary" android:textSize="@dimen/race_text_metric_label" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:text="@{raceDeckUiState.navigation.sog}" android:textColor="@color/race_text_primary" android:textSize="@dimen/race_text_metric" android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="2dp"
+                    android:layout_marginStart="@dimen/race_space_4"
                     android:layout_weight="1"
                     android:background="@drawable/drawer_bg"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="VMG" android:textColor="@color/race_text_secondary" android:textSize="12sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@{viewmodel != null ? viewmodel.VMGGateData : `—`}" android:textColor="@color/race_text_primary" android:textSize="24sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="VMG" android:textColor="@color/race_text_secondary" android:textSize="@dimen/race_text_metric_label" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:text="@{raceDeckUiState.navigation.vmg}" android:textColor="@color/race_text_primary" android:textSize="@dimen/race_text_metric" android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/race_space_4"
                 android:layout_weight="1"
                 android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginEnd="2dp"
+                    android:layout_marginEnd="@dimen/race_space_4"
                     android:layout_weight="1"
                     android:background="@drawable/drawer_bg"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TTG" android:textColor="@color/race_text_secondary" android:textSize="12sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@{viewmodel != null ? viewmodel.TTGData : `—`}" android:textColor="@color/race_text_primary" android:textSize="22sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TTG" android:textColor="@color/race_text_secondary" android:textSize="@dimen/race_text_metric_label" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:text="@{raceDeckUiState.navigation.ttg}" android:textColor="@color/race_text_primary" android:textSize="@dimen/race_text_metric_ttg" android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginHorizontal="2dp"
+                    android:layout_marginHorizontal="@dimen/race_space_4"
                     android:layout_weight="1"
                     android:background="@drawable/drawer_bg"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ETA" android:textColor="@color/race_text_secondary" android:textSize="12sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@{viewmodel != null ? viewmodel.ETAData : `—`}" android:textColor="@color/race_text_primary" android:textSize="18sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ETA" android:textColor="@color/race_text_secondary" android:textSize="@dimen/race_text_metric_label" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:text="@{raceDeckUiState.navigation.eta}" android:textColor="@color/race_text_primary" android:textSize="@dimen/race_text_instrument_secondary" android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="2dp"
+                    android:layout_marginStart="@dimen/race_space_4"
                     android:layout_weight="1"
                     android:background="@drawable/drawer_bg"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TIME" android:textColor="@color/race_text_secondary" android:textSize="12sp" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@{viewmodel != null ? viewmodel.timeData : `—`}" android:textColor="@color/race_text_primary" android:textSize="18sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TIME" android:textColor="@color/race_text_secondary" android:textSize="@dimen/race_text_metric_label" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFeatureSettings="tnum" android:text="@{raceDeckUiState.navigation.time}" android:textColor="@color/race_text_primary" android:textSize="@dimen/race_text_instrument_secondary" android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -837,7 +865,7 @@
             android:id="@+id/lastSend"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="@dimen/race_space_8"
             android:layout_marginBottom="8dp"
             android:contentDescription="Last send position"
             android:visibility="gone"
@@ -861,12 +889,12 @@
         <LinearLayout
             android:id="@+id/raceBottomActions"
             android:layout_width="0dp"
-            android:layout_height="72dp"
+            android:layout_height="@dimen/race_bottom_actions_height"
             android:background="@color/race_surface_panel"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:paddingStart="@dimen/race_space_8"
+            android:paddingEnd="@dimen/race_space_8"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -878,7 +906,7 @@
                 android:layout_weight="1"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                android:minHeight="0dp"
+                android:minHeight="@dimen/race_control_min_height"
                 android:backgroundTint="@color/race_surface_panel"
                 android:drawableTop="@drawable/ic_race_targets"
                 android:drawableTint="@color/race_nav_primary"
@@ -894,13 +922,13 @@
                 android:layout_weight="1"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                android:minHeight="0dp"
-                android:backgroundTint="@color/race_nav_primary"
+                android:minHeight="@dimen/race_control_min_height"
+                android:backgroundTint="@color/race_surface_panel"
                 android:drawableTop="@drawable/ic_race_map"
-                android:drawableTint="@color/race_surface_panel"
+                android:drawableTint="@color/race_nav_primary"
                 android:drawablePadding="2dp"
                 android:text="@string/race_deck_map"
-                android:textColor="@color/race_surface_panel"
+                android:textColor="@color/race_nav_primary"
                 android:textSize="12sp" />
 
             <Button
@@ -910,7 +938,7 @@
                 android:layout_weight="1"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                android:minHeight="0dp"
+                android:minHeight="@dimen/race_control_min_height"
                 android:backgroundTint="@color/race_surface_panel"
                 android:drawableTop="@drawable/ic_race_more"
                 android:drawableTint="@color/race_nav_primary"
@@ -924,14 +952,14 @@
         android:id="@+id/passCelebrationCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginStart="@dimen/race_space_12"
+        android:layout_marginTop="@dimen/race_space_12"
+        android:layout_marginEnd="@dimen/race_space_12"
         android:visibility="gone"
         android:elevation="12dp"
         android:accessibilityLiveRegion="polite"
-        app:cardBackgroundColor="@android:color/white"
-        app:cardCornerRadius="20dp"
+        app:cardBackgroundColor="@color/race_surface_panel"
+        app:cardCornerRadius="@dimen/race_panel_radius"
         app:cardElevation="12dp"
         app:strokeColor="@color/pass_gate_accent"
         app:strokeWidth="2dp"
@@ -944,7 +972,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="14dp">
+            android:padding="@dimen/race_space_12">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -957,12 +985,12 @@
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:importantForAccessibility="no"
-                    android:src="@drawable/ic_gate_celebration" />
+                    android:src="@{raceDeckUiState.passBanner != null &amp;&amp; raceDeckUiState.passBanner.icon != null ? raceDeckUiState.passBanner.icon : @drawable/ic_gate_celebration}" />
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="@dimen/race_space_12"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
@@ -970,34 +998,37 @@
                         android:id="@+id/passCelebrationTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/gate_pass_notification_title"
-                        android:textColor="@color/primary_dark"
-                        android:textSize="20sp"
+                        android:text="@{raceDeckUiState.passBanner != null ? raceDeckUiState.passBanner.titleText : ``}"
+                        android:textColor="@color/race_nav_primary"
+                        android:textSize="@dimen/race_text_target_name"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/passCelebrationName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/race_space_4"
                         android:ellipsize="end"
                         android:maxLines="2"
-                        android:textColor="@color/pass_secondary_text"
-                        android:textSize="15sp" />
+                        android:textColor="@color/race_text_secondary"
+                        android:text="@{raceDeckUiState.passBanner != null ? raceDeckUiState.passBanner.name : ``}"
+                        android:textSize="@dimen/race_text_pass_name" />
 
                     <TextView
                         android:id="@+id/passCelebrationEventDetails"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="@color/pass_secondary_text"
-                        android:textSize="14sp" />
+                        android:layout_marginTop="@dimen/race_space_4"
+                        android:fontFeatureSettings="tnum"
+                        android:textColor="@color/race_text_secondary"
+                        android:text="@{raceDeckUiState.passBanner != null ? raceDeckUiState.passBanner.eventDetails : ``}"
+                        android:textSize="@dimen/race_text_dialog_body" />
                 </LinearLayout>
 
                 <ImageButton
                     android:id="@+id/passCelebrationDismiss"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/race_touch_target_min"
+                    android:layout_height="@dimen/race_touch_target_min"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/dismiss_pass_celebration"
                     android:padding="8dp"
@@ -1007,7 +1038,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/race_space_8"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -1022,38 +1053,39 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/pass_saved_checked"
-                        android:textColor="@color/pass_secondary_text"
-                        android:textSize="14sp" />
+                        android:textColor="@color/race_text_secondary"
+                        android:textSize="@dimen/race_text_dialog_body" />
 
                     <TextView
                         android:id="@+id/passCelebrationUploaded"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/pass_upload_pending"
-                        android:textColor="@color/pass_secondary_text"
-                        android:textSize="14sp" />
+                        android:layout_marginTop="@dimen/race_space_4"
+                        android:text="@{raceDeckUiState.passBanner != null ? raceDeckUiState.passBanner.uploadStatusText : @string/pass_upload_pending}"
+                        android:textColor="@color/race_text_secondary"
+                        android:textSize="@dimen/race_text_dialog_body" />
 
                     <TextView
                         android:id="@+id/passCelebrationNextTarget"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="@color/pass_secondary_text"
-                        android:textSize="14sp"
-                        android:visibility="gone" />
+                        android:layout_marginTop="@dimen/race_space_4"
+                        android:textColor="@color/race_text_secondary"
+                        android:textSize="@dimen/race_text_dialog_body"
+                        android:text="@{raceDeckUiState.passBanner != null ? raceDeckUiState.passBanner.nextTargetLabel : ``}"
+                        android:visibility="@{raceDeckUiState.passBanner != null &amp;&amp; raceDeckUiState.passBanner.nextTargetLabel != null ? View.VISIBLE : View.GONE}" />
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/passCelebrationAction"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:minHeight="48dp"
+                    android:layout_marginStart="@dimen/race_space_8"
+                    android:minHeight="@dimen/race_control_min_height"
                     android:text="@string/view_route"
                     android:textAllCaps="false"
                     app:backgroundTint="@color/pass_gate_accent"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="@dimen/race_panel_radius" />
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

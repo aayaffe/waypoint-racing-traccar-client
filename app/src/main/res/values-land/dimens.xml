@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="race_space_4">2dp</dimen>
+    <dimen name="race_space_8">2dp</dimen>
+    <dimen name="race_space_12">8dp</dimen>
+    <dimen name="race_header_min_height">48dp</dimen>
+    <dimen name="race_target_min_height">88dp</dimen>
+    <dimen name="race_endpoints_min_height">48dp</dimen>
+    <dimen name="race_metrics_min_height">56dp</dimen>
+    <dimen name="race_bottom_actions_height">56dp</dimen>
+    <dimen name="race_text_target_name">18sp</dimen>
+    <dimen name="race_text_active_target_title">16sp</dimen>
+    <dimen name="race_text_target_subtitle">9sp</dimen>
+    <dimen name="race_text_instrument_secondary">12sp</dimen>
+    <dimen name="race_text_endpoint">12sp</dimen>
+    <dimen name="race_text_metric">12sp</dimen>
+    <dimen name="race_text_metric_ttg">12sp</dimen>
+    <dimen name="race_text_metric_label">8sp</dimen>
+    <dimen name="race_text_position">10sp</dimen>
+    <dimen name="race_text_health">10sp</dimen>
+</resources>

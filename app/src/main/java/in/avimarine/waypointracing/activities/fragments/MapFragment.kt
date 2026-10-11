@@ -25,8 +25,8 @@ import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.annotation.AnnotationPlugin
 import com.mapbox.maps.plugin.annotation.annotations
-import com.mapbox.maps.plugin.annotation.generated.OnPointAnnotationLongClickListener
-import com.mapbox.maps.plugin.annotation.generated.OnPolylineAnnotationLongClickListener
+import com.mapbox.maps.plugin.annotation.generated.OnPointAnnotationClickListener
+import com.mapbox.maps.plugin.annotation.generated.OnPolylineAnnotationClickListener
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationManager
@@ -49,6 +49,7 @@ import `in`.avimarine.waypointracing.route.GatePassings
 import `in`.avimarine.waypointracing.route.Route
 import `in`.avimarine.waypointracing.route.RouteElement
 import `in`.avimarine.waypointracing.route.RouteElementType
+import `in`.avimarine.waypointracing.ui.MapTargetSelectionPresentation
 import `in`.avimarine.waypointracing.utils.Preferences
 import `in`.avimarine.waypointracing.utils.RouteParser.Companion.parseRoute
 
@@ -71,10 +72,12 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     private var bp_bronze: Bitmap? = null
     private var bp_finish: Bitmap? = null
     private var nextWpt = -1
+    private var highlightedTargetOrdinal: Int? = null
     private var lastCoordinateOverlayUpdateMillis = 0L
     private var latestIndicatorPoint: Point? = null
     private var needsAutoFrame = true
     private var autoFrameEnabled = true
+    private var targetSelectionDialog: AlertDialog? = null
 
 
 
@@ -103,6 +106,14 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         annotationApi = mapView.annotations
         pointAnnotationManager = annotationApi?.createPointAnnotationManager()
         lineAnnotationManager = annotationApi?.createPolylineAnnotationManager()
+        pointAnnotationManager?.addClickListener(OnPointAnnotationClickListener {
+            showTargetSelectionConfirmation(it.getData())
+            true
+        })
+        lineAnnotationManager?.addClickListener(OnPolylineAnnotationClickListener {
+            showTargetSelectionConfirmation(it.getData())
+            true
+        })
         mapView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 autoFrameEnabled = false
@@ -189,6 +200,9 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
 
     override fun onDestroyView() {
         Log.d(TAG, "onDestroyView")
+        targetSelectionDialog?.setOnDismissListener(null)
+        targetSelectionDialog?.dismiss()
+        targetSelectionDialog = null
         val locationComponentPlugin = mapView.location
         locationComponentPlugin.removeOnIndicatorPositionChangedListener(this)
         mapView.onDestroy()
@@ -222,6 +236,7 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         val wpt = route.elements.elementAtOrNull(nextWpt)
         route.elements.forEachIndexed { index, re ->
             val selected = re.id == (wpt?.id ?: false)
+            val highlighted = index == highlightedTargetOrdinal
             val jsonObject = JsonParser.parseString(re.toGeoJson()).asJsonObject
             jsonObject.getAsJsonObject("properties").apply {
                 addProperty("ordinal", index)
@@ -229,27 +244,19 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
             when (re.routeElementType) {
                 RouteElementType.WAYPOINT -> {
                     val pointAnnotationOptions =
-                        pointAnnotationOptions(re, jsonObject, selected, maxPoints, minPoints)
+                        pointAnnotationOptions(re, jsonObject, selected, highlighted, maxPoints, minPoints)
                     pointAnnotationManager?.create(pointAnnotationOptions)
                 }
                 RouteElementType.GATE, RouteElementType.FINISH, RouteElementType.START -> {
-                    val lineAnnotationOptions = lineAnnotationOptions(re, jsonObject, selected)
+                    val lineAnnotationOptions = lineAnnotationOptions(re, jsonObject, selected, highlighted)
                     lineAnnotationManager?.create(lineAnnotationOptions)
                     val pointAnnotationOptions =
-                        pointAnnotationOptions(re, jsonObject, selected, maxPoints, minPoints)
+                        pointAnnotationOptions(re, jsonObject, selected, highlighted, maxPoints, minPoints)
                     pointAnnotationManager?.create(pointAnnotationOptions)
                 }
             }
         }
 
-        pointAnnotationManager?.addLongClickListener(OnPointAnnotationLongClickListener {
-            handleLongClick(it.getData())
-            true
-        })
-        lineAnnotationManager?.addLongClickListener(OnPolylineAnnotationLongClickListener {
-            handleLongClick(it.getData())
-            true
-        })
         if (adjustZoom) {
             autoFrameEnabled = true
             needsAutoFrame = latestIndicatorPoint == null
@@ -259,14 +266,16 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
 
     }
 
-    private fun handleLongClick(data: JsonElement?) {
+    private fun showTargetSelectionConfirmation(data: JsonElement?) {
         val ordinal = data?.asJsonObject?.get("properties")?.asJsonObject?.get("ordinal")?.asInt ?: -1
         if (ordinal !in route.elements.indices) return
         val target = route.elements[ordinal]
-        AlertDialog.Builder(requireContext())
+        highlightedTargetOrdinal = ordinal
+        addRouteWaypoints(route, nextWpt, adjustZoom = false)
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle(target.name)
             .setMessage(R.string.map_target_selection_message)
-            .setPositiveButton(R.string.map_target_selection_confirm) { _, _ ->
+            .setPositiveButton(MapTargetSelectionPresentation.confirmLabel(target.routeElementType)) { _, _ ->
                 setNextWpt(ordinal)
                 Toast.makeText(
                     requireContext(),
@@ -275,13 +284,23 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
                 ).show()
             }
             .setNegativeButton(android.R.string.cancel, null)
-            .show()
+            .create()
+        dialog.setOnDismissListener {
+            targetSelectionDialog = null
+            if (highlightedTargetOrdinal == ordinal) {
+                highlightedTargetOrdinal = null
+                addRouteWaypoints(route, nextWpt, adjustZoom = false)
+            }
+        }
+        targetSelectionDialog = dialog
+        dialog.show()
     }
 
     private fun pointAnnotationOptions(
         re: RouteElement,
         jsonObject: JsonObject,
         selected: Boolean,
+        highlighted: Boolean,
         maxPoints: Double,
         minPoints: Double
     ): List<PointAnnotationOptions> {
@@ -289,17 +308,17 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
             val portWpt = PointAnnotationOptions()
                 .withPoint(Point.fromLngLat(re.portWpt.longitude, re.portWpt.latitude))
                 .withData(jsonObject)
-                .withIconImage(routeElementToBitmap(re, selected, maxPoints, minPoints))
+                .withIconImage(routeElementToBitmap(re, selected, highlighted, maxPoints, minPoints))
             val stbWpt = PointAnnotationOptions()
                 .withPoint(Point.fromLngLat(re.stbdWpt.longitude, re.stbdWpt.latitude))
                 .withData(jsonObject)
-                .withIconImage(routeElementToBitmap(re, selected, maxPoints, minPoints))
+                .withIconImage(routeElementToBitmap(re, selected, highlighted, maxPoints, minPoints))
             return listOf(portWpt, stbWpt)
         } else {
             return listOf(PointAnnotationOptions()
                 .withPoint(Point.fromLngLat(re.portWpt.longitude, re.portWpt.latitude))
                 .withData(jsonObject)
-                .withIconImage(routeElementToBitmap(re, selected, maxPoints, minPoints)))
+                .withIconImage(routeElementToBitmap(re, selected, highlighted, maxPoints, minPoints)))
         }
 
     }
@@ -307,9 +326,10 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
         re: RouteElement,
         jsonObject: JsonObject,
         selected: Boolean,
+        highlighted: Boolean,
     ): PolylineAnnotationOptions {
         return PolylineAnnotationOptions()
-            .withLineColor(routeElementToColor(re, selected))
+            .withLineColor(routeElementToColor(re, selected, highlighted))
             .withLineWidth(2.0)
             .withData(jsonObject)
             .withPoints(
@@ -320,8 +340,9 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
             )
     }
 
-    private fun routeElementToColor(re: RouteElement, selected: Boolean): String {
+    private fun routeElementToColor(re: RouteElement, selected: Boolean, highlighted: Boolean): String {
         if (selected) return "#005A8D"
+        if (highlighted) return "#16804A"
         val gp =
             activity?.let {
                 GatePassings.getCurrentRouteGatePassings(
@@ -364,15 +385,18 @@ class MapFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListen
     private fun routeElementToBitmap(
         routeElement: RouteElement,
         selected: Boolean,
+        highlighted: Boolean,
         maxPoints: Double,
         minPoints: Double
     ): Bitmap {
         if (routeElement.routeElementType == RouteElementType.FINISH) {
             return bp_finish!!
         }
-
         if (selected) {
             return bp_selected!!
+        }
+        if (highlighted) {
+            return bp_selected_green!!
         }
 
         val gp =

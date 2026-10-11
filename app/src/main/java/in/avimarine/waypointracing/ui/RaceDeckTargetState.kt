@@ -10,6 +10,8 @@ data class RaceDeckTargetState(
     val name: String,
     val label: RaceDeckTargetLabel,
     val showsEndpoints: Boolean,
+    val displayLabel: String = "",
+    val accessibilityDescription: String = "",
 )
 
 /** Pure presentation mapping; route detection and progression remain outside the UI layer. */

@@ -160,7 +160,7 @@ class LocationViewModel(
     }
 
     fun getETAData(): String {
-        if (wpt == null) return "-----"
+        if (wpt == null) return RaceDeckFormatter.eta(null)
 
         val distance = if (wpt.routeElementType == RouteElementType.WAYPOINT) {
             getDistance(location, wpt.portWpt)
@@ -172,7 +172,7 @@ class LocationViewModel(
             distance.getValue(DistanceUnits.NauticalMiles),
             vmg.getValue(SpeedUnits.Knots),
             location.time
-        ) ?: return "-----"
+        )
 
         return RaceDeckFormatter.eta(arrival)
     }

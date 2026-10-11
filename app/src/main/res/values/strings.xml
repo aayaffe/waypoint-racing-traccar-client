@@ -85,7 +85,9 @@
     <string name="race_deck_sync_pending">SYNC ↑ PENDING</string>
     <string name="race_deck_device_ready">DEVICE ✓</string>
     <string name="race_deck_device_warning">DEVICE ⚠</string>
+    <string name="race_deck_device_critical">DEVICE ✕</string>
     <string name="race_deck_device_setup_title">DEVICE SETUP NEEDS ATTENTION</string>
+    <string name="race_deck_background_restricted_banner">BACKGROUND TRACKING RESTRICTED</string>
     <string name="race_deck_device_review">REVIEW</string>
     <string name="race_deck_notifications_disabled">Notifications are off</string>
     <string name="race_deck_background_restricted">Background tracking is restricted</string>
@@ -125,6 +127,9 @@
     <string name="race_deck_tracking_off_message">Position is not being recorded.</string>
     <string name="map_target_selection_message">Select this as the active race target?</string>
     <string name="map_target_selection_confirm">SELECT TARGET</string>
+    <string name="map_target_selection_confirm_mark">SELECT MARK</string>
+    <string name="map_target_selection_confirm_gate">SELECT GATE</string>
+    <string name="map_target_selection_confirm_finish">SELECT FINISH</string>
     <string name="map_target_selected">Navigating to %1$s</string>
     <string name="race_deck_stop_tracking_title">Stop tracking?</string>
     <string name="race_deck_stop_tracking_message">Waypoint Racing will stop recording your position and live uploads until tracking is turned on again.</string>

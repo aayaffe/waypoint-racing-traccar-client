@@ -10,4 +10,20 @@ class TargetSelectionTest {
         assertEquals(1, TargetSelection.validOrFallback(7, 4, 1))
         assertEquals(0, TargetSelection.validOrFallback(-1, 0, 5))
     }
+
+    @Test
+    fun mapPreviewUsesAnExplicitActionLabelForEachTargetKind() {
+        assertEquals(
+            `in`.avimarine.waypointracing.R.string.map_target_selection_confirm_mark,
+            MapTargetSelectionPresentation.confirmLabel(`in`.avimarine.waypointracing.route.RouteElementType.WAYPOINT),
+        )
+        assertEquals(
+            `in`.avimarine.waypointracing.R.string.map_target_selection_confirm_gate,
+            MapTargetSelectionPresentation.confirmLabel(`in`.avimarine.waypointracing.route.RouteElementType.GATE),
+        )
+        assertEquals(
+            `in`.avimarine.waypointracing.R.string.map_target_selection_confirm_finish,
+            MapTargetSelectionPresentation.confirmLabel(`in`.avimarine.waypointracing.route.RouteElementType.FINISH),
+        )
+    }
 }
