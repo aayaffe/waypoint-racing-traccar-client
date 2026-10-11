@@ -183,6 +183,7 @@
                 tools:text="14:37:12" />
 
             <LinearLayout
+                android:id="@+id/raceDeckHealthRow"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/race_space_8"
@@ -911,6 +912,8 @@
                 android:drawableTop="@drawable/ic_race_targets"
                 android:drawableTint="@color/race_nav_primary"
                 android:drawablePadding="2dp"
+                android:gravity="center"
+                android:paddingVertical="0dp"
                 android:text="@string/race_deck_targets"
                 android:textColor="@color/race_nav_primary"
                 android:textSize="12sp" />
@@ -927,6 +930,8 @@
                 android:drawableTop="@drawable/ic_race_map"
                 android:drawableTint="@color/race_nav_primary"
                 android:drawablePadding="2dp"
+                android:gravity="center"
+                android:paddingVertical="0dp"
                 android:text="@string/race_deck_map"
                 android:textColor="@color/race_nav_primary"
                 android:textSize="12sp" />
@@ -943,6 +948,8 @@
                 android:drawableTop="@drawable/ic_race_more"
                 android:drawableTint="@color/race_nav_primary"
                 android:drawablePadding="2dp"
+                android:gravity="center"
+                android:paddingVertical="0dp"
                 android:text="@string/race_deck_more"
                 android:textColor="@color/race_nav_primary"
                 android:textSize="12sp" />

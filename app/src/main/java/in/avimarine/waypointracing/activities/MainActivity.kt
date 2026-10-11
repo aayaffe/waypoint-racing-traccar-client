@@ -854,6 +854,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
     private fun configureRaceDeckHeaderLayout(landscape: Boolean) {
         val course = binding.raceDeckCourseName.layoutParams as ConstraintLayout.LayoutParams
         val boat = binding.raceDeckBoatName.layoutParams as ConstraintLayout.LayoutParams
+        val health = binding.raceDeckHealthRow.layoutParams as ConstraintLayout.LayoutParams
         if (landscape) {
             course.endToStart = R.id.raceDeckBoatName
             course.endToEnd = ConstraintLayout.LayoutParams.UNSET
@@ -865,6 +866,7 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             boat.endToStart = R.id.raceDeckClock
             boat.horizontalWeight = 1f
             boat.marginStart = resources.getDimensionPixelSize(R.dimen.race_space_4)
+            health.topToBottom = R.id.raceDeckCourseName
         } else {
             course.endToStart = R.id.raceDeckClock
             course.endToEnd = ConstraintLayout.LayoutParams.UNSET
@@ -876,9 +878,11 @@ class MainActivity : EdgeToEdgeActivity(), PositionProvider.PositionListener,
             boat.endToStart = R.id.raceDeckClock
             boat.horizontalWeight = 0f
             boat.marginStart = 0
+            health.topToBottom = R.id.raceDeckBoatName
         }
         binding.raceDeckCourseName.layoutParams = course
         binding.raceDeckBoatName.layoutParams = boat
+        binding.raceDeckHealthRow.layoutParams = health
     }
 
     private fun configureCompactPortraitSizing(compactPortrait: Boolean) {

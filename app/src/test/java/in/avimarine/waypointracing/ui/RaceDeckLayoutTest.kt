@@ -235,6 +235,26 @@ class RaceDeckLayoutTest {
     }
 
     @Test
+    @Config(sdk = [28], qualifiers = "sw600dp-land")
+    fun tabletLandscapeUsesReadableDashboardAndUnclippedActionHeight() {
+        val context = ContextThemeWrapper(
+            ApplicationProvider.getApplicationContext(), R.style.AppTheme
+        )
+        val binding = ActivityMainBinding.inflate(LayoutInflater.from(context))
+
+        assertEquals(
+            (80 * context.resources.displayMetrics.density).toInt(),
+            context.resources.getDimensionPixelSize(R.dimen.race_bottom_actions_height),
+        )
+        assertTrue(
+            context.resources.getDimensionPixelSize(R.dimen.race_target_min_height) >
+                context.resources.getDimensionPixelSize(R.dimen.race_bottom_actions_height),
+        )
+        assertEquals(0, binding.raceTargetsAction.paddingTop)
+        assertEquals(0, binding.raceTargetsAction.paddingBottom)
+    }
+
+    @Test
     fun passAndTargetSurfacesUseNightPaletteResources() {
         val applicationContext = ApplicationProvider.getApplicationContext<android.content.Context>()
         val configuration = Configuration(applicationContext.resources.configuration).apply {

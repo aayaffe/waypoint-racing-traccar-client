@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tablet landscape keeps the dashboard legible without changing phone landscape. -->
+    <dimen name="race_space_4">4dp</dimen>
+    <dimen name="race_space_8">8dp</dimen>
+    <dimen name="race_space_12">12dp</dimen>
+    <dimen name="race_header_min_height">72dp</dimen>
+    <dimen name="race_target_min_height">136dp</dimen>
+    <dimen name="race_endpoints_min_height">76dp</dimen>
+    <dimen name="race_metrics_min_height">128dp</dimen>
+    <dimen name="race_bottom_actions_height">80dp</dimen>
+    <dimen name="race_text_target_name">20sp</dimen>
+    <dimen name="race_text_active_target_title">22sp</dimen>
+    <dimen name="race_text_target_subtitle">12sp</dimen>
+    <dimen name="race_text_instrument_secondary">18sp</dimen>
+    <dimen name="race_text_endpoint">18sp</dimen>
+    <dimen name="race_text_metric">20sp</dimen>
+    <dimen name="race_text_metric_ttg">20sp</dimen>
+    <dimen name="race_text_metric_label">11sp</dimen>
+    <dimen name="race_text_position">13sp</dimen>
+    <dimen name="race_text_health">11sp</dimen>
+</resources>
