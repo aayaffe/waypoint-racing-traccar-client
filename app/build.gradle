@@ -85,7 +85,7 @@ dependencies {
     implementation project(path: ':AviMarineAndroidUtils')
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.11.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.11.0'
-    implementation platform('com.google.firebase:firebase-bom:33.1.2')
+    implementation platform('com.google.firebase:firebase-bom:35.1.0')
     implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-firestore'
@@ -108,9 +108,9 @@ dependencies {
     implementation 'com.github.judemanutd:autostarter:1.1.0'
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0"
     implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation 'com.firebaseui:firebase-ui-firestore:8.0.0'
-    implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
-    implementation 'com.github.acefalobi:android-stepper:0.3.0'
+    implementation 'com.firebaseui:firebase-ui-firestore:8.0.2'
+    implementation 'com.firebaseui:firebase-ui-auth:8.0.2'
+    implementation 'com.github.acefalobi:android-stepper:0.3.1'
     implementation 'com.github.santalu:maskara:1.0.0'
     implementation 'com.mapbox.maps:android-ndk27:10.19.0'
     testImplementation "org.robolectric:robolectric:4.17"

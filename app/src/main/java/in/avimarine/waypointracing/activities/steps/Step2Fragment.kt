@@ -26,7 +26,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.preference.PreferenceManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.firestore.toObject
 import `in`.avimarine.androidutils.TAG
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
